@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  web:
+    container_name: stq_web
+    build: .
+    command: python manage.py runserver ${WEB_HOST}:${WEB_PORT}
+    volumes:
+      - .:/app
+    ports:
+      - "${WEB_PORT}:${WEB_PORT}"
+    depends_on:
+      - mariadb
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - stq_network
+
+  nginx:
+    container_name: stq_nginx
+    image: nginx:alpine
+    ports:
+      - "${NGINX_HOST_PORT}:${NGINX_CONTAINER_PORT}"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./static:/app/static:ro
+    depends_on:
+      - web
+    networks:
+      - stq_network
+
+  worker:
+    container_name: stq_worker
+    build: .
+    command: python manage.py qcluster
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+    environment:
+      - DATABASE_HOST=${DATABASE_HOST}
+      - DATABASE_NAME=${DATABASE_NAME}
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+    networks:
+      - stq_network
+
+  mariadb:
+    container_name: stq_mariadb
+    image: mariadb:10.11
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+      - "${MYSQL_PORT}:${MYSQL_PORT}"
+    networks:
+      - stq_network
+
+networks:
+  stq_network:
+    driver: bridge
+
+volumes:
+  mariadb_data:
