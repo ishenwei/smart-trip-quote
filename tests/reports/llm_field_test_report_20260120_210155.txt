@@ -1,0 +1,2566 @@
+
+================================================================================
+LLM字段识别测试报告
+================================================================================
+
+测试时间: 2026-01-20 21:01:55
+总测试数: 51
+通过: 6 (11.8%)
+部分通过: 0 (0.0%)
+失败: 45 (88.2%)
+
+--------------------------------------------------------------------------------
+字段识别准确率统计
+--------------------------------------------------------------------------------
+
+base_info.origin:
+  总数: 5
+  通过: 0
+  失败: 5
+  准确率: 0.0%
+
+base_info.destination_cities:
+  总数: 5
+  通过: 0
+  失败: 5
+  准确率: 0.0%
+
+base_info.trip_days:
+  总数: 7
+  通过: 3
+  失败: 4
+  准确率: 42.9%
+
+base_info.group_size:
+  总数: 5
+  通过: 1
+  失败: 4
+  准确率: 20.0%
+
+base_info.travel_date:
+  总数: 5
+  通过: 0
+  失败: 5
+  准确率: 0.0%
+
+preferences.transportation:
+  总数: 5
+  通过: 0
+  失败: 5
+  准确率: 0.0%
+
+preferences.accommodation:
+  总数: 5
+  通过: 0
+  失败: 5
+  准确率: 0.0%
+
+preferences.itinerary:
+  总数: 5
+  通过: 0
+  失败: 5
+  准确率: 0.0%
+
+budget.budget:
+  总数: 1
+  通过: 0
+  失败: 1
+  准确率: 0.0%
+
+combined.combined:
+  总数: 1
+  通过: 0
+  失败: 1
+  准确率: 0.0%
+
+--------------------------------------------------------------------------------
+失败测试详情
+--------------------------------------------------------------------------------
+
+标准格式-明确出发地:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+边界值-多个出发地关键词:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数, group_size.total必须是>=1的整数"
+
+错误格式-缺少出发地:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "抱歉，我无法从您的描述中识别出发地。\n\n您的输入：去上海旅游5天\n\n目的地已识别，但请告诉我您从哪个城市出发，例如：\n• '从上海出发'\n• '我在北京，想去上海'"
+
+特殊字符-包含标点符号:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数, group_size.total必须是>=1的整数"
+
+空值-未指定出发地:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+标准格式-明确目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+边界值-多个目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数, group_size.total必须是>=1的整数"
+
+错误格式-缺少目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "抱歉，我无法从您的描述中识别目的地。\n\n您的输入：从北京出发旅游5天\n\n出发地已识别为'北京'，但请告诉我您想去哪个城市，例如：\n• '从北京去上海'\n• '从北京出发，去成都'"
+
+特殊字符-包含省份:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+空值-未指定目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数, group_size.total必须是>=1的整数"
+
+标准格式-明确天数:
+  类别: base_info
+  字段: trip_days
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+边界值-最小天数:
+  类别: base_info
+  字段: trip_days
+  预期: {
+  "trip_days": 1
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 1,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，明确识别出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游1天'，识别出行天数为1天。",
+      "用户未提及出行人数，根据常见情况推断为1人出行，成人数量设为1，总人数设为1。",
+      "用户未提及具体出行日期，因此开始日期和结束日期设为null，并标记日期灵活。",
+      "用户未提及交通方式、住宿等级、行程节奏、预算、偏好标签等信息，相关字段均设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: trip_days
+
+边界值-最大天数:
+  类别: base_info
+  字段: trip_days
+  预期: {
+  "trip_days": 365
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 365,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为北京。",
+      "目的地根据关键词'去'识别为上海。",
+      "出行天数根据'365天'识别为365天。",
+      "用户未提及出行人数，默认按1位成人处理。",
+      "用户未提及具体日期、交通方式、住宿等级、行程节奏、偏好标签、预算等信息，相关字段设置为null或空。"
+    ]
+  }
+}
+  不匹配字段: Missing field: trip_days
+
+特殊格式-使用日:
+  类别: base_info
+  字段: trip_days
+  预期: {
+  "trip_days": 7
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 7,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，提取出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游7日'，提取出行天数为7天。",
+      "用户未明确提及出行人数，根据默认规则，假设为1位成人。",
+      "用户未提及具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未提及交通方式、住宿等级、行程节奏、预算、偏好标签等具体偏好，因此相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: trip_days
+
+标准格式-明确人数:
+  类别: base_info
+  字段: group_size
+  预期: {
+  "group_size": {
+    "adults": 2,
+    "children": 0,
+    "seniors": 0,
+    "total": 2
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 2,
+      "children": 0,
+      "seniors": 0,
+      "total": 2
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为'北京'。",
+      "目的地根据关键词'去'识别为'上海'。",
+      "出行天数根据'5天'识别为5。",
+      "人数根据'2个成人'识别为2个成人，未提及儿童和老人，故设为0。",
+      "未提及具体旅行日期，故日期设为null，并推断日期灵活。",
+      "未提及交通方式、住宿等级、行程节奏、预算、偏好标签或特殊约束，故相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: group_size
+
+边界值-包含儿童和老人:
+  类别: base_info
+  字段: group_size
+  预期: {
+  "group_size": {
+    "adults": 2,
+    "children": 1,
+    "seniors": 1,
+    "total": 4
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 2,
+      "children": 1,
+      "seniors": 1,
+      "total": 4
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，明确识别出发地为'北京'，目的地为'上海'。",
+      "根据'旅游5天'，识别出行天数为5天。",
+      "根据'2个成人，1个儿童，1个老人'，识别成人数量为2，儿童数量为1，老人数量为1，总人数为4。",
+      "用户未提及具体出行日期，因此开始日期和结束日期设为null，并推断日期是灵活的（is_flexible: true）。",
+      "用户未提及交通方式、住宿等级、行程节奏、预算、偏好标签或特殊要求，因此相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: group_size
+
+特殊格式-使用人:
+  类别: base_info
+  字段: group_size
+  预期: {
+  "group_size": {
+    "total": 3
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK/BJS",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 3,
+      "children": 0,
+      "seniors": 0,
+      "total": 3
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据'从北京去上海'，明确识别出发地为北京，目的地为上海。",
+      "根据'旅游5天'，识别出行天数为5天。",
+      "根据'3个人'，识别总人数为3人。由于未指定年龄构成，推断为3个成人。",
+      "用户未指定具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未提及交通方式、住宿偏好、预算、行程节奏或兴趣标签，相关字段均设为null或空。"
+    ]
+  }
+}
+  不匹配字段: Missing field: group_size
+
+空值-未指定人数:
+  类别: base_info
+  字段: group_size
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+标准格式-明确日期:
+  类别: base_info
+  字段: travel_date
+  预期: {
+  "travel_date": {
+    "start_date": "2025-03-20",
+    "is_flexible": false
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": "2025-03-20",
+      "end_date": null,
+      "is_flexible": false
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，提取出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游5天'，提取出行天数为5。",
+      "根据用户输入'2025-03-20出发'，提取出发日期为2025-03-20，并推断日期不灵活。",
+      "用户未明确提及出行人数，根据常见情况推断为1人出行，因此group_size.adults设为1，total设为1。",
+      "用户未提及预算、交通方式、住宿等级、行程节奏或偏好标签，相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: travel_date
+
+边界值-日期范围:
+  类别: base_info
+  字段: travel_date
+  预期: {
+  "travel_date": {
+    "start_date": "2025-03-20",
+    "end_date": "2025-03-25",
+    "is_flexible": false
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": "2025-03-20",
+      "end_date": "2025-03-25",
+      "is_flexible": false
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，提取出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游5天'，提取出行天数为5。",
+      "根据用户输入'2025-03-20到2025-03-25'，提取开始日期和结束日期，并推断日期不灵活。",
+      "用户未提及出行人数，根据常规推断为单人出行，设置成人数量为1，总人数为1。",
+      "用户未提及交通方式、住宿等级、行程节奏、偏好标签、预算等信息，相关字段设置为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: travel_date
+
+错误格式-日期格式错误:
+  类别: base_info
+  字段: travel_date
+  预期: {
+  "travel_date": {
+    "start_date": null,
+    "is_flexible": true
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": "2025-03-20",
+      "end_date": "2025-03-24",
+      "is_flexible": false
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，明确识别出发地为'北京'，目的地为'上海'。",
+      "根据'旅游5天'，提取出行天数为5。",
+      "根据'2025年3月20日出发'，提取开始日期为2025-03-20，并根据5天行程推断结束日期为2025-03-24，日期不灵活。",
+      "用户未提及出行人数，默认按1位成人处理。",
+      "用户未提及交通方式、住宿等级、行程节奏、预算、偏好标签或特殊要求，相关字段均设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: travel_date
+
+特殊格式-灵活日期:
+  类别: base_info
+  字段: travel_date
+  预期: {
+  "travel_date": {
+    "start_date": null,
+    "end_date": null,
+    "is_flexible": true
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "用户未提及出行人数，根据常见情况推断为1人出行。",
+      "用户未提及具体交通方式、住宿等级、行程节奏、预算和偏好标签，因此相关字段设为null或空。",
+      "用户提到'时间灵活'，因此将travel_date.is_flexible设置为true，具体日期未指定。",
+      "用户明确提到'从北京去上海'，因此出发地为北京，目的地为上海。",
+      "用户明确提到'旅游5天'，因此trip_days设置为5。"
+    ]
+  }
+}
+  不匹配字段: Missing field: travel_date
+
+空值-未指定日期:
+  类别: base_info
+  字段: travel_date
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+标准格式-飞机:
+  类别: preferences
+  字段: transportation
+  预期: {
+  "transportation": {
+    "type": "RoundTripFlight"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": "RoundTripFlight",
+      "notes": "用户明确提到'坐飞机'"
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [
+        "CityScape",
+        "Food",
+        "Shopping",
+        "Culture"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为北京。",
+      "目的地根据关键词'去'识别为上海。",
+      "出行天数根据'5天'识别为5。",
+      "用户未提及人数，默认按1位成人处理。",
+      "用户未提及具体日期，日期设为灵活。",
+      "交通方式根据'坐飞机'识别为往返航班(RoundTripFlight)。",
+      "用户未提及住宿等级，根据常规旅游推断为舒适型(Comfort)。",
+      "用户未提及行程节奏，推断为适中(Moderate)。",
+      "根据目的地上海的城市特点，推断偏好标签为城市风光、美食、购物、文化。",
+      "用户未提及预算，但根据国内5天行程及飞机交通，推断预算等级为舒适型(Comfort)。"
+    ]
+  }
+}
+  不匹配字段: Missing field: transportation
+
+边界值-高铁:
+  类别: preferences
+  字段: transportation
+  预期: {
+  "transportation": {
+    "type": "HighSpeedTrain"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": "HighSpeedTrain",
+      "notes": "用户明确指定乘坐高铁"
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "用户未明确指定出行人数，根据常见情况推断为1人出行。",
+      "用户未指定具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未提及预算、住宿等级、行程节奏和偏好标签，这些字段均设为null或空。"
+    ]
+  }
+}
+  不匹配字段: Missing field: transportation
+
+错误格式-无效交通方式:
+  类别: preferences
+  字段: transportation
+  预期: {
+  "transportation": {
+    "type": null
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": "Other",
+      "notes": "用户提及‘坐火箭’，这是一种非标准交通方式，归类为Other。"
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "用户明确提到‘从北京去上海’，因此出发地为‘北京’，目的地为‘上海’。",
+      "用户提到‘旅游5天’，因此出行天数为5。",
+      "用户未提及出行人数，根据上下文推断为单人出行，因此成人数量设为1，总人数为1。",
+      "用户未提及具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户提及交通方式为‘坐火箭’，这是一种非标准、目前不存在的交通方式，因此将交通方式类型设为‘Other’，并在notes中说明。",
+      "用户未提及住宿等级、行程节奏、预算、偏好标签或特殊约束，因此相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: transportation
+
+特殊格式-自驾:
+  类别: preferences
+  字段: transportation
+  预期: {
+  "transportation": {
+    "type": "SelfDriving"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": "SelfDriving",
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，提取出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游5天'，提取出行天数为5天。",
+      "根据用户输入'自驾'，推断交通方式为'SelfDriving'。",
+      "用户未提及出行人数，根据常见情况推断为1人出行，总人数为1，成人数量为1。",
+      "用户未提及具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未提及预算、住宿等级、行程节奏和偏好标签，相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: transportation
+
+空值-未指定交通方式:
+  类别: preferences
+  字段: transportation
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+标准格式-舒适型:
+  类别: preferences
+  字段: accommodation
+  预期: {
+  "accommodation": {
+    "level": "Comfort"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据'从北京去上海'，识别出发地为北京，目的地为上海。",
+      "根据'旅游5天'，识别出行天数为5天。",
+      "用户未明确提及出行人数，根据常见情况推断为1人出行。",
+      "用户未提及具体交通方式，因此transportation.type设为null。",
+      "根据'舒适型酒店'，将住宿等级映射为'Comfort'。",
+      "用户未提及预算信息，因此budget.level设为null。",
+      "用户未提及具体出行日期，因此travel_date设为null且is_flexible为true。",
+      "用户未提及行程节奏或偏好标签，因此相关字段设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: accommodation
+
+边界值-豪华型:
+  类别: preferences
+  字段: accommodation
+  预期: {
+  "accommodation": {
+    "level": "Luxury"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Luxury",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据'从北京去上海'，识别出发地为北京，目的地为上海。",
+      "根据'旅游5天'，识别出行天数为5天。",
+      "用户未提及出行人数，默认按单人出行处理，成人数量设为1，总人数设为1。",
+      "根据'豪华酒店'，识别住宿等级为Luxury。",
+      "用户未提及具体交通方式、行程节奏、偏好标签、预算、具体日期等信息，相关字段设为null或空列表。",
+      "用户未提及具体日期，日期设为灵活。"
+    ]
+  }
+}
+  不匹配字段: Missing field: accommodation
+
+错误格式-无效等级:
+  类别: preferences
+  字段: accommodation
+  预期: {
+  "accommodation": {
+    "level": null
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Luxury",
+      "requirements": "超级豪华酒店"
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "从用户输入'从北京去上海'中提取出发地为'北京'，目的地为'上海'。",
+      "从用户输入'旅游5天'中提取出行天数为5天。",
+      "用户未明确指定出行人数，根据常见情况推断为1人出行。",
+      "用户未指定具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未指定交通方式偏好，因此设为null。",
+      "从用户输入'超级豪华酒店'中推断住宿等级为'Luxury'，并将原话记录在住宿要求中。",
+      "用户未提及行程节奏、偏好标签、必游景点或避免活动，因此相关字段设为空或null。",
+      "用户未提及预算信息，因此预算等级和范围设为null。"
+    ]
+  }
+}
+  不匹配字段: Missing field: accommodation
+
+特殊格式-经济型:
+  类别: preferences
+  字段: accommodation
+  预期: {
+  "accommodation": {
+    "level": "Economy"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Economy",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为北京。",
+      "目的地根据关键词'去'识别为上海。",
+      "出行天数根据'5天'识别为5。",
+      "用户未提及人数，默认按单人出行处理，设置adults=1, total=1。",
+      "用户未提及具体日期，设置日期为null且is_flexible为true。",
+      "用户未提及交通方式偏好，设置transportation.type为null。",
+      "住宿等级根据关键词'经济型'识别为Economy。",
+      "用户未提及行程节奏、偏好标签、必游景点或避免活动，相关字段设置为空。",
+      "用户未提及预算信息，预算相关字段设置为null。"
+    ]
+  }
+}
+  不匹配字段: Missing field: accommodation
+
+空值-未指定酒店等级:
+  类别: preferences
+  字段: accommodation
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+标准格式-适中节奏:
+  类别: preferences
+  字段: itinerary
+  预期: {
+  "itinerary": {
+    "rhythm": "Moderate"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK/BJS",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'提取为'北京'。",
+      "目的地根据关键词'去'提取为'上海'。",
+      "出行天数根据'5天'提取为5。",
+      "行程节奏根据'适中'提取为'Moderate'。",
+      "用户未提及出行人数，根据常见情况推断为1人出行，成人数量设为1，总人数设为1。",
+      "用户未提及具体出行日期，故起止日期设为null，日期灵活性设为true。",
+      "用户未提及交通方式、住宿等级、预算、偏好标签及特殊约束，相关字段均设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: itinerary
+
+边界值-轻松节奏:
+  类别: preferences
+  字段: itinerary
+  预期: {
+  "itinerary": {
+    "rhythm": "Relaxed"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Relaxed",
+      "tags": [
+        "CityScape",
+        "Food",
+        "Shopping",
+        "Entertainment"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，提取出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游5天'，提取出行天数为5。",
+      "用户未提及出行人数，默认按1位成人处理。",
+      "用户未提及具体日期，将日期相关字段设为null，并标记日期灵活。",
+      "用户未提及交通方式、住宿等级和预算，相关字段设为null。",
+      "根据用户输入'行程轻松'，推断行程节奏为'Relaxed'。",
+      "根据目的地'上海'的常见旅游属性，推断偏好标签为['CityScape', 'Food', 'Shopping', 'Entertainment']。"
+    ]
+  }
+}
+  不匹配字段: Missing field: itinerary
+
+错误格式-无效节奏:
+  类别: preferences
+  字段: itinerary
+  预期: {
+  "itinerary": {
+    "rhythm": null
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK/BJS",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Intense",
+      "tags": [
+        "CityScape"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，明确提取出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游5天'，提取出行天数为5。",
+      "用户未提及出行人数，根据默认规则，假设为1位成人。",
+      "用户未提及具体日期，因此日期设为null，并标记为灵活。",
+      "用户未提及交通方式、住宿、预算等具体信息，相关字段设为null。",
+      "根据用户输入'行程超级快'，推断行程节奏为'Intense'（紧凑）。",
+      "根据目的地为上海，推断偏好标签包含'CityScape'（城市风光）。"
+    ]
+  }
+}
+  不匹配字段: Missing field: itinerary
+
+特殊格式-紧凑节奏:
+  类别: preferences
+  字段: itinerary
+  预期: {
+  "itinerary": {
+    "rhythm": "Intense"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Intense",
+      "tags": [
+        "CityScape"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据'从北京去上海'，识别出发地为北京，目的地为上海。",
+      "根据'旅游5天'，识别出行天数为5天。",
+      "根据'行程紧凑'，识别行程节奏为Intense。",
+      "用户未提及人数，默认按1位成人处理。",
+      "用户未提及具体日期，日期设为灵活。",
+      "用户未提及交通方式、住宿等级和预算，相关字段设为null。",
+      "目的地为上海，推断偏好标签包含CityScape。"
+    ]
+  }
+}
+  不匹配字段: Missing field: itinerary
+
+空值-未指定节奏:
+  类别: preferences
+  字段: itinerary
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+边界值-低预算:
+  类别: budget
+  字段: budget
+  预期: {
+  "budget": {
+    "level": "Economy",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": 1500
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Economy",
+    "currency": "CNY",
+    "range": {
+      "min": 1500,
+      "max": 1500
+    },
+    "budget_notes": "用户指定预算为1500元"
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，识别出发地为北京，目的地为上海。",
+      "根据用户输入'旅游5天'，识别出行天数为5天。",
+      "用户未明确提及出行人数，根据常见情况推断为1人出行。",
+      "用户未提及具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未提及交通方式、住宿等级、行程节奏和偏好标签，相关字段设为null或空列表。",
+      "根据用户输入'预算1500元'，识别预算范围为1500元。由于预算低于2000元/人，推断预算等级为Economy。"
+    ]
+  }
+}
+  不匹配字段: budget.range.min: Expected None, got 1500
+
+边界值-高预算:
+  类别: budget
+  字段: budget
+  预期: {
+  "budget": {
+    "level": "Luxury",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": 15000
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250415-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK/BJS",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA/PVG",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [
+        "CityScape",
+        "Food",
+        "Shopping",
+        "Entertainment"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "HighEnd",
+    "currency": "CNY",
+    "range": {
+      "min": 15000,
+      "max": 15000
+    },
+    "budget_notes": "用户明确指定总预算为15000元。"
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为'北京'。",
+      "目的地根据关键词'去'识别为'上海'。",
+      "出行天数根据'5天'识别为5。",
+      "用户未明确指定出行人数，根据常见情况推断为1人出行。",
+      "用户未指定具体出行日期，因此日期设为null，并标记为灵活。",
+      "用户未指定交通方式、住宿等级和行程节奏，相关字段设为null。",
+      "根据目的地'上海'的典型旅游特征，推断偏好标签为CityScape, Food, Shopping, Entertainment。",
+      "预算15000元（单人5天）对应人均预算3000元/天，推断为HighEnd等级。"
+    ]
+  }
+}
+  不匹配字段: budget.level: Expected Luxury, got HighEnd, budget.range.min: Expected None, got 15000
+
+错误格式-无效货币:
+  类别: budget
+  字段: budget
+  预期: {
+  "budget": {
+    "level": "Comfort",
+    "currency": "USD",
+    "range": {
+      "min": null,
+      "max": 5000
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [
+        "CityScape",
+        "Food",
+        "Shopping",
+        "Entertainment"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "HighEnd",
+    "currency": "USD",
+    "range": {
+      "min": 5000,
+      "max": 5000
+    },
+    "budget_notes": "用户指定预算为5000美元。"
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为北京。",
+      "目的地根据关键词'去'识别为上海。",
+      "出行天数根据'5天'识别为5。",
+      "用户未指定出行人数，默认按1位成人处理。",
+      "用户未指定具体出行日期，日期设为灵活。",
+      "用户未指定交通方式、住宿等级和行程节奏，相关字段设为null。",
+      "根据目的地'上海'推断偏好标签可能包含城市景观、美食、购物和娱乐。",
+      "预算金额为5000美元，根据规则推断预算等级为HighEnd。",
+      "用户明确使用美元作为货币单位，因此currency设为USD。"
+    ]
+  }
+}
+  不匹配字段: budget.level: Expected Comfort, got HighEnd, budget.range.min: Expected None, got 5000
+
+空值-未指定预算:
+  类别: budget
+  字段: budget
+  预期: "Success"
+  实际: "Validation failed: group_size.total(1)与各类型人数之和(0)不一致"
+
+完整场景-所有字段:
+  类别: combined
+  字段: combined
+  预期: {
+  "origin": {
+    "name": "北京",
+    "type": "Domestic"
+  },
+  "destination_cities": [
+    {
+      "name": "上海"
+    }
+  ],
+  "trip_days": 5,
+  "group_size": {
+    "adults": 2,
+    "children": 0,
+    "seniors": 0,
+    "total": 2
+  },
+  "travel_date": {
+    "start_date": null,
+    "is_flexible": true
+  },
+  "transportation": {
+    "type": "RoundTripFlight"
+  },
+  "accommodation": {
+    "level": "Comfort"
+  },
+  "itinerary": {
+    "rhythm": "Moderate"
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": 5000,
+      "max": 10000
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": "PEK",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 2,
+      "children": 0,
+      "seniors": 0,
+      "total": 2
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": "RoundTripFlight",
+      "notes": "用户提到'坐飞机'，推断为往返航班"
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": "用户明确要求'舒适型酒店'"
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [
+        "CityScape",
+        "Food",
+        "Shopping"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": 5000,
+      "max": 10000
+    },
+    "budget_notes": "用户明确预算范围5000到10000元，推断为每人预算，等级为Comfort"
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从'识别为北京。",
+      "目的地根据关键词'去'识别为上海。",
+      "出行天数根据'5天'识别为5。",
+      "人数根据'2个成人'识别为2名成人，未提及儿童和老人，故设为0。",
+      "交通方式根据'坐飞机'识别为RoundTripFlight，因未指定单程，推断为往返。",
+      "住宿等级根据'舒适型酒店'识别为Comfort。",
+      "行程节奏根据'行程适中'识别为Moderate。",
+      "偏好标签根据目的地'上海'推断可能包含CityScape, Food, Shopping。",
+      "预算范围根据'5000到10000元'识别，推断为每人预算，并根据规则推断预算等级为Comfort。",
+      "未提及具体出行日期，故日期设为null且is_flexible为true。"
+    ]
+  }
+}
+  不匹配字段: Missing field: origin, Missing field: destination_cities, Missing field: trip_days, Missing field: group_size, Missing field: travel_date, Missing field: transportation, Missing field: accommodation, Missing field: itinerary
+
+复杂场景-多目的地多人数:
+  类别: combined
+  字段: combined
+  预期: {
+  "origin": {
+    "name": "广州",
+    "type": "Domestic"
+  },
+  "destination_cities": [
+    {
+      "name": "上海"
+    },
+    {
+      "name": "杭州"
+    },
+    {
+      "name": "苏州"
+    }
+  ],
+  "trip_days": 7,
+  "group_size": {
+    "adults": 3,
+    "children": 2,
+    "seniors": 1,
+    "total": 6
+  },
+  "transportation": {
+    "type": "HighSpeedTrain"
+  },
+  "accommodation": {
+    "level": "Luxury"
+  },
+  "itinerary": {
+    "rhythm": "Relaxed"
+  },
+  "budget": {
+    "level": "Luxury",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": 20000
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250320-0001",
+  "base_info": {
+    "origin": {
+      "name": "广州",
+      "code": "CAN",
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": "SHA",
+        "country": "中国"
+      },
+      {
+        "name": "杭州",
+        "code": "HGH",
+        "country": "中国"
+      },
+      {
+        "name": "苏州",
+        "code": "SZV",
+        "country": "中国"
+      }
+    ],
+    "trip_days": 7,
+    "group_size": {
+      "adults": 3,
+      "children": 2,
+      "seniors": 1,
+      "total": 6
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": "HighSpeedTrain",
+      "notes": "用户明确指定'高铁'"
+    },
+    "accommodation": {
+      "level": "Luxury",
+      "requirements": "用户明确指定'豪华酒店'"
+    },
+    "itinerary": {
+      "rhythm": "Relaxed",
+      "tags": [
+        "Culture",
+        "CityScape",
+        "History",
+        "Food"
+      ],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "HighEnd",
+    "currency": "CNY",
+    "range": {
+      "min": 20000,
+      "max": 20000
+    },
+    "budget_notes": "用户明确指定总预算20000元"
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从...出发'识别为广州。",
+      "目的地根据关键词'去'和逗号分隔识别为上海、杭州、苏州三个城市。",
+      "出行天数根据'旅游7天'识别为7天。",
+      "人数根据'3个成人，2个儿童，1个老人'识别，总人数计算为6。",
+      "交通方式根据'高铁'关键词映射为HighSpeedTrain。",
+      "住宿等级根据'豪华酒店'关键词映射为Luxury。",
+      "行程节奏根据'行程轻松'关键词映射为Relaxed。",
+      "偏好标签根据多城市旅游推断可能包含文化、城市景观、历史和美食。",
+      "预算根据'预算20000元'识别为总预算20000元，并基于总人数和天数推断人均预算约3333元，属于HighEnd等级。",
+      "未指定具体出行日期，因此日期设为null且is_flexible为true。",
+      "未指定必游景点和避免活动，因此列表为空。"
+    ]
+  }
+}
+  不匹配字段: Missing field: origin, Missing field: destination_cities, Missing field: trip_days, Missing field: group_size, Missing field: transportation, Missing field: accommodation, Missing field: itinerary, budget.level: Expected Luxury, got HighEnd, budget.range.min: Expected None, got 20000
+
+边界场景-最小有效输入:
+  类别: combined
+  字段: combined
+  预期: {
+  "origin": {
+    "name": "北京",
+    "type": "Domestic"
+  },
+  "destination_cities": [
+    {
+      "name": "上海"
+    }
+  ],
+  "trip_days": 1,
+  "group_size": {
+    "total": 1
+  },
+  "travel_date": {
+    "start_date": null,
+    "is_flexible": true
+  },
+  "accommodation": {
+    "level": "Comfort"
+  },
+  "itinerary": {
+    "rhythm": "Moderate"
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY"
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250315-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 1,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "根据用户输入'从北京去上海'，明确识别出发地为'北京'，目的地为'上海'。",
+      "根据用户输入'旅游1天'，识别出行天数为1天。",
+      "用户未提及出行人数，根据常见情况推断为1人出行，成人数量设为1，总人数设为1。",
+      "用户未提及具体出行日期，因此开始日期和结束日期设为null，并标记日期灵活。",
+      "用户未提及交通方式、住宿等级、行程节奏、预算、偏好标签等信息，相关字段均设为null或空列表。"
+    ]
+  }
+}
+  不匹配字段: Missing field: origin, Missing field: destination_cities, Missing field: trip_days, Missing field: group_size, Missing field: travel_date, Missing field: accommodation, Missing field: itinerary
+
+--------------------------------------------------------------------------------
+改进建议
+--------------------------------------------------------------------------------
+
+1. 字段'origin'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+2. 字段'destination_cities'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+3. 字段'trip_days'的识别准确率较低(42.9%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+4. 字段'group_size'的识别准确率较低(20.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+5. 字段'travel_date'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+6. 字段'transportation'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+7. 字段'accommodation'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+8. 字段'itinerary'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+9. 字段'budget'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+10. 字段'combined'的识别准确率较低(0.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+11. 整体失败率较高，建议检查数据验证逻辑，确保验证规则与实际需求一致
+
+================================================================================

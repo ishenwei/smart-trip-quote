@@ -125,7 +125,7 @@ class RequirementValidator:
         if rhythm not in valid_rhythms:
             raise ValidationError({'trip_rhythm': f'行程节奏必须是以下之一: {", ".join(valid_rhythms)}'})
         
-        if tags:
+        if tags and len(tags) > 0:
             valid_tags = ['Culture', 'CityScape', 'Food', 'History', 'Nature', 'Shopping', 'Entertainment', 'Other']
             for tag in tags:
                 if tag not in valid_tags:

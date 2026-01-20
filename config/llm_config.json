@@ -1,0 +1,53 @@
+{
+  "providers": {
+    "deepseek": {
+      "api_key": "sk-a309a673569743ebb05d0991d3f6e51a",
+      "api_url": "https://api.deepseek.com/v1/chat/completions",
+      "model": "deepseek-chat",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "timeout": 30,
+      "max_retries": 3,
+      "retry_delay": 1.0,
+      "enable_cache": true,
+      "cache_ttl": 3600
+    },
+    "gemini": {
+      "api_key": "AIzaSyALe0MnjDmTRf7zgn87vxLUe7aKfzoZRgY",
+      "api_url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+      "model": "gemini-pro",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "timeout": 30,
+      "max_retries": 3,
+      "retry_delay": 1.0,
+      "enable_cache": true,
+      "cache_ttl": 3600
+    },
+    "openai": {
+      "api_key": "your_openai_api_key_here",
+      "api_url": "https://api.openai.com/v1/chat/completions",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "timeout": 30,
+      "max_retries": 3,
+      "retry_delay": 1.0,
+      "enable_cache": true,
+      "cache_ttl": 3600
+    }
+  },
+  "rate_limit": {
+    "requests_per_minute": 60,
+    "requests_per_hour": 1000,
+    "burst_size": 10,
+    "enabled": true
+  },
+  "logging": {
+    "level": "INFO",
+    "log_file": "logs/llm_service.log",
+    "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "enable_request_logging": true,
+    "enable_response_logging": true
+  }
+}
