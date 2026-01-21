@@ -17,6 +17,22 @@ services:
     networks:
       - stq_network
 
+  frontend:
+    container_name: stq_frontend
+    image: node:20-alpine
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web:/app
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    environment:
+      - VITE_API_URL=http://web:${WEB_PORT}
+    depends_on:
+      - web
+    networks:
+      - stq_network
+
   nginx:
     container_name: stq_nginx
     image: nginx:alpine
