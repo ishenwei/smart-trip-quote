@@ -67,13 +67,34 @@ class RequirementService:
         if not requirement_id:
             # 如果没有提供需求ID，生成一个新的
             from datetime import datetime
-            import random
-            import string
+            from django.db import transaction
             
+            # 获取当前日期
             date_str = datetime.now().strftime('%Y%m%d')
-            # 生成4位随机字母数字
-            random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-            requirement_id = f'REQ-{date_str}-{random_str}'
+            
+            # 使用事务确保并发安全
+            with transaction.atomic():
+                # 查询当天已存在的最大编号
+                prefix = f'REQ-{date_str}-'
+                # 获取当天所有的requirement_id
+                existing_ids = Requirement.objects.filter(
+                    requirement_id__startswith=prefix
+                ).values_list('requirement_id', flat=True)
+                
+                # 提取最大编号
+                max_num = 0
+                for req_id in existing_ids:
+                    try:
+                        num_part = req_id.split('-')[-1]
+                        num = int(num_part)
+                        if num > max_num:
+                            max_num = num
+                    except (ValueError, IndexError):
+                        pass
+                
+                # 生成新的编号
+                new_num = max_num + 1
+                requirement_id = f'{prefix}{new_num:03d}'
         else:
             # 如果提供了需求ID，检查是否已存在
             while RequirementService.get_requirement_by_id(requirement_id):
@@ -85,6 +106,8 @@ class RequirementService:
         
         requirement = Requirement(
             requirement_id=requirement_id,
+            origin_input=data.get('origin_input') or '',
+            requirement_json_data=data,
             
             origin_name=origin_name,
             origin_code=origin_code,
@@ -208,6 +231,15 @@ class RequirementService:
         
         if 'extension' in data:
             requirement.extension = data['extension']
+        
+        if 'origin_input' in data:
+            requirement.origin_input = data['origin_input']
+        
+        if 'requirement_json_data' in data:
+            requirement.requirement_json_data = data['requirement_json_data']
+        else:
+            # 如果没有直接提供requirement_json_data，更新为整个数据
+            requirement.requirement_json_data = data
         
         requirement.save()
         

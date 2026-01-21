@@ -85,6 +85,13 @@ class RequirementAdmin(admin.ModelAdmin):
                 'destination_cities'
             )
         }),
+        ('原始输入与JSON数据', {
+            'fields': (
+                'origin_input_display',
+                'requirement_json_data_display'
+            ),
+            'classes': ('collapse',),
+        }),
         ('行程信息', {
             'fields': (
                 'trip_days',
@@ -154,7 +161,7 @@ class RequirementAdmin(admin.ModelAdmin):
         }),
     )
     
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'origin_input_display', 'requirement_json_data_display']
     
     def destination_display(self, obj):
         cities = obj.destination_cities if isinstance(obj.destination_cities, list) else []
@@ -241,6 +248,44 @@ class RequirementAdmin(admin.ModelAdmin):
     def response_change(self, request, obj):
         self.message_user(request, f'成功更新需求 {obj.requirement_id}。')
         return super().response_change(request, obj)
+    
+    def origin_input_display(self, obj):
+        """格式化展示原始输入"""
+        if not obj.origin_input:
+            return '-'
+        # 使用pre标签保持原始格式和换行
+        return format_html(
+            '<pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; border-radius: 4px; max-height: 300px; overflow-y: auto;">{}</pre>',
+            obj.origin_input
+        )
+    origin_input_display.short_description = '客户原始输入'
+    origin_input_display.allow_tags = True
+    
+    def requirement_json_data_display(self, obj):
+        """格式化展示JSON数据"""
+        import json
+        if not obj.requirement_json_data:
+            return '-'
+        try:
+            # 确保数据是字典格式
+            if isinstance(obj.requirement_json_data, str):
+                data = json.loads(obj.requirement_json_data)
+            else:
+                data = obj.requirement_json_data
+            # 格式化JSON
+            formatted_json = json.dumps(data, ensure_ascii=False, indent=2)
+            # 返回HTML格式，使用pre标签保持缩进
+            return format_html(
+                '<pre style="background-color: #f8f9fa; padding: 10px; border: 1px solid #e9ecef; border-radius: 4px; max-height: 400px; overflow-y: auto;">{}</pre>',
+                formatted_json
+            )
+        except Exception as e:
+            return format_html(
+                '<span style="color: #dc3545;">JSON解析错误: {}</span>',
+                str(e)
+            )
+    requirement_json_data_display.short_description = 'JSON结构数据'
+    requirement_json_data_display.allow_tags = True
     
     class Media:
         css = {

@@ -8,7 +8,8 @@ services:
     ports:
       - "${WEB_PORT}:${WEB_PORT}"
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
     environment:
       - DATABASE_HOST=${DATABASE_HOST}
       - DATABASE_NAME=${DATABASE_NAME}
@@ -73,9 +74,15 @@ services:
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:
-      - "${MYSQL_PORT}:${MYSQL_PORT}"
+      - "${MYSQL_PORT}:3306"
     networks:
       - stq_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
 networks:
   stq_network:

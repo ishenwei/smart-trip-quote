@@ -40,6 +40,8 @@ class Requirement(BaseModel):
         LUXURY = 'Luxury', '奢华'
     
     requirement_id = models.CharField(max_length=50, unique=True, verbose_name='需求ID')
+    origin_input = models.TextField(blank=True, verbose_name='客户原始输入')
+    requirement_json_data = JSONField(verbose_name='JSON结构数据', default=dict)
     
     origin_name = models.CharField(max_length=100, verbose_name='出发地名称')
     origin_code = models.CharField(max_length=10, blank=True, verbose_name='出发地代码')
