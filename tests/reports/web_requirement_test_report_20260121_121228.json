@@ -1,0 +1,40 @@
+{
+  "report_time": "2026-01-21T12:12:28.525751",
+  "test_summary": {
+    "total_cases": 4,
+    "passed_cases": 0,
+    "failed_cases": 4,
+    "pass_rate": 0.0,
+    "average_response_time": 0.218048095703125
+  },
+  "test_results": [
+    {
+      "test_case_id": "TC001",
+      "description": "基础旅游需求 - 明确目的地、时间和人数",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 400 - Failed to save to database: (1062, \"Duplicate entry 'REQ-20260120-0001' for key 'requirement_id'\")",
+      "response_time": 0.23247313499450684
+    },
+    {
+      "test_case_id": "TC002",
+      "description": "包含特定活动偏好的旅游需求",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 400 - Failed to save to database: (1062, \"Duplicate entry 'REQ-20250120-0001' for key 'requirement_id'\")",
+      "response_time": 0.19990229606628418
+    },
+    {
+      "test_case_id": "TC003",
+      "description": "包含预算限制的旅游需求",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 400 - Failed to save to database: (1062, \"Duplicate entry 'REQ-20250120-0001' for key 'requirement_id'\")",
+      "response_time": 0.23907208442687988
+    },
+    {
+      "test_case_id": "TC004",
+      "description": "包含特殊要求的旅游需求",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 400 - Failed to save to database: (1062, \"Duplicate entry 'REQ-20250120-0001' for key 'requirement_id'\")",
+      "response_time": 0.2007448673248291
+    }
+  ]
+}

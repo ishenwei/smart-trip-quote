@@ -1,0 +1,387 @@
+
+================================================================================
+LLM字段识别测试报告
+================================================================================
+
+测试时间: 2026-01-21 11:21:18
+总测试数: 51
+通过: 40 (78.4%)
+部分通过: 0 (0.0%)
+失败: 11 (21.6%)
+
+--------------------------------------------------------------------------------
+字段识别准确率统计
+--------------------------------------------------------------------------------
+
+base_info.origin:
+  总数: 5
+  通过: 1
+  失败: 4
+  准确率: 20.0%
+
+base_info.destination_cities:
+  总数: 5
+  通过: 1
+  失败: 4
+  准确率: 20.0%
+
+base_info.trip_days:
+  总数: 7
+  通过: 7
+  失败: 0
+  准确率: 100.0%
+
+base_info.group_size:
+  总数: 5
+  通过: 5
+  失败: 0
+  准确率: 100.0%
+
+base_info.travel_date:
+  总数: 5
+  通过: 4
+  失败: 1
+  准确率: 80.0%
+
+preferences.transportation:
+  总数: 5
+  通过: 5
+  失败: 0
+  准确率: 100.0%
+
+preferences.accommodation:
+  总数: 5
+  通过: 4
+  失败: 1
+  准确率: 80.0%
+
+preferences.itinerary:
+  总数: 5
+  通过: 4
+  失败: 1
+  准确率: 80.0%
+
+budget.budget:
+  总数: 1
+  通过: 1
+  失败: 0
+  准确率: 100.0%
+
+combined.combined:
+  总数: 1
+  通过: 1
+  失败: 0
+  准确率: 100.0%
+
+--------------------------------------------------------------------------------
+失败测试详情
+--------------------------------------------------------------------------------
+
+边界值-多个出发地关键词:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+错误格式-缺少出发地:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "抱歉，我无法从您的描述中识别出发地。\n\n您的输入：去上海旅游5天\n\n目的地已识别，但请告诉我您从哪个城市出发，例如：\n• '从上海出发'\n• '我在北京，想去上海'"
+
+特殊字符-包含标点符号:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+空值-未指定出发地:
+  类别: base_info
+  字段: origin
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+边界值-多个目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+错误格式-缺少目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "抱歉，我无法从您的描述中识别目的地。\n\n您的输入：从北京出发旅游5天\n\n出发地已识别为'北京'，但请告诉我您想去哪个城市，例如：\n• '从北京去上海'\n• '从北京出发，去成都'"
+
+特殊字符-包含省份:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+空值-未指定目的地:
+  类别: base_info
+  字段: destination_cities
+  预期: "Success"
+  实际: "Validation failed: Error: 抱歉，您必须提供旅行的天数"
+
+错误格式-日期格式错误:
+  类别: base_info
+  字段: travel_date
+  预期: {
+  "base_info": {
+    "travel_date": {
+      "start_date": null,
+      "is_flexible": true
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20260120-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": null
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": "2025-03-20",
+      "end_date": null,
+      "is_flexible": false
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "用户未明确指定出行人数，根据规则默认为1人（1个成人）。",
+      "用户未明确指定交通方式，因此transportation.type设为null。",
+      "用户未明确指定住宿等级，根据规则默认为'Comfort'。",
+      "用户未明确指定行程节奏，根据规则默认为'Moderate'。",
+      "用户未明确指定预算，根据规则默认预算等级为'Comfort'，货币为CNY。",
+      "用户未指定结束日期，因此travel_date.end_date设为null。",
+      "出发地和目的地均为中国城市，因此origin.type推断为'Domestic'。"
+    ]
+  }
+}
+  不匹配字段: base_info.travel_date.start_date: Expected None, got 2025-03-20, base_info.travel_date.is_flexible: Expected True, got False
+
+错误格式-无效等级:
+  类别: preferences
+  字段: accommodation
+  预期: {
+  "preferences": {
+    "accommodation": {
+      "level": null
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20260120-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": null
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Luxury",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Moderate",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "出发地根据关键词'从北京去'提取为'北京'。",
+      "目的地根据关键词'去上海'提取为'上海'。",
+      "出行天数根据'5天'提取为5。",
+      "用户未明确指定出行人数，根据规则默认设置为1人（1个成人）。",
+      "用户未指定出行日期，因此日期设为灵活（is_flexible: true）。",
+      "用户未指定交通方式，因此transportation.type设为null。",
+      "住宿等级根据'超级豪华酒店'推断为'Luxury'。",
+      "用户未指定行程节奏，根据规则默认设置为'Moderate'。",
+      "用户未指定预算，根据规则默认设置为'Comfort'等级。",
+      "出发地和目的地均为中国城市，因此origin.type推断为'Domestic'。"
+    ]
+  }
+}
+  不匹配字段: preferences.accommodation.level: Expected None, got Luxury
+
+错误格式-无效节奏:
+  类别: preferences
+  字段: itinerary
+  预期: {
+  "preferences": {
+    "itinerary": {
+      "rhythm": null
+    }
+  }
+}
+  实际: {
+  "requirement_id": "REQ-20250120-0001",
+  "base_info": {
+    "origin": {
+      "name": "北京",
+      "code": null,
+      "type": "Domestic"
+    },
+    "destination_cities": [
+      {
+        "name": "上海",
+        "code": null,
+        "country": "中国"
+      }
+    ],
+    "trip_days": 5,
+    "group_size": {
+      "adults": 1,
+      "children": 0,
+      "seniors": 0,
+      "total": 1
+    },
+    "travel_date": {
+      "start_date": null,
+      "end_date": null,
+      "is_flexible": true
+    }
+  },
+  "preferences": {
+    "transportation": {
+      "type": null,
+      "notes": null
+    },
+    "accommodation": {
+      "level": "Comfort",
+      "requirements": ""
+    },
+    "itinerary": {
+      "rhythm": "Intense",
+      "tags": [],
+      "special_constraints": {
+        "must_visit_spots": [],
+        "avoid_activities": []
+      }
+    }
+  },
+  "budget": {
+    "level": "Comfort",
+    "currency": "CNY",
+    "range": {
+      "min": null,
+      "max": null
+    },
+    "budget_notes": null
+  },
+  "metadata": {
+    "source_type": "NaturalLanguage",
+    "status": "PendingReview",
+    "assumptions": [
+      "用户输入'从北京去上海旅游5天'，根据关键词'从'和'去'，提取出发地为'北京'，目的地为'上海'。",
+      "用户输入'5天'，提取出行天数为5。",
+      "用户未明确指定出行人数，根据规则，默认设置为1人（1个成人）。",
+      "用户未指定出行日期，因此将travel_date设置为灵活日期（is_flexible: true）。",
+      "用户未指定交通方式，因此transportation.type设置为null。",
+      "用户未指定住宿等级，根据规则，默认设置为'Comfort'。",
+      "用户输入'行程超级快'，根据规则，'快'、'紧凑'等关键词对应行程节奏'Intense'。",
+      "用户未指定预算，根据规则，默认设置为'Comfort'等级。",
+      "出发地'北京'和目的地'上海'均为中国城市，因此origin.type推断为'Domestic'。"
+    ]
+  }
+}
+  不匹配字段: preferences.itinerary.rhythm: Expected None, got Intense
+
+--------------------------------------------------------------------------------
+改进建议
+--------------------------------------------------------------------------------
+
+1. 字段'origin'的识别准确率较低(20.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+2. 字段'destination_cities'的识别准确率较低(20.0%)，建议优化LLM提示词，增加该字段的识别规则和示例
+
+3. 整体失败率较高，建议检查数据验证逻辑，确保验证规则与实际需求一致
+
+================================================================================

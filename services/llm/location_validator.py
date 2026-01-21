@@ -106,19 +106,6 @@ class LocationValidator:
                 ]
             )
         
-        if not has_valid_origin:
-            return LocationValidationResult(
-                status=LocationValidationStatus.MISSING_ORIGIN,
-                origin=origin,
-                destination=destinations,
-                is_valid=False,
-                error_message="未能识别出发地信息",
-                suggestions=[
-                    "请提供出发地，例如：'从北京出发'",
-                    "或者在描述中说明您的出发城市"
-                ]
-            )
-        
         if not has_valid_destination:
             return LocationValidationResult(
                 status=LocationValidationStatus.MISSING_DESTINATION,

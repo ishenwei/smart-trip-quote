@@ -1,0 +1,40 @@
+{
+  "report_time": "2026-01-21T12:07:56.831093",
+  "test_summary": {
+    "total_cases": 4,
+    "passed_cases": 0,
+    "failed_cases": 4,
+    "pass_rate": 0.0,
+    "average_response_time": 12.812108337879181
+  },
+  "test_results": [
+    {
+      "test_case_id": "TC001",
+      "description": "基础旅游需求 - 明确目的地、时间和人数",
+      "status": "FAILED",
+      "error": "验证结果失败: unhashable type: 'dict'",
+      "response_time": 21.070764780044556
+    },
+    {
+      "test_case_id": "TC002",
+      "description": "包含特定活动偏好的旅游需求",
+      "status": "FAILED",
+      "error": "输入旅游需求失败: Message: no such element: Unable to locate element: {\"method\":\"css selector\",\"selector\":\"[id=\"userInput\"]\"}\n  (Session info: chrome=144.0.7559.60); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception\nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x997d13\n\t0x997d54\n\t0x7bb290\n\t0x8056ea\n\t0x80598b\n\t0x847912\n\t0x828004\n\t0x845111\n\t0x827d56\n\t0x7f94d9\n\t0x7fa294\n\t0xc0bb64\n\t0xc07215\n\t0xc23fad\n\t0x9b1ef8\n\t0x9b9b0d\n\t0x9a0738\n\t0x9a0902\n\t0x98a1da\n\t0x76535d49\n\t0x7783d5db\n\t0x7783d561\n",
+      "response_time": 10.0604727268219
+    },
+    {
+      "test_case_id": "TC003",
+      "description": "包含预算限制的旅游需求",
+      "status": "FAILED",
+      "error": "输入旅游需求失败: Message: no such element: Unable to locate element: {\"method\":\"css selector\",\"selector\":\"[id=\"userInput\"]\"}\n  (Session info: chrome=144.0.7559.60); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception\nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x997d13\n\t0x997d54\n\t0x7bb290\n\t0x8056ea\n\t0x80598b\n\t0x847912\n\t0x828004\n\t0x845111\n\t0x827d56\n\t0x7f94d9\n\t0x7fa294\n\t0xc0bb64\n\t0xc07215\n\t0xc23fad\n\t0x9b1ef8\n\t0x9b9b0d\n\t0x9a0738\n\t0x9a0902\n\t0x98a1da\n\t0x76535d49\n\t0x7783d5db\n\t0x7783d561\n",
+      "response_time": 10.06108832359314
+    },
+    {
+      "test_case_id": "TC004",
+      "description": "包含特殊要求的旅游需求",
+      "status": "FAILED",
+      "error": "输入旅游需求失败: Message: no such element: Unable to locate element: {\"method\":\"css selector\",\"selector\":\"[id=\"userInput\"]\"}\n  (Session info: chrome=144.0.7559.60); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#nosuchelementexception\nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x997d13\n\t0x997d54\n\t0x7bb290\n\t0x8056ea\n\t0x80598b\n\t0x847912\n\t0x828004\n\t0x845111\n\t0x827d56\n\t0x7f94d9\n\t0x7fa294\n\t0xc0bb64\n\t0xc07215\n\t0xc23fad\n\t0x9b1ef8\n\t0x9b9b0d\n\t0x9a0738\n\t0x9a0902\n\t0x98a1da\n\t0x76535d49\n\t0x7783d5db\n\t0x7783d561\n",
+      "response_time": 10.056107521057129
+    }
+  ]
+}

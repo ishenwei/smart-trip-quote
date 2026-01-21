@@ -1,0 +1,113 @@
+{
+  "report_time": "2026-01-21T12:11:43.443733",
+  "test_summary": {
+    "total_cases": 4,
+    "passed_cases": 1,
+    "failed_cases": 3,
+    "pass_rate": 25.0,
+    "average_response_time": 41.58597308397293
+  },
+  "test_results": [
+    {
+      "test_case_id": "TC001",
+      "description": "基础旅游需求 - 明确目的地、时间和人数",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 400 - Failed to save to database: (1062, \"Duplicate entry 'REQ-20260120-0001' for key 'requirement_id'\")",
+      "response_time": 0.24859619140625
+    },
+    {
+      "test_case_id": "TC002",
+      "description": "包含特定活动偏好的旅游需求",
+      "status": "PASSED",
+      "response_time": 20.071210384368896,
+      "actual_json": {
+        "requirement_id": "REQ-20250120-0001",
+        "base_info": {
+          "origin": {
+            "name": "未指定",
+            "code": null,
+            "type": "Domestic"
+          },
+          "destination_cities": [
+            {
+              "name": "杭州",
+              "code": null,
+              "country": "中国"
+            }
+          ],
+          "trip_days": 3,
+          "group_size": {
+            "adults": 2,
+            "children": 0,
+            "seniors": 0,
+            "total": 2
+          },
+          "travel_date": {
+            "start_date": null,
+            "end_date": null,
+            "is_flexible": true
+          }
+        },
+        "preferences": {
+          "transportation": {
+            "type": null,
+            "notes": null
+          },
+          "accommodation": {
+            "level": "Comfort",
+            "requirements": "希望住西湖附近的酒店"
+          },
+          "itinerary": {
+            "rhythm": "Moderate",
+            "tags": [
+              "Nature",
+              "Food"
+            ],
+            "special_constraints": {
+              "must_visit_spots": [],
+              "avoid_activities": []
+            }
+          }
+        },
+        "budget": {
+          "level": "Comfort",
+          "currency": "CNY",
+          "range": {
+            "min": null,
+            "max": null
+          },
+          "budget_notes": null
+        },
+        "metadata": {
+          "source_type": "NaturalLanguage",
+          "status": "PendingReview",
+          "assumptions": [
+            "用户未明确指定出发地，因此将origin.name设为'未指定'。",
+            "用户提到'端午节期间'，这是一个季节/节日描述，未提供具体日期，因此将travel_date设为灵活日期（is_flexible: true）。",
+            "用户提到'和朋友'，推断为2个成人，因此group_size设为2个成人，总人数2。",
+            "用户未明确指定交通方式，因此transportation.type设为null。",
+            "用户未明确指定酒店等级，但要求'西湖附近的酒店'，因此accommodation.level采用默认值'Comfort'，并将位置要求在requirements中说明。",
+            "用户提到'喜欢爬山和品尝当地美食'，因此itinerary.tags中添加了'Nature'和'Food'。",
+            "用户未明确指定行程节奏，采用默认值'Moderate'。",
+            "用户未明确指定预算，采用默认预算等级'Comfort'。",
+            "出发地和目的地均为中国城市，因此origin.type推断为'Domestic'。"
+          ]
+        }
+      }
+    },
+    {
+      "test_case_id": "TC003",
+      "description": "包含预算限制的旅游需求",
+      "status": "FAILED",
+      "error": "验证结果失败: Message: \nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x997d13\n\t0x997d54\n\t0x7bb290\n\t0x8056ea\n\t0x80598b\n\t0x847912\n\t0x828004\n\t0x845111\n\t0x827d56\n\t0x7f94d9\n\t0x7fa294\n\t0xc0bb64\n\t0xc07215\n\t0xc23fad\n\t0x9b1ef8\n\t0x9b9b0d\n\t0x9a0738\n\t0x9a0902\n\t0x98a1da\n\t0x76535d49\n\t0x7783d5db\n\t0x7783d561\n",
+      "response_time": 73.11037063598633
+    },
+    {
+      "test_case_id": "TC004",
+      "description": "包含特殊要求的旅游需求",
+      "status": "FAILED",
+      "error": "验证结果失败: Message: \nStacktrace:\nSymbols not available. Dumping unresolved backtrace:\n\t0x997d13\n\t0x997d54\n\t0x7bb290\n\t0x8056ea\n\t0x80598b\n\t0x847912\n\t0x828004\n\t0x845111\n\t0x827d56\n\t0x7f94d9\n\t0x7fa294\n\t0xc0bb64\n\t0xc07215\n\t0xc23fad\n\t0x9b1ef8\n\t0x9b9b0d\n\t0x9a0738\n\t0x9a0902\n\t0x98a1da\n\t0x76535d49\n\t0x7783d5db\n\t0x7783d561\n",
+      "response_time": 72.91371512413025
+    }
+  ]
+}

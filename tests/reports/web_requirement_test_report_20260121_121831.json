@@ -1,0 +1,323 @@
+{
+  "report_time": "2026-01-21T12:18:31.710805",
+  "test_summary": {
+    "total_cases": 4,
+    "passed_cases": 4,
+    "failed_cases": 0,
+    "pass_rate": 100.0,
+    "average_response_time": 10.341504454612732
+  },
+  "test_results": [
+    {
+      "test_case_id": "TC001",
+      "description": "基础旅游需求 - 明确目的地、时间和人数",
+      "status": "PASSED",
+      "response_time": 10.340246438980103,
+      "actual_json": {
+        "requirement_id": "REQ-20260120-0001",
+        "base_info": {
+          "origin": {
+            "name": "未指定",
+            "code": null,
+            "type": "Domestic"
+          },
+          "destination_cities": [
+            {
+              "name": "三亚",
+              "code": null,
+              "country": "中国"
+            }
+          ],
+          "trip_days": 5,
+          "group_size": {
+            "adults": 2,
+            "children": 1,
+            "seniors": 0,
+            "total": 3
+          },
+          "travel_date": {
+            "start_date": "2026-05-01",
+            "end_date": "2026-05-05",
+            "is_flexible": false
+          }
+        },
+        "preferences": {
+          "transportation": {
+            "type": null,
+            "notes": null
+          },
+          "accommodation": {
+            "level": "Comfort",
+            "requirements": "海景房"
+          },
+          "itinerary": {
+            "rhythm": "Moderate",
+            "tags": [],
+            "special_constraints": {
+              "must_visit_spots": [],
+              "avoid_activities": []
+            }
+          }
+        },
+        "budget": {
+          "level": "Comfort",
+          "currency": "CNY",
+          "range": {
+            "min": null,
+            "max": null
+          },
+          "budget_notes": null
+        },
+        "metadata": {
+          "source_type": "NaturalLanguage",
+          "status": "PendingReview",
+          "assumptions": [
+            "用户未明确指定出发地，因此将origin.name设置为'未指定'。",
+            "用户指定了目的地为'三亚'，因此destination_cities设置为三亚。",
+            "用户指定了日期范围'2026年5月1日到5月5日'，计算得出出行天数为5天（5月1日至5月5日共5天），因此trip_days设置为5。",
+            "用户指定了'2个大人1个小孩，共3人'，因此group_size设置为adults: 2, children: 1, total: 3。",
+            "用户未指定交通方式，因此transportation.type设置为null。",
+            "用户未明确指定酒店等级，但要求'海景房'，此要求已记录在accommodation.requirements中。酒店等级按默认值设置为'Comfort'。",
+            "用户未指定行程节奏，按默认值设置为'Moderate'。",
+            "用户未指定预算，按默认值设置为'Comfort'等级。",
+            "出发地和目的地均为中国城市，因此origin.type推断为'Domestic'。"
+          ]
+        }
+      }
+    },
+    {
+      "test_case_id": "TC002",
+      "description": "包含特定活动偏好的旅游需求",
+      "status": "PASSED",
+      "response_time": 10.280912399291992,
+      "actual_json": {
+        "requirement_id": "REQ-20250120-0001",
+        "base_info": {
+          "origin": {
+            "name": "未指定",
+            "code": null,
+            "type": "Domestic"
+          },
+          "destination_cities": [
+            {
+              "name": "杭州",
+              "code": null,
+              "country": "中国"
+            }
+          ],
+          "trip_days": 3,
+          "group_size": {
+            "adults": 2,
+            "children": 0,
+            "seniors": 0,
+            "total": 2
+          },
+          "travel_date": {
+            "start_date": null,
+            "end_date": null,
+            "is_flexible": true
+          }
+        },
+        "preferences": {
+          "transportation": {
+            "type": null,
+            "notes": null
+          },
+          "accommodation": {
+            "level": "Comfort",
+            "requirements": "希望住西湖附近的酒店"
+          },
+          "itinerary": {
+            "rhythm": "Moderate",
+            "tags": [
+              "Nature",
+              "Food"
+            ],
+            "special_constraints": {
+              "must_visit_spots": [],
+              "avoid_activities": []
+            }
+          }
+        },
+        "budget": {
+          "level": "Comfort",
+          "currency": "CNY",
+          "range": {
+            "min": null,
+            "max": null
+          },
+          "budget_notes": null
+        },
+        "metadata": {
+          "source_type": "NaturalLanguage",
+          "status": "PendingReview",
+          "assumptions": [
+            "用户未明确指定出发地，因此将origin.name设为'未指定'。",
+            "用户提到'端午节期间'，这是一个灵活的时间段，因此将travel_date.is_flexible设为true，start_date和end_date设为null。",
+            "用户提到'和朋友'，共'2个人'，推断为2位成人，因此group_size.adults设为2，total设为2。",
+            "用户未明确指定交通方式，因此transportation.type设为null。",
+            "用户提到'希望住西湖附近的酒店'，这是一个住宿位置要求，记录在accommodation.requirements中。用户未指定酒店等级，采用默认值'Comfort'。",
+            "用户提到'喜欢爬山和品尝当地美食'，推断偏好标签为'Nature'和'Food'。",
+            "用户未指定行程节奏，采用默认值'Moderate'。",
+            "用户未指定预算，采用默认等级'Comfort'。",
+            "出发地和目的地均为中国城市，因此origin.type推断为'Domestic'。"
+          ]
+        }
+      }
+    },
+    {
+      "test_case_id": "TC003",
+      "description": "包含预算限制的旅游需求",
+      "status": "PASSED",
+      "response_time": 10.362453937530518,
+      "actual_json": {
+        "requirement_id": "REQ-20250120-0001",
+        "base_info": {
+          "origin": {
+            "name": "未指定",
+            "code": null,
+            "type": "Domestic"
+          },
+          "destination_cities": [
+            {
+              "name": "成都",
+              "code": null,
+              "country": "中国"
+            }
+          ],
+          "trip_days": 5,
+          "group_size": {
+            "adults": 2,
+            "children": 0,
+            "seniors": 0,
+            "total": 2
+          },
+          "travel_date": {
+            "start_date": null,
+            "end_date": null,
+            "is_flexible": true
+          }
+        },
+        "preferences": {
+          "transportation": {
+            "type": null,
+            "notes": "用户提到‘交通方便’，但未明确指定具体交通方式（如飞机、高铁）。"
+          },
+          "accommodation": {
+            "level": "Comfort",
+            "requirements": "舒适型酒店"
+          },
+          "itinerary": {
+            "rhythm": "Moderate",
+            "tags": [],
+            "special_constraints": {
+              "must_visit_spots": [],
+              "avoid_activities": []
+            }
+          }
+        },
+        "budget": {
+          "level": "Comfort",
+          "currency": "CNY",
+          "range": {
+            "min": null,
+            "max": 8000
+          },
+          "budget_notes": "预算8000元左右"
+        },
+        "metadata": {
+          "source_type": "NaturalLanguage",
+          "status": "PendingReview",
+          "assumptions": [
+            "出发地未明确指定，设为‘未指定’。根据目的地‘成都’推断为国内出发，origin.type设为‘Domestic’。",
+            "目的地为‘成都’，根据关键词‘去’提取。",
+            "出行天数为5天，根据关键词‘住5天’提取。",
+            "人数为2人，根据‘2个人’提取，并推断为2个成人。",
+            "出行日期为‘国庆节期间’，这是一个季节性描述，未指定具体日期，因此start_date设为null，is_flexible设为true。",
+            "交通方式未明确指定，仅提到‘交通方便’，因此transportation.type设为null。",
+            "住宿等级为‘舒适型酒店’，对应‘Comfort’。",
+            "行程节奏未明确指定，默认为‘Moderate’。",
+            "预算为‘8000元左右’，提取最大值8000元，并根据总预算推断预算等级为‘Comfort’。"
+          ]
+        }
+      }
+    },
+    {
+      "test_case_id": "TC004",
+      "description": "包含特殊要求的旅游需求",
+      "status": "PASSED",
+      "response_time": 10.382405042648315,
+      "actual_json": {
+        "requirement_id": "REQ-20260120-0001",
+        "base_info": {
+          "origin": {
+            "name": "未指定",
+            "code": null,
+            "type": "Domestic"
+          },
+          "destination_cities": [
+            {
+              "name": "北京",
+              "code": null,
+              "country": "中国"
+            }
+          ],
+          "trip_days": 7,
+          "group_size": {
+            "adults": 2,
+            "children": 0,
+            "seniors": 1,
+            "total": 3
+          },
+          "travel_date": {
+            "start_date": "2026-10-01",
+            "end_date": "2026-10-07",
+            "is_flexible": false
+          }
+        },
+        "preferences": {
+          "transportation": {
+            "type": null,
+            "notes": null
+          },
+          "accommodation": {
+            "level": "Comfort",
+            "requirements": "需要住有电梯的酒店"
+          },
+          "itinerary": {
+            "rhythm": "Moderate",
+            "tags": [],
+            "special_constraints": {
+              "must_visit_spots": [],
+              "avoid_activities": []
+            }
+          }
+        },
+        "budget": {
+          "level": "Luxury",
+          "currency": "CNY",
+          "range": {
+            "min": null,
+            "max": 20000
+          },
+          "budget_notes": null
+        },
+        "metadata": {
+          "source_type": "NaturalLanguage",
+          "status": "PendingReview",
+          "assumptions": [
+            "用户未明确指定出发地，因此origin.name设为'未指定'。",
+            "用户提到'和父母计划'，推断为3人同行，其中包含用户本人（成人）、父亲（老人）、母亲（成人）。故group_size设为adults: 2, seniors: 1, total: 3。",
+            "用户指定了明确的日期范围'2026年10月1日到10月7日'，计算得出行程天数为7天。",
+            "用户未指定交通方式，因此transportation.type设为null。",
+            "用户未指定酒店等级，但预算较高（20000元），推断住宿等级为Comfort。用户明确要求'有电梯的酒店'，已记录在accommodation.requirements中。",
+            "用户未指定行程节奏，默认为Moderate。",
+            "用户提到'父亲需要轮椅'和'有饮食禁忌不能吃辣'，这些属于特殊需求，但未在标准JSON结构中找到对应字段，建议在后续沟通中确认无障碍设施和餐饮安排。",
+            "用户预算为20000元，根据总预算推断预算等级为Luxury。",
+            "出发地和目的地均为中国城市，因此origin.type推断为Domestic。"
+          ]
+        }
+      }
+    }
+  ]
+}

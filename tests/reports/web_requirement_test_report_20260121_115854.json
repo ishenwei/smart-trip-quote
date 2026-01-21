@@ -1,0 +1,40 @@
+{
+  "report_time": "2026-01-21T11:58:54.159274",
+  "test_summary": {
+    "total_cases": 4,
+    "passed_cases": 0,
+    "failed_cases": 4,
+    "pass_rate": 0.0,
+    "average_response_time": 0.19629943370819092
+  },
+  "test_results": [
+    {
+      "test_case_id": "TC001",
+      "description": "基础旅游需求 - 明确目的地、时间和人数",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 404 - 处理失败",
+      "response_time": 0.24019217491149902
+    },
+    {
+      "test_case_id": "TC002",
+      "description": "包含特定活动偏好的旅游需求",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 404 - 处理失败",
+      "response_time": 0.21155786514282227
+    },
+    {
+      "test_case_id": "TC003",
+      "description": "包含预算限制的旅游需求",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 404 - 处理失败",
+      "response_time": 0.13396000862121582
+    },
+    {
+      "test_case_id": "TC004",
+      "description": "包含特殊要求的旅游需求",
+      "status": "FAILED",
+      "error": "提交失败: 服务器错误: 404 - 处理失败",
+      "response_time": 0.19948768615722656
+    }
+  ]
+}

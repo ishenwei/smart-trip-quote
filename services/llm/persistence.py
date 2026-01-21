@@ -62,8 +62,29 @@ class RequirementService:
         
         extension = data.get('extension') or {}
         
+        # 生成唯一的需求ID
+        requirement_id = data.get('requirement_id')
+        if not requirement_id:
+            # 如果没有提供需求ID，生成一个新的
+            from datetime import datetime
+            import random
+            import string
+            
+            date_str = datetime.now().strftime('%Y%m%d')
+            # 生成4位随机字母数字
+            random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
+            requirement_id = f'REQ-{date_str}-{random_str}'
+        else:
+            # 如果提供了需求ID，检查是否已存在
+            while RequirementService.get_requirement_by_id(requirement_id):
+                # 如果已存在，在末尾添加随机字符
+                import random
+                import string
+                random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=2))
+                requirement_id = f'{requirement_id}-{random_str}'
+        
         requirement = Requirement(
-            requirement_id=data.get('requirement_id'),
+            requirement_id=requirement_id,
             
             origin_name=origin_name,
             origin_code=origin_code,
