@@ -11,7 +11,7 @@
       <div class="container">
         <section class="input-section" v-if="!submissionSuccess">
           <h2>描述您的旅游需求</h2>
-          <p class="section-description">请用自然语言详细描述您的旅游计划，包括目的地、出行时间、人数、预算等信息</p>
+          <p class="section-description">请用自然语言详细描述您的旅游计划，包括出发地、目的地、出行时间、人数、预算等信息</p>
           
           <form @submit.prevent="submitRequirement" class="requirement-form">
             <div class="form-group">
@@ -19,7 +19,7 @@
               <textarea
                 id="userInput"
                 v-model="userInput"
-                placeholder="例如：我想在国庆节期间和家人去三亚旅游，2个大人1个小孩，住4天，预算15000元左右，希望住海景房，有推荐的景点和美食"
+                placeholder="例如：我想和家人从上海出发去三亚旅游，2个大人1个小孩，住4天，预算15000元左右，希望住海景房，有推荐的景点和美食"
                 :maxlength="5000"
                 class="input-textarea"
                 :disabled="isSubmitting"
@@ -31,34 +31,6 @@
                 </span>
                 <span class="format-hint">请尽量详细描述您的需求，以获得更准确的规划</span>
               </div>
-            </div>
-            
-            <div class="form-group">
-              <label for="provider">LLM提供商（可选）</label>
-              <select
-                id="provider"
-                v-model="provider"
-                class="input-select"
-                :disabled="isSubmitting"
-              >
-                <option value="">默认提供商</option>
-                <option value="deepseek">DeepSeek</option>
-                <option value="gemini">Gemini</option>
-                <option value="openai">OpenAI</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="clientId">客户端ID（可选）</label>
-              <input
-                type="text"
-                id="clientId"
-                v-model="clientId"
-                placeholder="用于限流追踪"
-                class="input-text"
-                :disabled="isSubmitting"
-                maxlength="100"
-              />
             </div>
             
             <div class="form-actions">
@@ -140,8 +112,6 @@ export default {
   data() {
     return {
       userInput: '',
-      provider: '',
-      clientId: '',
       isSubmitting: false,
       submissionSuccess: false,
       submissionResult: null,
@@ -172,8 +142,6 @@ export default {
       try {
         const response = await axios.post('/api/llm/process/', {
           user_input: this.userInput,
-          provider: this.provider || undefined,
-          client_id: this.clientId || undefined,
           save_to_db: true,
         });
         
@@ -199,8 +167,6 @@ export default {
     
     resetForm() {
       this.userInput = '';
-      this.provider = '';
-      this.clientId = '';
       this.errorMessage = '';
     },
     
@@ -360,28 +326,7 @@ body {
   font-style: italic;
 }
 
-.input-select,
-.input-text {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  font-size: 1rem;
-  transition: var(--transition);
-}
 
-.input-select:focus,
-.input-text:focus {
-  outline: none;
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.1);
-}
-
-.input-select:disabled,
-.input-text:disabled {
-  background-color: var(--secondary-color);
-  cursor: not-allowed;
-}
 
 .form-actions {
   display: flex;
