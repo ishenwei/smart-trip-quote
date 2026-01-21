@@ -6,6 +6,7 @@ aiohttp>=3.9.0
 requests>=2.31.0
 cryptography>=41.0.0
 drf-yasg>=1.21.0
+django-q2
 pytest>=7.4.0
 pytest-django>=4.5.0
 pytest-cov>=4.1.0
