@@ -73,8 +73,6 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
-    ports:
-      - "${MYSQL_PORT}:3306"
     networks:
       - stq_network
     healthcheck:
