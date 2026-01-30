@@ -155,8 +155,8 @@ class Requirement(BaseModel):
     
     class Meta:
         db_table = 'requirements'
-        verbose_name = '旅游需求'
-        verbose_name_plural = '旅游需求'
+        verbose_name = '旅游需求管理'
+        verbose_name_plural = '旅游需求管理'
         ordering = ['-created_at']
         indexes = [
             models.Index(fields=['requirement_id']),

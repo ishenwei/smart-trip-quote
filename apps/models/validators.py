@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError
 from datetime import datetime, timedelta
+import re
 
 
 class RequirementValidator:
@@ -313,3 +314,23 @@ class RequirementValidator:
             raise ValidationError(errors)
         
         return True
+
+def validate_phone_number(value):
+    """验证电话号码"""
+    if not value:
+        return
+    
+    # 支持多种电话号码格式
+    phone_regex = re.compile(r'^[+]?[\d\s-]{8,20}$')
+    if not phone_regex.match(value):
+        raise ValidationError('电话号码格式不正确，请输入有效的电话号码')
+
+def validate_city_name(value):
+    """验证城市名称"""
+    if not value:
+        return
+    
+    # 城市名称验证
+    city_regex = re.compile(r'^[\u4e00-\u9fa5a-zA-Z\s-]{2,100}$')
+    if not city_regex.match(value):
+        raise ValidationError('城市名称格式不正确，长度应在2-100个字符之间')

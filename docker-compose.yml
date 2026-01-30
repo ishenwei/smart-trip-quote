@@ -66,6 +66,7 @@ services:
   mariadb:
     container_name: stq_mariadb
     image: mariadb:10.11
+    command: --log-bin=mysql-bin
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -73,6 +74,8 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
+    ports:
+      - "3308:3306"
     networks:
       - stq_network
     healthcheck:
