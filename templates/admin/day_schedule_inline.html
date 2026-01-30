@@ -1,0 +1,153 @@
+{% load i18n admin_urls static admin_modify %}
+<style>
+/* 图标按钮样式 */
+.admin-icon-button {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* 悬停效果 */
+.admin-icon-button:hover {
+  background-color: #e9ecef !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 点击效果 */
+.admin-icon-button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* 焦点效果 */
+.admin-icon-button:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 1px;
+}
+</style>
+<div class="inline-group" id="{{ inline_admin_formset.formset.prefix }}-group">
+  <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">
+    {{ inline_admin_formset.formset.management_form }}
+    <fieldset class="module">
+      <h2>{{ inline_admin_formset.opts.verbose_name_plural|capfirst }}</h2>
+      {% if inline_admin_formset.formset.max_num == 1 %}
+        <p class="help">{% blocktrans with inline_admin_formset.opts.verbose_name_plural|lower as name %}Please add a {{ name }}{% endblocktrans %}</p>
+      {% endif %}
+      <table>
+        <thead><tr>
+          <th colspan="{{ inline_admin_formset.fields|length }}">
+            <!-- 添加新增按钮 -->
+            {% url 'admin:apps_dailyschedule_add' as add_url %}
+            {% if inline_admin_formset.formset.instance %}
+              <a href="{{ add_url }}?itinerary_id={{ inline_admin_formset.formset.instance.itinerary_id }}&day_number={{ inline_admin_formset.formset.day_number }}" 
+                 class="admin-icon-button" 
+                 title="新增" 
+                 aria-label="新增行程活动"
+                 style="float: right; margin-left: 10px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">
+                +
+              </a>
+            {% endif %}
+          </th>
+        </tr>
+        <tr>
+          {% for field in inline_admin_formset.fields %}
+            {% if not field.widget.is_hidden %}
+              <th{% if field.required %} class="required"{% endif %}>
+                {{ field.label|capfirst }}
+                {% if field.help_text %}<img src="{% static 'admin/img/icon-unknown.svg' %}" class="help help-tooltip" width="10" height="10" alt="({{ field.help_text|striptags }})" title="{{ field.help_text|striptags }}">{% endif %}
+              </th>
+            {% endif %}
+          {% endfor %}
+          {% if inline_admin_formset.formset.can_delete %}
+            <th>{% translate "Delete?" %}</th>
+          {% endif %}
+        </tr></thead>
+        <tbody>
+          {% for inline_admin_form in inline_admin_formset %}
+            {% if inline_admin_form.form.non_field_errors %}
+              <tr><td colspan="{{ inline_admin_form|cell_count }}">{{ inline_admin_form.form.non_field_errors }}</td></tr>
+            {% endif %}
+            <tr class="form-row {% if inline_admin_form.original or inline_admin_form.show_url %}has_original{% endif %}{% if forloop.last %}empty-form{% endif %}" 
+                id="{{ inline_admin_formset.formset.prefix }}-{% if not forloop.last %}{{ forloop.counter0 }}{% else %}empty{% endif %}">
+              <td class="original">
+                {% if inline_admin_form.original or inline_admin_form.show_url %}
+                  <p>
+                    {% if inline_admin_form.original %}
+                      {{ inline_admin_form.original }}
+                    {% endif %}
+                    {% if inline_admin_form.show_url %}
+                      <a href="{{ inline_admin_form.absolute_url }}" class="viewsitelink">{% translate "View on site" %}</a>
+                    {% endif %}
+                  </p>
+                {% endif %}
+                {% if inline_admin_form.has_auto_field %}
+                  {{ inline_admin_form.pk_field.field }}
+                {% endif %}
+                {{ inline_admin_form.fk_field.field }}
+                {% spaceless %}
+                  {% for fieldset in inline_admin_form %}
+                    {% for line in fieldset %}
+                      {% for field in line %}
+                        {% if field.is_hidden %}
+                          {{ field.field }}
+                        {% endif %}
+                      {% endfor %}
+                    {% endfor %}
+                  {% endfor %}
+                {% endspaceless %}
+              </td>
+              {% for fieldset in inline_admin_form %}
+                {% for line in fieldset %}
+                  {% for field in line %}
+                    <td{% if field.field.name %} class="field-{{ field.field.name }}"{% endif %}>
+                      {% if field.is_readonly %}
+                        <p>{{ field.contents }}</p>
+                      {% else %}
+                        {{ field.field }}
+                        {{ field.field.errors.as_ul }}
+                      {% endif %}
+                    </td>
+                  {% endfor %}
+                {% endfor %}
+              {% endfor %}
+              {% if inline_admin_formset.formset.can_delete %}
+                <td class="delete">
+                  {% if inline_admin_form.original %}
+                    {{ inline_admin_form.deletion_field.field }}
+                  {% endif %}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </fieldset>
+  </div>
+</div>
+
+<script type="text/javascript">
+(function($) {
+  $(document).ready(function($) {
+    // 为所有图标按钮添加点击事件处理
+    $('.admin-icon-button').click(function(e) {
+      e.preventDefault();
+      var url = $(this).attr('href');
+      var title = $(this).attr('title');
+      
+      // 根据标题判断按钮类型，执行不同的操作
+      if (title === '删除') {
+        if (confirm('确定要删除这条行程记录吗？')) {
+          // 打开删除确认页面
+          window.open(url, 'delete_daily_schedule', 'width=600,height=400,top=100,left=100,scrollbars=yes');
+        }
+      } else {
+        // 打开编辑或新增页面
+        window.open(url, 'edit_daily_schedule', 'width=800,height=600,top=100,left=100,scrollbars=yes');
+      }
+    });
+  });
+})(django.jQuery);
+</script>

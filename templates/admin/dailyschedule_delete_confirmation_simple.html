@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ title }}{% endblock %}</title>
+    {% load static %}
+    {% load i18n admin_urls static admin_modify %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}">
+    {% block extrastyle %}{% endblock %}
+    {% block extrahead %}{% endblock %}
+    {% block responsive %}
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="{% static 'admin/css/responsive.css' %}">
+        <script type="text/javascript">
+            window.__admin_media_prefix__ = "{% filter escapejs %}{% static 'admin/' %}{% endfilter %}";
+        </script>
+    {% endblock %}
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+</head>
+<body class=" {% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+    <!-- 移除了 Django Admin 的导航栏和侧边栏 -->
+    <div id="container">
+        {% if not is_popup %}
+            <!-- 移除了顶部导航栏 -->
+        {% endif %}
+        <div id="content" class="flex">
+            {% block content %}
+                <div id="content-main">
+                    <div class="delete-confirmation">
+                        <h2>{% blocktrans with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"?{% endblocktrans %}</h2>
+                        {% if perms_lacking %}
+                            <p>{% blocktrans with escaped_object=object %}Deleting the {{ object_name }} "{{ escaped_object }}" would result in deleting related objects, but your account doesn't have permission to delete the following types of objects:{% endblocktrans %}</p>
+                            <ul>
+                                {% for obj in perms_lacking %}
+                                    <li>{{ obj }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% elif protected %}
+                            <p>{% blocktrans with escaped_object=object %}Deleting the {{ object_name }} "{{ escaped_object }}" would require deleting the following protected related objects:{% endblocktrans %}</p>
+                            <ul>
+                                {% for obj in protected %}
+                                    <li>{{ obj }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>{% blocktrans with escaped_object=object %}Are you sure you want to delete the {{ object_name }} "{{ escaped_object }}"? All of the following related items will be deleted:{% endblocktrans %}</p>
+                            <ul>{{ deleted_objects|unordered_list }}</ul>
+                            <form method="post">
+                                {% csrf_token %}
+                                <div>
+                                    <input type="hidden" name="post" value="yes">
+                                    {% if is_popup %}
+                                        <input type="hidden" name="_popup" value="1">
+                                    {% endif %}
+                                    <input type="submit" value="{% translate 'Yes, I’m sure' %}" class="btn btn-danger">
+                                    <a href="#" class="btn cancel-link">{% translate 'No, take me back' %}</a>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+    <script type="text/javascript">
+    (function($) {
+      $(document).ready(function($) {
+        // 监听删除按钮点击
+        $('form input[type="submit"]').click(function() {
+          // 删除成功后刷新父窗口
+          window.onbeforeunload = function() {
+            if (window.opener) {
+              window.opener.location.reload();
+            }
+          };
+        });
+        
+        // 监听取消按钮点击
+        $('form a.cancel-link').click(function() {
+          // 关闭窗口
+          window.close();
+          return false;
+        });
+      });
+    })(django.jQuery);
+    </script>
+</body>
+</html>

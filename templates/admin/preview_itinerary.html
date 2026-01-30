@@ -303,6 +303,13 @@
                                 <div class="schedule-location">地点: {{ schedule.city_name }}</div>
                                 {% if schedule.activity_type %}
                                     <div class="schedule-contact">活动类型: {{ schedule.activity_type }}</div>
+                                    {% if schedule.activity_type == 'CHECK_IN' or schedule.activity_type == 'CHECK_OUT' %}
+                                        {% if schedule.hotel_id %}
+                                            <div class="schedule-contact">酒店名称: {{ schedule.hotel_id.hotel_name }}</div>
+                                        {% else %}
+                                            <div class="schedule-contact">酒店名称: 无</div>
+                                        {% endif %}
+                                    {% endif %}
                                 {% endif %}
                             </div>
                         {% endfor %}

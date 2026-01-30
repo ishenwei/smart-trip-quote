@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ title }}{% endblock %}</title>
+    {% load static %}
+    {% load i18n admin_urls static admin_modify %}
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/base.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}">
+    {% block extrastyle %}{% endblock %}
+    {% block extrahead %}{% endblock %}
+    {% block responsive %}
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="{% static 'admin/css/responsive.css' %}">
+        <script type="text/javascript">
+            window.__admin_media_prefix__ = "{% filter escapejs %}{% static 'admin/' %}{% endfilter %}";
+        </script>
+    {% endblock %}
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+    <style type="text/css">
+        .messagelist {
+            margin: 0 0 15px 0;
+            padding: 10px;
+            list-style: none;
+        }
+        .messagelist li {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .messagelist li.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .messagelist li.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .messagelist li.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .messagelist li.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body class=" {% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+    <!-- 移除了 Django Admin 的导航栏和侧边栏 -->
+    <div id="container">
+        {% if not is_popup %}
+            <!-- 移除了顶部导航栏 -->
+        {% endif %}
+        <div id="content" class="flex">
+            {% block content %}
+                <div id="content-main">
+                    {% block object-tools %}{% endblock %}
+                    {% if messages %}
+                        <ul class="messagelist">
+                            {% for message in messages %}
+                                <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}{% if form_url %}action="{{ form_url }}" {% endif %}method="post" id="{{ opts.model_name }}_form" novalidate>
+                        {% csrf_token %}
+                        {% block form_top %}{% endblock %}
+                        <div>
+                            {% if is_popup %}
+                                <input type="hidden" name="_popup" value="1">
+                            {% endif %}
+                            {% if save_on_top %}
+                                {% block submit_buttons_top %}
+                                    {% submit_row %}
+                                {% endblock %}
+                            {% endif %}
+                            {% if errors %}
+                                <p class="errornote">
+                                    {% if errors|length == 1 %}{% translate "Please correct the error below." %}{% else %}{% translate "Please correct the errors below." %}{% endif %}
+                                </p>
+                                {{ adminform.form.non_field_errors }}
+                            {% endif %}
+                            {% block field_sets %}
+                                {% for fieldset in adminform %}
+                                    {% include "admin/includes/fieldset.html" %}
+                                {% endfor %}
+                            {% endblock %}
+                            {% block after_field_sets %}{% endblock %}
+                            {% block inline_field_sets %}
+                                {% for inline_admin_formset in inline_admin_formsets %}
+                                    {% include inline_admin_formset.opts.template %}
+                                {% endfor %}
+                            {% endblock %}
+                            {% block after_related_objects %}{% endblock %}
+                            {% block submit_buttons_bottom %}
+                                {% submit_row %}
+                            {% endblock %}
+                            {% block admin_change_form_document_ready %}
+                                <script type="text/javascript" id="django-admin-form-add-constants" src="{% static 'admin/js/change_form.js' %}" django-admin-form-add-constants="{"果子": "value"}"></script>
+                            {% endblock %}
+                        </div>
+                    </form>
+                </div>
+            {% endblock %}
+        </div>
+    </div>
+    <script type="text/javascript">
+    (function($) {
+      $(document).ready(function($) {
+        // 检查是否有成功消息
+        var messages = $('.messagelist .success');
+        if (messages.length > 0) {
+            // 显示成功消息后自动消失
+            messages.css('display', 'block');
+            setTimeout(function() {
+                messages.fadeOut(1000);
+            }, 3000);
+        }
+        
+        // 监听表单提交
+        $('form').submit(function() {
+          // 显示加载状态
+          $('#submit-row input[type="submit"]').attr('disabled', true).val('保存中...');
+        });
+        
+        // 监听保存按钮点击
+        $('#submit-row input[name="_save"]').click(function() {
+          // 保存成功后刷新父窗口
+          window.onbeforeunload = function() {
+            if (window.opener) {
+              window.opener.location.reload();
+            }
+          };
+        });
+        
+        // 监听保存并继续编辑按钮点击
+        $('#submit-row input[name="_continue"]').click(function() {
+          // 保存成功后刷新父窗口
+          window.onbeforeunload = function() {
+            if (window.opener) {
+              window.opener.location.reload();
+            }
+          };
+        });
+        
+        // 监听取消按钮点击
+        $('#submit-row a.deletelink, #submit-row a.cancel-link').click(function() {
+          // 关闭窗口
+          window.close();
+          return false;
+        });
+      });
+    })(django.jQuery);
+    </script>
+</body>
+</html>

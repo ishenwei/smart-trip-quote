@@ -12,7 +12,7 @@ from ..models import (
 # 定义TravelerStats的内联编辑类
 class TravelerStatsInline(admin.TabularInline):
     model = TravelerStats
-    extra = 1
+    extra = 0
     verbose_name = '出行人员统计'
     verbose_name_plural = '出行人员统计'
     classes = ('compact',)
@@ -20,7 +20,7 @@ class TravelerStatsInline(admin.TabularInline):
 # 定义Destination的内联编辑类
 class DestinationInline(admin.TabularInline):
     model = Destination
-    extra = 1
+    extra = 0
     verbose_name = '目的地'
     verbose_name_plural = '目的地'
     classes = ('compact',)
@@ -28,10 +28,83 @@ class DestinationInline(admin.TabularInline):
 # 定义DailySchedule的内联编辑类
 class DailyScheduleInline(admin.TabularInline):
     model = DailySchedule
-    extra = 1
+    extra = 0
     verbose_name = '每日行程活动'
     verbose_name_plural = '每日行程活动'
     classes = ('compact',)
+    
+    # 添加编辑和删除按钮
+    def edit_daily_schedule(self, obj):
+        if obj:
+            edit_url = reverse('admin:apps_dailyschedule_change', args=[obj.schedule_id])
+            return format_html(
+                '<a href="{0}" class="admin-icon-button" title="编辑" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✏️</a>',
+                edit_url
+            )
+        return ''
+    
+    def delete_daily_schedule(self, obj):
+        if obj:
+            delete_url = reverse('admin:apps_dailyschedule_delete', args=[obj.schedule_id])
+            return format_html(
+                '<a href="{0}" class="admin-icon-button" title="删除" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✕</a>',
+                delete_url
+            )
+        return ''
+    
+    edit_daily_schedule.short_description = '操作'
+    edit_daily_schedule.allow_tags = True
+    
+    delete_daily_schedule.short_description = '删除'
+    delete_daily_schedule.allow_tags = True
+    
+    # 将自定义方法添加到只读字段
+    readonly_fields = (
+        'edit_daily_schedule',
+        'delete_daily_schedule',
+        'day_number',
+        'schedule_date',
+        'city_name',
+        'activity_type',
+        'activity_title',
+        'activity_description',
+        'start_time',
+        'end_time',
+        'attraction_id',
+        'hotel_id',
+        'restaurant_id',
+        'estimated_cost',
+        'currency',
+        'booking_status',
+        'booking_reference',
+        'notes',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at'
+    )
+    
+    # 定义显示的字段
+    fields = (
+        'edit_daily_schedule',
+        'delete_daily_schedule',
+        'day_number',
+        'schedule_date',
+        'city_name',
+        'activity_type',
+        'activity_title',
+        'activity_description',
+        'start_time',
+        'end_time',
+        'attraction_id',
+        'hotel_id',
+        'restaurant_id',
+        'estimated_cost',
+        'currency',
+        'booking_status',
+        'booking_reference',
+        'notes'
+    )
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
@@ -39,7 +112,7 @@ class DailyScheduleInline(admin.TabularInline):
 # 动态生成每天的行程内联类
 class DayScheduleInline(admin.TabularInline):
     model = DailySchedule
-    extra = 1
+    extra = 0
     classes = ('compact',)
     
     def __init__(self, day_number, *args, **kwargs):
@@ -52,12 +125,87 @@ class DayScheduleInline(admin.TabularInline):
         qs = super().get_queryset(request)
         return qs.filter(day_number=self.day_number)
     
-    def formfield_for_dbfield(self, db_field, request, **kwargs):
-        if db_field.name == 'day_number':
-            kwargs['initial'] = self.day_number
-            # 设置为只读，确保天数不会被修改
-            kwargs['widget'] = admin.widgets.AdminTextInputWidget(attrs={'readonly': True, 'size': '5'})
-        return super().formfield_for_dbfield(db_field, request, **kwargs)
+    # 添加编辑和删除按钮
+    def edit_daily_schedule(self, obj):
+        if obj:
+            edit_url = reverse('admin:apps_dailyschedule_change', args=[obj.schedule_id])
+            return format_html(
+                '<a href="{0}" class="admin-icon-button" title="编辑" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✏️</a>',
+                edit_url
+            )
+        return ''
+    
+    def delete_daily_schedule(self, obj):
+        if obj:
+            delete_url = reverse('admin:apps_dailyschedule_delete', args=[obj.schedule_id])
+            return format_html(
+                '<a href="{0}" class="admin-icon-button" title="删除" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✕</a>',
+                delete_url
+            )
+        return ''
+    
+    edit_daily_schedule.short_description = '操作'
+    edit_daily_schedule.allow_tags = True
+    
+    delete_daily_schedule.short_description = '删除'
+    delete_daily_schedule.allow_tags = True
+    
+    # 将自定义方法添加到只读字段
+    readonly_fields = (
+        'edit_daily_schedule',
+        'delete_daily_schedule',
+        'day_number',
+        'schedule_date',
+        'city_name',
+        'activity_type',
+        'activity_title',
+        'activity_description',
+        'start_time',
+        'end_time',
+        'attraction_id',
+        'hotel_id',
+        'restaurant_id',
+        'estimated_cost',
+        'currency',
+        'booking_status',
+        'booking_reference',
+        'notes',
+        'created_by',
+        'updated_by',
+        'created_at',
+        'updated_at'
+    )
+    
+    # 定义显示的字段
+    fields = (
+        'edit_daily_schedule',
+        'delete_daily_schedule',
+        'day_number',
+        'schedule_date',
+        'city_name',
+        'activity_type',
+        'activity_title',
+        'activity_description',
+        'start_time',
+        'end_time',
+        'attraction_id',
+        'hotel_id',
+        'restaurant_id',
+        'estimated_cost',
+        'currency',
+        'booking_status',
+        'booking_reference',
+        'notes'
+    )
+    
+    # 添加新增按钮
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        formset.day_number = self.day_number
+        return formset
+    
+    # 重写模板以添加新增按钮
+    template = 'admin/day_schedule_inline.html'
 
 # 自定义Itinerary的Admin类
 class ItineraryAdmin(admin.ModelAdmin):
@@ -207,18 +355,14 @@ class ItineraryAdmin(admin.ModelAdmin):
     
     # 保存时的处理
     def save_model(self, request, obj, form, change):
-        if not change:
-            obj.created_by = request.user.username
-        else:
-            obj.updated_by = request.user.username
+        # 移除对不存在字段的设置
         super().save_model(request, obj, form, change)
     
     # 保存内联时的处理
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         for instance in instances:
-            if not hasattr(instance, 'created_by') and hasattr(request, 'user'):
-                instance.created_by = request.user.username
+            # 移除对不存在字段的设置
             instance.save()
         formset.save_m2m()
     
@@ -256,5 +400,155 @@ class ItineraryAdmin(admin.ModelAdmin):
     preview_itinerary.short_description = '预览操作'
     preview_itinerary.allow_tags = True
 
+# 为DailySchedule创建Admin类
+class DailyScheduleAdmin(admin.ModelAdmin):
+    # 自定义模板
+    change_form_template = 'admin/dailyschedule_change_form_simple.html'
+    delete_confirmation_template = 'admin/dailyschedule_delete_confirmation_simple.html'
+    
+    # 列表显示字段
+    list_display = (
+        'schedule_id',
+        'itinerary_id',
+        'day_number',
+        'schedule_date',
+        'city_name',
+        'activity_type',
+        'activity_title',
+        'start_time',
+        'end_time',
+        'created_at'
+    )
+    
+    # 搜索字段
+    search_fields = (
+        'schedule_id',
+        'itinerary_id__itinerary_id',
+        'city_name',
+        'activity_title'
+    )
+    
+    # 筛选字段
+    list_filter = (
+        'day_number',
+        'activity_type',
+        'booking_status'
+    )
+    
+    # 详情页字段分组
+    fieldsets = (
+        ('基本信息', {
+            'fields': (
+                ('itinerary_id', 'day_number'),
+                ('schedule_date', 'city_name'),
+                ('activity_type', 'activity_title'),
+                ('activity_description',),
+                ('start_time', 'end_time')
+            ),
+            'classes': ('compact',)
+        }),
+        ('关联资源', {
+            'fields': (
+                ('attraction_id', 'hotel_id', 'restaurant_id'),
+            ),
+            'classes': ('compact',)
+        }),
+        ('费用信息', {
+            'fields': (
+                ('estimated_cost', 'currency'),
+            ),
+            'classes': ('compact',)
+        }),
+        ('预订信息', {
+            'fields': (
+                ('booking_status', 'booking_reference'),
+                ('notes',)
+            ),
+            'classes': ('compact',)
+        }),
+        ('管理信息', {
+            'fields': (
+                ('created_at', 'updated_at')
+            ),
+            'classes': ('collapse', 'compact')
+        })
+    )
+    
+    # 只读字段
+    readonly_fields = (
+        'created_at',
+        'updated_at'
+    )
+    
+    # 表单字段尺寸调整
+    formfield_overrides = {
+        models.CharField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '40'})},
+        models.TextField: {'widget': admin.widgets.AdminTextareaWidget(attrs={'rows': 3, 'cols': 60})},
+        models.IntegerField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '10', 'type': 'number'})},
+        models.DecimalField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '15', 'type': 'number'})},
+        models.DateField: {'widget': admin.widgets.AdminDateWidget(attrs={'size': '12'})},
+        models.TimeField: {'widget': admin.widgets.AdminTimeWidget(attrs={'size': '10'})},
+    }
+    
+    # 重写add_view方法，处理URL参数传入的默认值
+    def add_view(self, request, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        # 从URL参数中获取默认值
+        itinerary_id = request.GET.get('itinerary_id')
+        day_number = request.GET.get('day_number')
+        
+        # 如果有参数，设置到extra_context中
+        if itinerary_id:
+            extra_context['default_itinerary_id'] = itinerary_id
+        if day_number:
+            extra_context['default_day_number'] = day_number
+        
+        return super().add_view(request, form_url, extra_context)
+    
+    # 重写get_form方法，设置默认值
+    def get_form(self, request, obj=None, **kwargs):
+        form = super().get_form(request, obj, **kwargs)
+        
+        # 对于新增操作，设置默认值
+        if not obj:
+            itinerary_id = request.GET.get('itinerary_id')
+            day_number = request.GET.get('day_number')
+            
+            if itinerary_id:
+                form.base_fields['itinerary_id'].initial = itinerary_id
+            if day_number:
+                form.base_fields['day_number'].initial = day_number
+        
+        return form
+    
+    # 保存时的处理
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.created_by = request.user.username
+        else:
+            obj.updated_by = request.user.username
+        super().save_model(request, obj, form, change)
+    
+    # 重写response_change，修改后重定向到详情页
+    def response_change(self, request, obj):
+        from django.urls import reverse
+        from django.http import HttpResponseRedirect
+        
+        opts = self.model._meta
+        # 保存成功后重定向到详情页，并显示成功消息
+        self.message_user(request, f'{opts.verbose_name} "{obj}" 保存成功。')
+        return HttpResponseRedirect(reverse('admin:apps_dailyschedule_change', args=[obj.pk]))
+    
+    # 重写response_add，添加后重定向到详情页
+    def response_add(self, request, obj, post_url_continue=None):
+        from django.urls import reverse
+        from django.http import HttpResponseRedirect
+        
+        opts = self.model._meta
+        # 保存成功后重定向到详情页，并显示成功消息
+        self.message_user(request, f'{opts.verbose_name} "{obj}" 创建成功。')
+        return HttpResponseRedirect(reverse('admin:apps_dailyschedule_change', args=[obj.pk]))
+
 # 注册模型到Admin
 admin.site.register(Itinerary, ItineraryAdmin)
+admin.site.register(DailySchedule, DailyScheduleAdmin)
