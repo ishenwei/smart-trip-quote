@@ -23,7 +23,8 @@ from apps.models.destinations import Destination
 from apps.models.daily_schedule import DailySchedule
 from apps.admin.requirement import RequirementAdmin
 from apps.admin import AttractionAdmin, HotelAdmin, RestaurantAdmin
-from apps.admin import ItineraryAdmin, TravelerStatsAdmin, DestinationAdmin, DailyScheduleAdmin
+from apps.admin import ItineraryAdmin
+from apps.admin.itinerary import TravelerStatsInline, DestinationInline, DayScheduleInline
 from apps.admin_ext.filters import (
     StatusFilter, SourceTypeFilter, TransportationTypeFilter,
     HotelLevelFilter, TripRhythmFilter, BudgetLevelFilter,
@@ -1151,12 +1152,12 @@ class ItineraryAdminTest(TestCase):
         expected_fields = (
             'itinerary_id',
             'itinerary_name',
-            'travel_purpose',
+            'contact_person',
+            'contact_phone',
             'start_date',
             'end_date',
             'total_days',
             'current_status',
-            'is_template',
             'created_by',
             'created_at'
         )
@@ -1181,7 +1182,6 @@ class ItineraryAdminTest(TestCase):
     def test_list_filter(self):
         print("\n测试4: 筛选字段")
         expected_filters = (
-            'travel_purpose',
             'current_status',
             'budget_flexibility',
             'is_template',
@@ -1291,23 +1291,79 @@ class ItineraryAdminTest(TestCase):
         self.assertGreater(len(inline_instances), 0)
         print(f"✓ 动态生成行程内联成功: {len(inline_instances)} 个内联")
     
-    def test_traveler_stats_admin(self):
-        print("\n测试11: TravelerStats Admin")
-        traveler_admin = TravelerStatsAdmin(TravelerStats, self.site)
-        self.assertIsNotNone(traveler_admin)
-        print("✓ TravelerStats模型已成功注册到Admin")
+    def test_traveler_stats_inline(self):
+        print("\n测试11: TravelerStats内联")
+        self.assertIsNotNone(TravelerStatsInline)
+        print("✓ TravelerStats内联类已成功定义")
     
-    def test_destination_admin(self):
-        print("\n测试12: Destination Admin")
-        destination_admin = DestinationAdmin(Destination, self.site)
-        self.assertIsNotNone(destination_admin)
-        print("✓ Destination模型已成功注册到Admin")
+    def test_destination_inline(self):
+        print("\n测试12: Destination内联")
+        self.assertIsNotNone(DestinationInline)
+        print("✓ Destination内联类已成功定义")
     
-    def test_daily_schedule_admin(self):
-        print("\n测试13: DailySchedule Admin")
-        daily_schedule_admin = DailyScheduleAdmin(DailySchedule, self.site)
-        self.assertIsNotNone(daily_schedule_admin)
-        print("✓ DailySchedule模型已成功注册到Admin")
+    def test_day_schedule_inline(self):
+        print("\n测试13: DaySchedule内联")
+        self.assertIsNotNone(DayScheduleInline)
+        print("✓ DaySchedule内联类已成功定义")
+    
+    def test_preview_itinerary(self):
+        print("\n测试14: 行程详情预览功能")
+        
+        # 导入必要的模块
+        from django.test import Client
+        from django.urls import reverse
+        
+        # 创建测试客户端
+        client = Client()
+        
+        # 模拟管理员用户登录
+        client.login(username='admin', password='password')
+        
+        # 测试预览行程页面
+        preview_url = reverse('preview_itinerary', args=[self.itinerary.itinerary_id])
+        response = client.get(preview_url)
+        
+        # 验证页面响应状态码为200 OK
+        self.assertEqual(response.status_code, 200)
+        print("✓ 行程详情预览页面响应状态码为200 OK")
+        
+        # 验证页面关键元素是否成功加载
+        response_content = response.content.decode('utf-8')
+        
+        # 验证页面标题
+        self.assertIn('行程详情预览 - 测试行程', response_content)
+        print("✓ 页面标题正确显示")
+        
+        # 验证基本信息部分
+        self.assertIn('1. 行程基本信息', response_content)
+        print("✓ 基本信息部分加载成功")
+        
+        # 验证旅客统计数据部分
+        self.assertIn('2. 旅客统计数据', response_content)
+        print("✓ 旅客统计数据部分加载成功")
+        
+        # 验证目的地信息部分
+        self.assertIn('3. 目的地信息', response_content)
+        print("✓ 目的地信息部分加载成功")
+        
+        # 验证每日行程安排部分
+        self.assertIn('4. 每日行程安排', response_content)
+        print("✓ 每日行程安排部分加载成功")
+        
+        # 验证行程名称
+        self.assertIn('测试行程', response_content)
+        print("✓ 行程名称正确显示")
+        
+        # 验证联系人信息
+        self.assertIn('张三', response_content)
+        self.assertIn('13800138000', response_content)
+        print("✓ 联系人信息正确显示")
+        
+        # 验证出发和返回城市
+        self.assertIn('北京', response_content)
+        print("✓ 出发和返回城市正确显示")
+        
+        print("✓ 行程详情预览页面所有关键元素加载成功")
 
 
 def run_all_tests():
@@ -1403,9 +1459,10 @@ def run_all_tests():
         itinerary_test.test_permissions,
         itinerary_test.test_save_model,
         itinerary_test.test_get_inline_instances,
-        itinerary_test.test_traveler_stats_admin,
-        itinerary_test.test_destination_admin,
-        itinerary_test.test_daily_schedule_admin
+        itinerary_test.test_traveler_stats_inline,
+        itinerary_test.test_destination_inline,
+        itinerary_test.test_day_schedule_inline,
+        itinerary_test.test_preview_itinerary
     ]
     
     all_tests = requirement_tests + attraction_tests + hotel_tests + restaurant_tests + itinerary_tests

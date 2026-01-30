@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
+from django.urls import reverse
 from ..models import (
     Itinerary,
     TravelerStats,
@@ -60,6 +61,9 @@ class DayScheduleInline(admin.TabularInline):
 
 # 自定义Itinerary的Admin类
 class ItineraryAdmin(admin.ModelAdmin):
+    # 自定义模板
+    change_form_template = 'admin/itinerary_change_form.html'
+    
     # 权限控制
     def has_add_permission(self, request):
         return request.user.has_perm('apps.add_itinerary')
@@ -217,6 +221,40 @@ class ItineraryAdmin(admin.ModelAdmin):
                 instance.created_by = request.user.username
             instance.save()
         formset.save_m2m()
+    
+    # 重写change_view方法，在详情页底部添加预览按钮
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        extra_context = extra_context or {}
+        obj = self.get_object(request, object_id)
+        if obj:
+            extra_context['preview_button'] = self.preview_itinerary(obj)
+        return super().change_view(request, object_id, form_url, extra_context)
+    
+    # 添加行程详情预览按钮
+    def preview_itinerary(self, obj):
+        preview_url = reverse('preview_itinerary', args=[obj.itinerary_id])
+        return format_html(
+            '<a href="{0}" target="_blank" class="preview-button" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; transition: background-color 0.2s ease, transform 0.1s ease;">\n'  # noqa
+            '    <span class="preview-icon" style="margin-right: 6px;">👁️</span> 行程详情预览\n'  # noqa
+            '</a>\n'  # noqa
+            '<style>\n'  # noqa
+            '    .preview-button:hover {{\n'  # noqa
+            '        background-color: #45a049;\n'  # noqa
+            '        transform: translateY(-1px);\n'  # noqa
+            '    }}\n'  # noqa
+            '    .preview-button:focus {{\n'  # noqa
+            '        outline: 2px solid #4CAF50;\n'  # noqa
+            '        outline-offset: 2px;\n'  # noqa
+            '    }}\n'  # noqa
+            '    .preview-button:active {{\n'  # noqa
+            '        transform: translateY(0);\n'  # noqa
+            '    }}\n'  # noqa
+            '</style>',
+            preview_url
+        )
+    
+    preview_itinerary.short_description = '预览操作'
+    preview_itinerary.allow_tags = True
 
 # 注册模型到Admin
 admin.site.register(Itinerary, ItineraryAdmin)

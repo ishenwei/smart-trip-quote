@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>行程详情预览 - {{ itinerary.itinerary_name }}</title>
+    <style>
+        /* 全局样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        /* 容器样式 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+        }
+        
+        /* 标题样式 */
+        h1 {
+            color: #2c3e50;
+            font-size: 28px;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 22px;
+            margin: 30px 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        h3 {
+            color: #555;
+            font-size: 18px;
+            margin: 20px 0 15px;
+        }
+        
+        /* 信息卡片样式 */
+        .info-card {
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f2f2f2;
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        /* 行程安排样式 */
+        .schedule-day {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+        }
+        
+        .schedule-day h3 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        
+        .schedule-item {
+            margin: 15px 0;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .schedule-time {
+            font-weight: 600;
+            color: #e67e22;
+        }
+        
+        .schedule-title {
+            font-weight: 600;
+            margin: 5px 0;
+        }
+        
+        .schedule-location {
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+        
+        .schedule-contact {
+            color: #27ae60;
+            margin: 5px 0;
+        }
+        
+        /* 响应式样式 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            h2 {
+                font-size: 20px;
+            }
+            
+            table {
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 8px;
+            }
+        }
+        
+        /* 打印样式 */
+        @media print {
+            body {
+                background-color: #fff;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>行程详情预览</h1>
+        
+        <!-- 行程基本信息 -->
+        <section>
+            <h2>1. 行程基本信息</h2>
+            <div class="info-card">
+                <table>
+                    <tr>
+                        <th>行程名称</th>
+                        <td>{{ itinerary.itinerary_name }}</td>
+                    </tr>
+                    <tr>
+                        <th>行程编号</th>
+                        <td>{{ itinerary.itinerary_id }}</td>
+                    </tr>
+                    <tr>
+                        <th>行程时长</th>
+                        <td>{{ itinerary.total_days }} 天</td>
+                    </tr>
+                    <tr>
+                        <th>出发日期</th>
+                        <td>{{ itinerary.start_date|date:"Y年m月d日" }}</td>
+                    </tr>
+                    <tr>
+                        <th>结束日期</th>
+                        <td>{{ itinerary.end_date|date:"Y年m月d日" }}</td>
+                    </tr>
+                    <tr>
+                        <th>行程状态</th>
+                        <td>{{ itinerary.current_status }}</td>
+                    </tr>
+                    <tr>
+                        <th>联系人</th>
+                        <td>{{ itinerary.contact_person }}</td>
+                    </tr>
+                    <tr>
+                        <th>联系电话</th>
+                        <td>{{ itinerary.contact_phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>出发城市</th>
+                        <td>{{ itinerary.departure_city }}</td>
+                    </tr>
+                    <tr>
+                        <th>返回城市</th>
+                        <td>{{ itinerary.return_city }}</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+        
+        <!-- 旅客统计数据 -->
+        <section>
+            <h2>2. 旅客统计数据</h2>
+            {% if traveler_stats %}
+                <div class="info-card">
+                    <table>
+                        <tr>
+                        <th>总旅客数量</th>
+                        <td>{{ traveler_stats.adult_count|add:traveler_stats.child_count|add:traveler_stats.infant_count|add:traveler_stats.senior_count }} 人</td>
+                    </tr>
+                    <tr>
+                        <th>成人数</th>
+                        <td>{{ traveler_stats.adult_count }} 人</td>
+                    </tr>
+                    <tr>
+                        <th>儿童数</th>
+                        <td>{{ traveler_stats.child_count }} 人</td>
+                    </tr>
+                    <tr>
+                        <th>婴儿数</th>
+                        <td>{{ traveler_stats.infant_count }} 人</td>
+                    </tr>
+                    <tr>
+                        <th>老人数</th>
+                        <td>{{ traveler_stats.senior_count }} 人</td>
+                    </tr>
+                    <tr>
+                        <th>备注</th>
+                        <td>{{ traveler_stats.notes }}</td>
+                    </tr>
+                    </table>
+                </div>
+            {% else %}
+                <div class="info-card">
+                    <p>暂无旅客统计数据</p>
+                </div>
+            {% endif %}
+        </section>
+        
+        <!-- 目的地信息 -->
+        <section>
+            <h2>3. 目的地信息</h2>
+            {% if destinations %}
+                {% for destination in destinations %}
+                    <div class="info-card">
+                        <h3>{{ destination.city_name }}, {{ destination.country_code }}</h3>
+                        <table>
+                            <tr>
+                                <th>抵达日期</th>
+                                <td>{{ destination.arrival_date|date:"Y年m月d日" }}</td>
+                            </tr>
+                            <tr>
+                                <th>离开日期</th>
+                                <td>{{ destination.departure_date|date:"Y年m月d日" }}</td>
+                            </tr>
+                            <tr>
+                                <th>停留天数</th>
+                                <td>{{ destination.nights }} 晚</td>
+                            </tr>
+                            <tr>
+                                <th>地区</th>
+                                <td>{{ destination.region }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="info-card">
+                    <p>暂无目的地信息</p>
+                </div>
+            {% endif %}
+        </section>
+        
+        <!-- 每日行程安排 -->
+        <section>
+            <h2>4. 每日行程安排</h2>
+            {% if grouped_schedules %}
+                {% for date, schedules in grouped_schedules.items %}
+                    <div class="schedule-day">
+                        <h3>{{ date|date:"Y年m月d日" }}</h3>
+                        {% for schedule in schedules %}
+                            <div class="schedule-item">
+                                <div class="schedule-time">{{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}</div>
+                                <div class="schedule-title">{{ schedule.activity_title }}</div>
+                                <div class="schedule-location">地点: {{ schedule.city_name }}</div>
+                                {% if schedule.activity_type %}
+                                    <div class="schedule-contact">活动类型: {{ schedule.activity_type }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="info-card">
+                    <p>暂无行程安排信息</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_related_objects %}
+{{ block.super }}
+
+{% if preview_button %}
+<div class="submit-row">
+    <div style="text-align: center;">
+        {{ preview_button }}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
