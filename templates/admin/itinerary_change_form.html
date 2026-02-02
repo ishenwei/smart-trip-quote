@@ -3,12 +3,26 @@
 {% block after_related_objects %}
 {{ block.super }}
 
-{% if preview_button %}
+{# 行程详情预览按钮 #}
 <div class="submit-row">
     <div style="text-align: center;">
-        {{ preview_button }}
+        <a href="/admin/itinerary/{{ original.itinerary_id }}/preview/" target="_blank" class="preview-button" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; transition: background-color 0.2s ease, transform 0.1s ease;">
+            <span class="preview-icon" style="margin-right: 6px;">👁️</span> 行程详情预览
+        </a>
+        <style>
+            .preview-button:hover {
+                background-color: #45a049;
+                transform: translateY(-1px);
+            }
+            .preview-button:focus {
+                outline: 2px solid #4CAF50;
+                outline-offset: 2px;
+            }
+            .preview-button:active {
+                transform: translateY(0);
+            }
+        </style>
     </div>
 </div>
-{% endif %}
 
 {% endblock %}

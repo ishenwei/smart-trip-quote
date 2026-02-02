@@ -2,7 +2,6 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
 from .base import BaseModel
-import uuid
 
 
 class Itinerary(BaseModel):
@@ -37,7 +36,7 @@ class Itinerary(BaseModel):
         CULTURAL = 'CULTURAL', '文化'
         CUSTOM = 'CUSTOM', '自定义'
 
-    itinerary_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='行程唯一标识')
+    itinerary_id = models.CharField(max_length=20, primary_key=True, editable=False, verbose_name='行程唯一标识')
     itinerary_name = models.CharField(max_length=100, verbose_name='行程名称')
     description = models.TextField(null=True, blank=True, verbose_name='行程描述')
     travel_purpose = models.CharField(max_length=20, choices=TravelPurpose.choices, verbose_name='旅行目的')
@@ -75,6 +74,47 @@ class Itinerary(BaseModel):
         # 版本号递增
         if self.pk:
             self.version += 1
+        else:
+            # 新创建记录，生成itinerary_id
+            if not self.itinerary_id:
+                from datetime import datetime
+                import time
+                
+                # 确保原子性，使用时间戳和循环检测
+                max_attempts = 100
+                for attempt in range(max_attempts):
+                    # 获取当前日期，格式化为YYYYMMDD
+                    today = datetime.now().strftime('%Y%m%d')
+                    
+                    # 查询当日已存在的记录，找到最大的序号
+                    prefix = f'ITI_{today}_'
+                    existing_records = Itinerary.objects.filter(itinerary_id__startswith=prefix)
+                    
+                    # 提取最大序号
+                    max_seq = 0
+                    for record in existing_records:
+                        try:
+                            seq = int(record.itinerary_id.split('_')[-1])
+                            if seq > max_seq:
+                                max_seq = seq
+                        except (ValueError, IndexError):
+                            pass
+                    
+                    # 生成下一个序号
+                    next_seq = max_seq + 1
+                    new_id = f'{prefix}{next_seq:03d}'
+                    
+                    # 检查是否存在冲突
+                    if not Itinerary.objects.filter(itinerary_id=new_id).exists():
+                        self.itinerary_id = new_id
+                        break
+                    
+                    # 避免无限循环，添加短暂延迟
+                    time.sleep(0.01)
+            
+            # 确保新创建的记录状态为草稿状态
+            if not self.current_status:
+                self.current_status = self.CurrentStatus.DRAFT
         
         super().save(*args, **kwargs)
 

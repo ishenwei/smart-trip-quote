@@ -328,6 +328,8 @@ class ItineraryAdmin(admin.ModelAdmin):
     # 只读字段
     readonly_fields = (
         'total_days',
+        'created_by',
+        'updated_by',
         'created_at',
         'updated_at',
         'version'
@@ -346,23 +348,53 @@ class ItineraryAdmin(admin.ModelAdmin):
     def get_inline_instances(self, request, obj=None):
         inline_instances = super().get_inline_instances(request, obj)
         
-        if obj and obj.total_days:
+        # 对于新增行程，默认显示第一天的日程
+        if not obj:
+            inline = DayScheduleInline(1, self.model, self.admin_site)
+            inline.extra = 0  # 显示新增按钮, 但不显示空白记录
+            inline_instances.append(inline)
+        # 对于现有行程，根据总天数生成日程
+        elif obj.total_days:
             for day in range(1, obj.total_days + 1):
                 inline = DayScheduleInline(day, self.model, self.admin_site)
+                inline.extra = 0  # 显示新增按钮, 但不显示空白记录
                 inline_instances.append(inline)
         
         return inline_instances
     
     # 保存时的处理
     def save_model(self, request, obj, form, change):
-        # 移除对不存在字段的设置
+        # 设置创建人和更新人
+        if not change:
+            obj.created_by = request.user.username
+        else:
+            obj.updated_by = request.user.username
+        
         super().save_model(request, obj, form, change)
+        
+        # 当行程保存后，更新关联的daily_schedule记录的日期
+        if obj and obj.start_date and obj.total_days:
+            from datetime import timedelta
+            
+            # 获取所有关联的daily_schedule记录
+            daily_schedules = DailySchedule.objects.filter(itinerary_id=obj)
+            
+            # 更新每个记录的schedule_date
+            for schedule in daily_schedules:
+                if 1 <= schedule.day_number <= obj.total_days:
+                    # 计算对应的日期（开始日期 + (day_number - 1)天）
+                    schedule.schedule_date = obj.start_date + timedelta(days=schedule.day_number - 1)
+                    schedule.save()
     
     # 保存内联时的处理
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         for instance in instances:
-            # 移除对不存在字段的设置
+            # 设置创建人和更新人
+            if not instance.pk:
+                instance.created_by = request.user.username
+            else:
+                instance.updated_by = request.user.username
             instance.save()
         formset.save_m2m()
     
@@ -371,7 +403,11 @@ class ItineraryAdmin(admin.ModelAdmin):
         extra_context = extra_context or {}
         obj = self.get_object(request, object_id)
         if obj:
-            extra_context['preview_button'] = self.preview_itinerary(obj)
+            try:
+                extra_context['preview_button'] = self.preview_itinerary(obj)
+            except Exception as e:
+                import traceback
+                traceback.print_exc()
         return super().change_view(request, object_id, form_url, extra_context)
     
     # 添加行程详情预览按钮
