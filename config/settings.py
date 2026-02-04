@@ -160,6 +160,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1:5173',
     'http://172.18.0.6:5173',
     'https://stq.ishenwei.online',
+    'https://stq-admin.ishenwei.online',
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -179,4 +180,5 @@ CORS_ORIGIN_WHITELIST = [
     'http://127.0.0.1:5173',
     'http://172.18.0.6:5173',
     'https://stq.ishenwei.online',
+    'https://stq-admin.ishenwei.online',
 ]

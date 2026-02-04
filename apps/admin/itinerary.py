@@ -565,6 +565,30 @@ class DailyScheduleAdmin(admin.ModelAdmin):
             obj.updated_by = request.user.username
         super().save_model(request, obj, form, change)
     
+    # 重写formfield_for_foreignkey方法，过滤destination下拉菜单
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'destination_id':
+            # 尝试从URL或请求中获取当前的itinerary_id
+            itinerary_id = None
+            
+            # 从URL中获取itinerary_id（编辑页面）
+            if 'object_id' in request.resolver_match.kwargs:
+                try:
+                    daily_schedule = self.model.objects.get(pk=request.resolver_match.kwargs['object_id'])
+                    itinerary_id = daily_schedule.itinerary_id
+                except:
+                    pass
+            
+            # 从请求参数中获取itinerary_id（新增页面）
+            if not itinerary_id and 'itinerary_id' in request.GET:
+                itinerary_id = request.GET.get('itinerary_id')
+            
+            # 如果有itinerary_id，过滤destination下拉菜单
+            if itinerary_id:
+                kwargs['queryset'] = Destination.objects.filter(itinerary=itinerary_id)
+        
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+    
     # 重写response_change，修改后重定向到详情页
     def response_change(self, request, obj):
         from django.urls import reverse
@@ -584,6 +608,13 @@ class DailyScheduleAdmin(admin.ModelAdmin):
         # 保存成功后重定向到详情页，并显示成功消息
         self.message_user(request, f'{opts.verbose_name} "{obj}" 创建成功。')
         return HttpResponseRedirect(reverse('admin:apps_dailyschedule_change', args=[obj.pk]))
+    
+    # 添加Media类，引用自定义的JavaScript文件
+    class Media:
+        js = (
+            'admin/js/jquery.init.js',
+            'admin/js/daily_schedule_filter.js',
+        )
 
 # 注册模型到Admin
 admin.site.register(Itinerary, ItineraryAdmin)
