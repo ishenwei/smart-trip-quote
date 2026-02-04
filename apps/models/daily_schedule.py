@@ -28,7 +28,7 @@ class DailySchedule(BaseModel):
     itinerary_id = models.ForeignKey('Itinerary', on_delete=models.CASCADE, to_field='itinerary_id', verbose_name='行程ID')
     day_number = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='第几天')
     schedule_date = models.DateField(verbose_name='活动日期')
-    city_name = models.CharField(max_length=100, verbose_name='城市名称')
+    destination_id = models.ForeignKey('Destination', on_delete=models.SET_NULL, null=True, blank=True, to_field='destination_id', verbose_name='目的地ID')
     activity_type = models.CharField(max_length=30, choices=ActivityType.choices, verbose_name='活动类型')
     activity_title = models.CharField(max_length=200, verbose_name='活动标题')
     activity_description = models.TextField(null=True, blank=True, verbose_name='活动描述')
@@ -86,7 +86,7 @@ class DailySchedule(BaseModel):
         indexes = [
             models.Index(fields=['itinerary_id']),
             models.Index(fields=['schedule_date']),
-            models.Index(fields=['city_name']),
+            models.Index(fields=['destination_id']),
             models.Index(fields=['activity_type']),
             models.Index(fields=['attraction_id']),
             models.Index(fields=['hotel_id']),

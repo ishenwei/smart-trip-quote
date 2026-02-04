@@ -23,6 +23,9 @@ class Destination(BaseModel):
         if self.arrival_date and self.departure_date:
             self.nights = (self.departure_date - self.arrival_date).days
         super().save(*args, **kwargs)
+    
+    def __str__(self):
+        return self.city_name
 
     class Meta:
         db_table = 'destinations'

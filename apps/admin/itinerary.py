@@ -64,7 +64,7 @@ class DailyScheduleInline(admin.TabularInline):
         'delete_daily_schedule',
         'day_number',
         'schedule_date',
-        'city_name',
+        'destination_id',
         'activity_type',
         'activity_title',
         'activity_description',
@@ -90,7 +90,7 @@ class DailyScheduleInline(admin.TabularInline):
         'delete_daily_schedule',
         'day_number',
         'schedule_date',
-        'city_name',
+        'destination_id',
         'activity_type',
         'activity_title',
         'activity_description',
@@ -156,7 +156,7 @@ class DayScheduleInline(admin.TabularInline):
         'delete_daily_schedule',
         'day_number',
         'schedule_date',
-        'city_name',
+        'destination_id',
         'activity_type',
         'activity_title',
         'activity_description',
@@ -182,7 +182,7 @@ class DayScheduleInline(admin.TabularInline):
         'delete_daily_schedule',
         'day_number',
         'schedule_date',
-        'city_name',
+        'destination_id',
         'activity_type',
         'activity_title',
         'activity_description',
@@ -448,7 +448,7 @@ class DailyScheduleAdmin(admin.ModelAdmin):
         'itinerary_id',
         'day_number',
         'schedule_date',
-        'city_name',
+        'destination_id',
         'activity_type',
         'activity_title',
         'start_time',
@@ -460,7 +460,7 @@ class DailyScheduleAdmin(admin.ModelAdmin):
     search_fields = (
         'schedule_id',
         'itinerary_id__itinerary_id',
-        'city_name',
+        'destination_id__city_name',
         'activity_title'
     )
     
@@ -476,7 +476,7 @@ class DailyScheduleAdmin(admin.ModelAdmin):
         ('基本信息', {
             'fields': (
                 ('itinerary_id', 'day_number'),
-                ('schedule_date', 'city_name'),
+                ('schedule_date', 'destination_id'),
                 ('activity_type', 'activity_title'),
                 ('activity_description',),
                 ('start_time', 'end_time')

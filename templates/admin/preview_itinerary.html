@@ -300,7 +300,7 @@
                             <div class="schedule-item">
                                 <div class="schedule-time">{{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}</div>
                                 <div class="schedule-title">{{ schedule.activity_title }}</div>
-                                <div class="schedule-location">地点: {{ schedule.city_name }}</div>
+                                <div class="schedule-location">地点: {{ schedule.destination_id.city_name }}</div>
                                 {% if schedule.activity_type %}
                                     <div class="schedule-contact">活动类型: {{ schedule.activity_type }}</div>
                                     {% if schedule.activity_type == 'CHECK_IN' or schedule.activity_type == 'CHECK_OUT' %}
