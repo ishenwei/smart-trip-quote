@@ -182,3 +182,12 @@ CORS_ORIGIN_WHITELIST = [
     'https://stq.ishenwei.online',
     'https://stq-admin.ishenwei.online',
 ]
+
+# CSRF trusted origins
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://172.18.0.6:5173',
+    'https://stq.ishenwei.online',
+    'https://stq-admin.ishenwei.online',
+]
