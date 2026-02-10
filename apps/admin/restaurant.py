@@ -2,7 +2,6 @@ from django.contrib import admin
 from ..models.restaurant import Restaurant
 
 
-@admin.register(Restaurant)
 class RestaurantAdmin(admin.ModelAdmin):
     # 列表显示字段
     list_display = (

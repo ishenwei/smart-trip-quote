@@ -616,6 +616,3 @@ class DailyScheduleAdmin(admin.ModelAdmin):
             'admin/js/daily_schedule_filter.js',
         )
 
-# 注册模型到Admin
-admin.site.register(Itinerary, ItineraryAdmin)
-admin.site.register(DailySchedule, DailyScheduleAdmin)

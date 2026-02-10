@@ -191,3 +191,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://stq.ishenwei.online',
     'https://stq-admin.ishenwei.online',
 ]
+
+# Admin Site Configuration
+ADMIN_SITE_HEADER = '智能旅游规划系统'
+ADMIN_SITE_TITLE = '智能旅游规划系统'
+ADMIN_INDEX_TITLE = '智能旅游规划系统管理'

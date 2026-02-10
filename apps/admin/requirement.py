@@ -16,7 +16,6 @@ from apps.admin_ext.actions import (
 )
 
 
-@admin.register(Requirement)
 class RequirementAdmin(admin.ModelAdmin):
     list_display = [
         'requirement_id',

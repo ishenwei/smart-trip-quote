@@ -2,7 +2,6 @@ from django.contrib import admin
 from ..models.attraction import Attraction
 
 
-@admin.register(Attraction)
 class AttractionAdmin(admin.ModelAdmin):
     # 列表显示字段
     list_display = (
