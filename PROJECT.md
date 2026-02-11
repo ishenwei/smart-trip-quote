@@ -688,6 +688,11 @@ const props = defineProps({
 - 测试文件以`test_`开头（如`test_llm_service.py`）
 - 与被测试模块对应
 
+**执行测试文件**:
+- 测试文件用docker compose 方式执行
+- 避免直接使用 python manage.py ...
+
+
 ## 10. 常见问题解决方案
 
 ### 10.1 LLM相关问题

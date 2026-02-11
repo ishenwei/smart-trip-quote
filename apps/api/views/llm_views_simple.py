@@ -10,9 +10,13 @@ from services.llm.service import LLMRequirementService, ProcessResult
 from services.llm.config import LLMProvider
 
 
-@method_decorator(csrf_exempt, name='dispatch')
 class ProcessRequirementView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
+    
+    @csrf_exempt
+    def dispatch(self, *args, **kwargs):
+        return super().dispatch(*args, **kwargs)
     
     def post(self, request):
         user_input = request.data.get('user_input')

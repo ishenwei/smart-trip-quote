@@ -88,7 +88,6 @@ class RequirementAdminTest(TestCase):
         )
         
         self.requirement = Requirement.objects.create(
-            requirement_id='REQ-ADMIN-001',
             origin_name='北京',
             origin_code='BJS',
             origin_type='International',

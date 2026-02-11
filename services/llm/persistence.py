@@ -62,47 +62,9 @@ class RequirementService:
         
         extension = data.get('extension') or {}
         
-        # 生成唯一的需求ID
-        requirement_id = data.get('requirement_id')
-        if not requirement_id:
-            # 如果没有提供需求ID，生成一个新的
-            from datetime import datetime
-            from django.db import transaction
-            
-            # 获取当前日期
-            date_str = datetime.now().strftime('%Y%m%d')
-            
-            # 使用事务确保并发安全
-            with transaction.atomic():
-                # 查询当天已存在的最大编号
-                prefix = f'REQ-{date_str}-'
-                # 获取当天所有的requirement_id
-                existing_ids = Requirement.objects.filter(
-                    requirement_id__startswith=prefix
-                ).values_list('requirement_id', flat=True)
-                
-                # 提取最大编号
-                max_num = 0
-                for req_id in existing_ids:
-                    try:
-                        num_part = req_id.split('-')[-1]
-                        num = int(num_part)
-                        if num > max_num:
-                            max_num = num
-                    except (ValueError, IndexError):
-                        pass
-                
-                # 生成新的编号
-                new_num = max_num + 1
-                requirement_id = f'{prefix}{new_num:03d}'
-        else:
-            # 如果提供了需求ID，检查是否已存在
-            while RequirementService.get_requirement_by_id(requirement_id):
-                # 如果已存在，在末尾添加随机字符
-                import random
-                import string
-                random_str = ''.join(random.choices(string.ascii_uppercase + string.digits, k=2))
-                requirement_id = f'{requirement_id}-{random_str}'
+        # 始终让Requirement模型的save方法自动生成requirement_id
+        # 忽略data中的requirement_id字段，无论是否存在
+        requirement_id = None
         
         requirement = Requirement(
             requirement_id=requirement_id,

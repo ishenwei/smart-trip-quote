@@ -39,7 +39,7 @@ class Requirement(BaseModel):
         HIGH_END = 'HighEnd', '高端'
         LUXURY = 'Luxury', '奢华'
     
-    requirement_id = models.CharField(max_length=50, unique=True, verbose_name='需求ID')
+    requirement_id = models.CharField(max_length=20, primary_key=True, editable=False, verbose_name='需求ID')
     origin_input = models.TextField(blank=True, verbose_name='客户原始输入')
     requirement_json_data = JSONField(verbose_name='JSON结构数据', default=dict)
     
@@ -100,9 +100,9 @@ class Requirement(BaseModel):
         blank=True,
         verbose_name='行程节奏'
     )
-    preference_tags = JSONField(verbose_name='偏好标签', default=list)
-    must_visit_spots = JSONField(verbose_name='必游景点', default=list)
-    avoid_activities = JSONField(verbose_name='避免活动', default=list)
+    preference_tags = JSONField(verbose_name='偏好标签', default=list, blank=True)
+    must_visit_spots = JSONField(verbose_name='必游景点', default=list, blank=True)
+    avoid_activities = JSONField(verbose_name='避免活动', default=list, blank=True)
     
     budget_level = models.CharField(
         max_length=20,
@@ -151,7 +151,7 @@ class Requirement(BaseModel):
     
     expires_at = models.DateTimeField(null=True, blank=True, verbose_name='过期时间')
     
-    extension = JSONField(verbose_name='扩展字段', default=dict)
+    extension = JSONField(verbose_name='扩展字段', default=dict, blank=True)
     
     class Meta:
         db_table = 'requirements'
@@ -168,6 +168,47 @@ class Requirement(BaseModel):
     
     def __str__(self):
         return f"{self.requirement_id} - {self.origin_name} 至 {self.destination_cities}"
+    
+    def save(self, *args, **kwargs):
+        # 新创建记录，生成requirement_id
+        if not self.pk:
+            if not self.requirement_id:
+                from datetime import datetime
+                import time
+                
+                # 确保原子性，使用时间戳和循环检测
+                max_attempts = 100
+                for attempt in range(max_attempts):
+                    # 获取当前日期，格式化为YYYYMMDD
+                    today = datetime.now().strftime('%Y%m%d')
+                    
+                    # 查询当日已存在的记录，找到最大的序号
+                    prefix = f'REQ_{today}_'
+                    existing_records = Requirement.objects.filter(requirement_id__startswith=prefix)
+                    
+                    # 提取最大序号
+                    max_seq = 0
+                    for record in existing_records:
+                        try:
+                            seq = int(record.requirement_id.split('_')[-1])
+                            if seq > max_seq:
+                                max_seq = seq
+                        except (ValueError, IndexError):
+                            pass
+                    
+                    # 生成下一个序号
+                    next_seq = max_seq + 1
+                    new_id = f'{prefix}{next_seq:03d}'
+                    
+                    # 检查是否存在冲突
+                    if not Requirement.objects.filter(requirement_id=new_id).exists():
+                        self.requirement_id = new_id
+                        break
+                    
+                    # 避免无限循环，添加短暂延迟
+                    time.sleep(0.01)
+        
+        super().save(*args, **kwargs)
     
     def clean(self):
         if self.travel_end_date and self.travel_start_date:

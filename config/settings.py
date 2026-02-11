@@ -196,3 +196,11 @@ CSRF_TRUSTED_ORIGINS = [
 ADMIN_SITE_HEADER = '智能旅游规划系统'
 ADMIN_SITE_TITLE = '智能旅游规划系统'
 ADMIN_INDEX_TITLE = '智能旅游规划系统管理'
+
+# n8n Webhook Configuration
+N8N_WEBHOOK_URL = os.getenv('N8N_WEBHOOK_URL', '')
+N8N_API_KEY = os.getenv('N8N_API_KEY', '')
+
+# Webhook Request Configuration
+WEBHOOK_TIMEOUT = 30  # 30秒超时
+WEBHOOK_MAX_RETRIES = 2  # 最多2次重试

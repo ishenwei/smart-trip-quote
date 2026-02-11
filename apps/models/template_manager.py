@@ -39,8 +39,9 @@ class TemplateManager:
     @staticmethod
     def _prepare_template_data(source, template_name, template_category, created_by, clear_sensitive_data):
         from .requirement import Requirement
+        # 模板的requirement_id由Requirement模型的save方法自动生成
+        # 不再使用TPL-前缀，让它和普通需求一样使用REQ_YYYYMMDD_XXX格式
         template_data = {
-            'requirement_id': f'TPL-{source.requirement_id}',
             'origin_name': source.origin_name,
             'origin_code': source.origin_code,
             'origin_type': source.origin_type,
@@ -197,7 +198,7 @@ class TemplateManager:
         return list(templates)
     
     @staticmethod
-    def use_template(template_id, new_requirement_id, created_by=None):
+    def use_template(template_id, created_by=None):
         from .requirement import Requirement
         try:
             template = Requirement.objects.get(requirement_id=template_id)
@@ -207,8 +208,8 @@ class TemplateManager:
         if not template.is_template:
             raise ValueError(f'该需求不是模板: {template_id}')
         
+        # 不再需要传入new_requirement_id，由Requirement模型的save方法自动生成
         requirement_data = {
-            'requirement_id': new_requirement_id,
             'origin_name': template.origin_name,
             'origin_code': template.origin_code,
             'origin_type': template.origin_type,
@@ -236,11 +237,7 @@ class TemplateManager:
             'budget_notes': template.budget_notes,
             'source_type': Requirement.SourceType.FORM_INPUT,
             'status': Requirement.Status.PENDING_REVIEW,
-            'assumptions': template.assumptions + [{
-                'field': 'requirement_id',
-                'inferred_value': new_requirement_id,
-                'reason': f'从模板 {template_id} 创建'
-            }],
+            'assumptions': template.assumptions,
             'created_by': created_by,
             'reviewed_by': '',
             'is_template': False,
@@ -253,10 +250,18 @@ class TemplateManager:
         with transaction.atomic():
             requirement = Requirement.objects.create(**requirement_data)
         
+        # 添加使用模板的记录到assumptions
+        requirement.assumptions.append({
+            'field': 'requirement_id',
+            'inferred_value': requirement.requirement_id,
+            'reason': f'从模板 {template_id} 创建'
+        })
+        requirement.save()
+        
         return requirement
     
     @staticmethod
-    def duplicate_template(template_id, new_requirement_id, new_template_name, created_by=None):
+    def duplicate_template(template_id, new_template_name, created_by=None):
         from .requirement import Requirement
         try:
             template = Requirement.objects.get(requirement_id=template_id)
@@ -270,10 +275,9 @@ class TemplateManager:
             template,
             new_template_name,
             template.template_category,
+            created_by,
             clear_sensitive_data=False
         )
-        new_template_data['requirement_id'] = new_requirement_id
-        new_template_data['created_by'] = created_by
         
         with transaction.atomic():
             new_template = Requirement.objects.create(**new_template_data)

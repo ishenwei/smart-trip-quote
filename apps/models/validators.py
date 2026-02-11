@@ -9,10 +9,10 @@ class RequirementValidator:
     def validate_requirement_id(requirement_id):
         if not requirement_id:
             raise ValidationError({'requirement_id': '需求ID不能为空'})
-        if len(requirement_id) > 50:
-            raise ValidationError({'requirement_id': '需求ID长度不能超过50个字符'})
-        if not requirement_id.startswith('REQ-'):
-            raise ValidationError({'requirement_id': '需求ID必须以REQ-开头'})
+        if len(requirement_id) > 20:
+            raise ValidationError({'requirement_id': '需求ID长度不能超过20个字符'})
+        if not requirement_id.startswith('REQ_'):
+            raise ValidationError({'requirement_id': '需求ID必须以REQ_开头'})
     
     @staticmethod
     def validate_origin(origin_name, origin_code=None, origin_type=None):

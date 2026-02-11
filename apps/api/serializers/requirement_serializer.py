@@ -183,6 +183,12 @@ class RequirementUpdateSerializer(serializers.ModelSerializer):
             'assumptions',
             'extension'
         ]
+        extra_kwargs = {
+            'preference_tags': {'required': False, 'allow_blank': True},
+            'must_visit_spots': {'required': False, 'allow_blank': True},
+            'avoid_activities': {'required': False, 'allow_blank': True},
+            'extension': {'required': False, 'allow_blank': True},
+        }
     
     def validate(self, data):
         from .validators import RequirementValidator

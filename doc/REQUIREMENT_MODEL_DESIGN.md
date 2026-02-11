@@ -168,8 +168,9 @@
 
 1. **validate_requirement_id** - 验证需求ID格式
    - 不能为空
-   - 长度不超过50字符
-   - 必须以"REQ-"开头
+   - 长度不超过20字符
+   - 必须以"REQ_"开头
+   - 格式为"REQ_YYYYMMDD_XXX"，其中YYYYMMDD为创建日期，XXX为当日序号（从001开始）
 
 2. **validate_origin** - 验证出发地信息
    - 名称不能为空
