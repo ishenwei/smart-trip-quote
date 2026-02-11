@@ -240,6 +240,8 @@ class LLMRequirementService:
             
             if save_to_db:
                 try:
+                    # 将原始用户输入添加到normalized_data中，以便保存到origin_input字段
+                    normalized_data['origin_input'] = user_input
                     requirement = RequirementService.create_requirement_from_json(normalized_data)
                     requirement_id = requirement.requirement_id
                     
@@ -404,6 +406,8 @@ class LLMRequirementService:
             
             if save_to_db:
                 try:
+                    # 将原始用户输入添加到normalized_data中，以便保存到origin_input字段
+                    normalized_data['origin_input'] = user_input
                     requirement = RequirementService.create_requirement_from_json(normalized_data)
                     requirement_id = requirement.requirement_id
                     
