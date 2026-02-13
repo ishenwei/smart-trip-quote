@@ -55,3 +55,6 @@ Thumbs.db
 
 # Test reports
 reports/
+
+#n8n data config/files
+n8n_data/

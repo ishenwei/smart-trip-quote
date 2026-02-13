@@ -6,23 +6,23 @@ import uuid
 
 class Attraction(BaseModel):
     ATTRACTION_STATUS_CHOICES = [
-        ('ACTIVE', 'Active'),
-        ('INACTIVE', 'Inactive'),
-        ('UNDER_CONSTRUCTION', 'Under Construction'),
-        ('CLOSED', 'Closed'),
+        ('ACTIVE', '营业中'),
+        ('INACTIVE', '非营业中'),
+        ('UNDER_CONSTRUCTION', '建设中'),
+        ('CLOSED', '已关闭'),
     ]
     
     ATTRACTION_CATEGORY_CHOICES = [
-        ('NATURAL', 'Natural'),
-        ('HISTORICAL', 'Historical'),
-        ('CULTURAL', 'Cultural'),
-        ('RELIGIOUS', 'Religious'),
-        ('MODERN', 'Modern'),
-        ('ENTERTAINMENT', 'Entertainment'),
-        ('SHOPPING', 'Shopping'),
-        ('OUTDOOR', 'Outdoor'),
-        ('INDOOR', 'Indoor'),
-        ('OTHER', 'Other'),
+        ('NATURAL', '自然景观'),
+        ('HISTORICAL', '历史古迹'),
+        ('CULTURAL', '文化景点'),
+        ('RELIGIOUS', '宗教场所'),
+        ('MODERN', '现代景点'),
+        ('ENTERTAINMENT', '娱乐场所'),
+        ('SHOPPING', '购物场所'),
+        ('OUTDOOR', '户外景点'),
+        ('INDOOR', '室内景点'),
+        ('OTHER', '其他'),
     ]
     
     attraction_id = models.UUIDField(primary_key=True, default=uuid.uuid4, verbose_name='景点ID', db_comment='景点唯一标识符,使用UUID格式')
@@ -32,7 +32,7 @@ class Attraction(BaseModel):
     city_name = models.CharField(max_length=100, verbose_name='城市名称', db_comment='景点所在城市名称')
     region = models.CharField(max_length=100, blank=True, null=True, verbose_name='地区', db_comment='景点所在地区或省份')
     address = models.TextField(blank=True, null=True, verbose_name='地址', db_comment='景点详细地址')
-    category = models.CharField(max_length=50, choices=ATTRACTION_CATEGORY_CHOICES, blank=True, null=True, verbose_name='分类', db_comment='景点主分类,如自然景观、历史古迹、文化景点等')
+    category = models.CharField(max_length=50, choices=ATTRACTION_CATEGORY_CHOICES, blank=True, null=True, verbose_name='分类', db_comment='景点主分类,如自然景观，历史古迹，文化景点，宗教场所，现代景点，娱乐场所，购物场所，户外景点，室内景点，其他')
     subcategory = models.CharField(max_length=50, blank=True, null=True, verbose_name='子分类', db_comment='景点子分类,用于更精细的分类')
     tags = JSONField(blank=True, null=True, verbose_name='标签数组', db_comment='景点标签数组,存储关键词如亲子、拍照、必游等')
     description = models.TextField(blank=True, null=True, verbose_name='描述', db_comment='景点详细描述介绍')
