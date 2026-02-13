@@ -39,125 +39,139 @@ class Requirement(BaseModel):
         HIGH_END = 'HighEnd', '高端'
         LUXURY = 'Luxury', '奢华'
     
-    requirement_id = models.CharField(max_length=20, primary_key=True, editable=False, verbose_name='需求ID')
-    origin_input = models.TextField(blank=True, verbose_name='客户原始输入')
-    requirement_json_data = JSONField(verbose_name='JSON结构数据', default=dict)
+    requirement_id = models.CharField(max_length=20, primary_key=True, editable=False, verbose_name='需求ID', db_comment='需求唯一标识符,格式为REQ_YYYYMMDD_XXX')
+    origin_input = models.TextField(blank=True, verbose_name='客户原始输入', db_comment='客户原始的自然语言输入')
+    requirement_json_data = JSONField(verbose_name='JSON结构数据', default=dict, db_comment='需求结构化JSON数据')
     
-    origin_name = models.CharField(max_length=100, verbose_name='出发地名称')
-    origin_code = models.CharField(max_length=10, blank=True, verbose_name='出发地代码')
-    origin_type = models.CharField(max_length=20, blank=True, verbose_name='出发地类型')
+    origin_name = models.CharField(max_length=100, verbose_name='出发地名称', db_comment='出发地城市名称')
+    origin_code = models.CharField(max_length=10, blank=True, verbose_name='出发地代码', db_comment='出发地城市代码')
+    origin_type = models.CharField(max_length=20, blank=True, verbose_name='出发地类型', db_comment='出发地类型')
     
-    destination_cities = JSONField(verbose_name='目的地城市列表', default=list)
+    destination_cities = JSONField(verbose_name='目的地城市列表', default=list, db_comment='目的地城市列表')
     
     trip_days = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(365)],
-        verbose_name='出行天数'
+        verbose_name='出行天数',
+        db_comment='出行天数,范围1-365'
     )
     
     group_adults = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)],
-        verbose_name='成人数量'
+        verbose_name='成人数量',
+        db_comment='成人数量'
     )
     group_children = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)],
-        verbose_name='儿童数量'
+        verbose_name='儿童数量',
+        db_comment='儿童数量'
     )
     group_seniors = models.IntegerField(
         default=0,
         validators=[MinValueValidator(0)],
-        verbose_name='老人数量'
+        verbose_name='老人数量',
+        db_comment='老人数量'
     )
     group_total = models.IntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name='总人数'
+        verbose_name='总人数',
+        db_comment='出行总人数'
     )
     
-    travel_start_date = models.DateField(null=True, blank=True, verbose_name='出行开始日期')
-    travel_end_date = models.DateField(null=True, blank=True, verbose_name='出行结束日期')
-    travel_date_flexible = models.BooleanField(default=False, verbose_name='日期是否灵活')
+    travel_start_date = models.DateField(null=True, blank=True, verbose_name='出行开始日期', db_comment='出行开始日期')
+    travel_end_date = models.DateField(null=True, blank=True, verbose_name='出行结束日期', db_comment='出行结束日期')
+    travel_date_flexible = models.BooleanField(default=False, verbose_name='日期是否灵活', db_comment='标识出行日期是否灵活可调')
     
     transportation_type = models.CharField(
         max_length=20,
         choices=TransportationType.choices,
         blank=True,
-        verbose_name='大交通方式'
+        verbose_name='大交通方式',
+        db_comment='大交通方式,如双飞、高铁、自驾等'
     )
-    transportation_notes = models.TextField(blank=True, verbose_name='交通偏好说明')
+    transportation_notes = models.TextField(blank=True, verbose_name='交通偏好说明', db_comment='交通偏好说明')
     
     hotel_level = models.CharField(
         max_length=20,
         choices=HotelLevel.choices,
         blank=True,
-        verbose_name='酒店等级'
+        verbose_name='酒店等级',
+        db_comment='酒店等级,如经济型、舒适型、高档型、豪华型'
     )
-    hotel_requirements = models.TextField(blank=True, verbose_name='住宿特殊要求')
+    hotel_requirements = models.TextField(blank=True, verbose_name='住宿特殊要求', db_comment='住宿特殊要求')
     
     trip_rhythm = models.CharField(
         max_length=20,
         choices=TripRhythm.choices,
         blank=True,
-        verbose_name='行程节奏'
+        verbose_name='行程节奏',
+        db_comment='行程节奏,如悠闲、适中、紧凑'
     )
-    preference_tags = JSONField(verbose_name='偏好标签', default=list, blank=True)
-    must_visit_spots = JSONField(verbose_name='必游景点', default=list, blank=True)
-    avoid_activities = JSONField(verbose_name='避免活动', default=list, blank=True)
+    preference_tags = JSONField(verbose_name='偏好标签', default=list, blank=True, db_comment='偏好标签列表')
+    must_visit_spots = JSONField(verbose_name='必游景点', default=list, blank=True, db_comment='必游景点列表')
+    avoid_activities = JSONField(verbose_name='避免活动', default=list, blank=True, db_comment='避免的活动列表')
     
     budget_level = models.CharField(
         max_length=20,
         choices=BudgetLevel.choices,
         blank=True,
-        verbose_name='预算等级'
+        verbose_name='预算等级',
+        db_comment='预算等级,如经济、舒适、高端、奢华'
     )
-    budget_currency = models.CharField(max_length=10, default='CNY', verbose_name='预算货币')
+    budget_currency = models.CharField(max_length=10, default='CNY', verbose_name='预算货币', db_comment='预算货币代码,如CNY、USD等')
     budget_min = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        verbose_name='最低预算'
+        verbose_name='最低预算',
+        db_comment='最低预算金额'
     )
     budget_max = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
-        verbose_name='最高预算'
+        verbose_name='最高预算',
+        db_comment='最高预算金额'
     )
-    budget_notes = models.TextField(blank=True, verbose_name='预算说明')
+    budget_notes = models.TextField(blank=True, verbose_name='预算说明', db_comment='预算说明')
     
     source_type = models.CharField(
         max_length=20,
         choices=SourceType.choices,
         default=SourceType.NATURAL_LANGUAGE,
-        verbose_name='需求来源'
+        verbose_name='需求来源',
+        db_comment='需求来源,如自然语言输入、表单输入'
     )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.PENDING_REVIEW,
-        verbose_name='需求状态'
+        verbose_name='需求状态',
+        db_comment='需求状态,如待审核、已确认、已过期'
     )
     
-    assumptions = JSONField(verbose_name='系统推断说明', default=list)
+    assumptions = JSONField(verbose_name='系统推断说明', default=list, db_comment='系统推断说明列表')
     
-    created_by = models.CharField(max_length=100, blank=True, null=True, verbose_name='创建人')
-    reviewed_by = models.CharField(max_length=100, blank=True, null=True, verbose_name='审核人')
+    created_by = models.CharField(max_length=100, blank=True, null=True, verbose_name='创建人', db_comment='需求创建人用户名')
+    reviewed_by = models.CharField(max_length=100, blank=True, null=True, verbose_name='审核人', db_comment='需求审核人用户名')
     
-    is_template = models.BooleanField(default=False, verbose_name='是否模板')
-    template_name = models.CharField(max_length=200, blank=True, verbose_name='模板名称')
-    template_category = models.CharField(max_length=100, blank=True, verbose_name='模板分类')
+    is_template = models.BooleanField(default=False, verbose_name='是否模板', db_comment='标识是否为需求模板')
+    template_name = models.CharField(max_length=200, blank=True, verbose_name='模板名称', db_comment='模板名称')
+    template_category = models.CharField(max_length=100, blank=True, verbose_name='模板分类', db_comment='模板分类')
     
-    expires_at = models.DateTimeField(null=True, blank=True, verbose_name='过期时间')
+    expires_at = models.DateTimeField(null=True, blank=True, verbose_name='过期时间', db_comment='需求过期时间')
     
-    extension = JSONField(verbose_name='扩展字段', default=dict, blank=True)
+    extension = JSONField(verbose_name='扩展字段', default=dict, blank=True, db_comment='扩展字段字典')
     
     class Meta:
         db_table = 'requirements'
         verbose_name = '旅游需求管理'
         verbose_name_plural = '旅游需求管理'
         ordering = ['-created_at']
+        db_table_comment = '旅游需求管理表,存储客户的旅游需求信息,包括出发地、目的地、出行人数、日期、预算、偏好等详细需求'
         indexes = [
             models.Index(fields=['requirement_id']),
             models.Index(fields=['status']),

@@ -24,27 +24,26 @@ class DailySchedule(BaseModel):
         CONFIRMED = 'CONFIRMED', '已确认'
         CANCELLED = 'CANCELLED', '已取消'
     
-    schedule_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='活动ID')
-    itinerary_id = models.ForeignKey('Itinerary', on_delete=models.CASCADE, to_field='itinerary_id', verbose_name='行程ID')
-    day_number = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='第几天')
-    schedule_date = models.DateField(verbose_name='活动日期')
-    destination_id = models.ForeignKey('Destination', on_delete=models.SET_NULL, null=True, blank=True, to_field='destination_id', verbose_name='目的地ID')
-    activity_type = models.CharField(max_length=30, choices=ActivityType.choices, verbose_name='活动类型')
-    activity_title = models.CharField(max_length=200, verbose_name='活动标题')
-    activity_description = models.TextField(null=True, blank=True, verbose_name='活动描述')
-    start_time = models.TimeField(verbose_name='开始时间')
-    end_time = models.TimeField(verbose_name='结束时间')
-    attraction_id = models.ForeignKey('Attraction', on_delete=models.SET_NULL, null=True, blank=True, to_field='attraction_id', verbose_name='关联景点ID')
-    hotel_id = models.ForeignKey('Hotel', on_delete=models.SET_NULL, null=True, blank=True, to_field='hotel_id', verbose_name='关联酒店ID')
-    restaurant_id = models.ForeignKey('Restaurant', on_delete=models.SET_NULL, null=True, blank=True, to_field='restaurant_id', verbose_name='关联餐厅ID')
-    estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)], verbose_name='预估费用')
-    currency = models.CharField(max_length=3, default='CNY', verbose_name='货币')
-    # budget_id = models.ForeignKey('BudgetBreakdown', on_delete=models.SET_NULL, null=True, blank=True, to_field='budget_id', verbose_name='预算细分')
-    booking_status = models.CharField(max_length=15, choices=BookingStatus.choices, null=True, blank=True, verbose_name='预订状态')
-    booking_reference = models.CharField(max_length=100, null=True, blank=True, verbose_name='预订参考号')
-    notes = models.TextField(null=True, blank=True, verbose_name='备注')
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
-    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    schedule_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='活动ID', db_comment='活动唯一标识符,使用UUID格式')
+    itinerary_id = models.ForeignKey('Itinerary', on_delete=models.CASCADE, to_field='itinerary_id', verbose_name='行程ID', db_comment='关联的行程ID,外键关联itinerary表')
+    day_number = models.IntegerField(validators=[MinValueValidator(1)], verbose_name='第几天', db_comment='行程中的第几天,从1开始计数')
+    schedule_date = models.DateField(verbose_name='活动日期', db_comment='活动发生的具体日期')
+    destination_id = models.ForeignKey('Destination', on_delete=models.SET_NULL, null=True, blank=True, to_field='destination_id', verbose_name='目的地ID', db_comment='关联的目的地ID,外键关联destinations表')
+    activity_type = models.CharField(max_length=30, choices=ActivityType.choices, verbose_name='活动类型', db_comment='活动类型,如航班、景点、餐饮、交通等')
+    activity_title = models.CharField(max_length=200, verbose_name='活动标题', db_comment='活动标题名称')
+    activity_description = models.TextField(null=True, blank=True, verbose_name='活动描述', db_comment='活动详细描述')
+    start_time = models.TimeField(verbose_name='开始时间', db_comment='活动开始时间')
+    end_time = models.TimeField(verbose_name='结束时间', db_comment='活动结束时间')
+    attraction_id = models.ForeignKey('Attraction', on_delete=models.SET_NULL, null=True, blank=True, to_field='attraction_id', verbose_name='关联景点ID', db_comment='关联的景点ID,外键关联attractions表')
+    hotel_id = models.ForeignKey('Hotel', on_delete=models.SET_NULL, null=True, blank=True, to_field='hotel_id', verbose_name='关联酒店ID', db_comment='关联的酒店ID,外键关联hotels表')
+    restaurant_id = models.ForeignKey('Restaurant', on_delete=models.SET_NULL, null=True, blank=True, to_field='restaurant_id', verbose_name='关联餐厅ID', db_comment='关联的餐厅ID,外键关联restaurants表')
+    estimated_cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)], verbose_name='预估费用', db_comment='该活动的预估费用')
+    currency = models.CharField(max_length=3, default='CNY', verbose_name='货币', db_comment='费用货币代码,如CNY、USD等')
+    booking_status = models.CharField(max_length=15, choices=BookingStatus.choices, null=True, blank=True, verbose_name='预订状态', db_comment='预订状态,如未预订、待确认、已确认、已取消')
+    booking_reference = models.CharField(max_length=100, null=True, blank=True, verbose_name='预订参考号', db_comment='预订订单号或参考号')
+    notes = models.TextField(null=True, blank=True, verbose_name='备注', db_comment='活动备注信息')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间', db_comment='记录创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间', db_comment='记录最后更新时间')
     
     def clean(self):
         from django.core.exceptions import ValidationError
@@ -83,6 +82,7 @@ class DailySchedule(BaseModel):
         verbose_name = '每日行程活动表'
         verbose_name_plural = '每日行程活动表'
         ordering = ['itinerary_id', 'day_number', 'start_time']
+        db_table_comment = '每日行程活动表,存储行程中每一天的具体活动安排,包括航班、景点游览、餐饮、交通等活动的详细信息'
         indexes = [
             models.Index(fields=['itinerary_id']),
             models.Index(fields=['schedule_date']),

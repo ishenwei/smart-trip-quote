@@ -28,57 +28,61 @@ class Restaurant(BaseModel):
         TEMPORARILY_CLOSED = 'TEMPORARILY_CLOSED', '临时关闭'
         PERMANENTLY_CLOSED = 'PERMANENTLY_CLOSED', '永久关闭'
     
-    restaurant_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='餐厅ID')
-    restaurant_code = models.CharField(max_length=50, unique=True, verbose_name='餐厅代码')
-    restaurant_name = models.CharField(max_length=200, verbose_name='餐厅名称')
-    country_code = models.CharField(max_length=2, verbose_name='国家代码')
-    city_name = models.CharField(max_length=100, verbose_name='城市名称')
-    district = models.CharField(max_length=100, blank=True, verbose_name='区域')
-    address = models.TextField(verbose_name='地址')
-    cuisine_type = models.CharField(max_length=100, verbose_name='菜系')
-    sub_cuisine_types = JSONField(verbose_name='子菜系数组', default=list)
+    restaurant_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='餐厅ID', db_comment='餐厅唯一标识符,使用UUID格式')
+    restaurant_code = models.CharField(max_length=50, unique=True, verbose_name='餐厅代码', db_comment='餐厅唯一编码,用于系统内部标识和检索')
+    restaurant_name = models.CharField(max_length=200, verbose_name='餐厅名称', db_comment='餐厅中文名称')
+    country_code = models.CharField(max_length=2, verbose_name='国家代码', db_comment='所在国家的ISO 3166-1 alpha-2代码,如CN、US等')
+    city_name = models.CharField(max_length=100, verbose_name='城市名称', db_comment='餐厅所在城市名称')
+    district = models.CharField(max_length=100, blank=True, verbose_name='区域', db_comment='餐厅所在区域或商圈')
+    address = models.TextField(verbose_name='地址', db_comment='餐厅详细地址')
+    cuisine_type = models.CharField(max_length=100, verbose_name='菜系', db_comment='餐厅主菜系,如中餐、西餐、日料等')
+    sub_cuisine_types = JSONField(verbose_name='子菜系数组', default=list, db_comment='子菜系列表,如川菜、粤菜等')
     restaurant_type = models.CharField(
         max_length=50,
         choices=RestaurantType.choices,
         blank=True,
-        verbose_name='餐厅类型'
+        verbose_name='餐厅类型',
+        db_comment='餐厅类型,如精致餐饮、休闲餐饮、快餐等'
     )
-    tags = JSONField(verbose_name='标签', default=dict)
-    description = models.TextField(blank=True, verbose_name='描述')
-    signature_dishes = JSONField(verbose_name='招牌菜', default=dict)
-    chef_name = models.CharField(max_length=100, blank=True, verbose_name='主厨名字')
-    year_established = models.IntegerField(blank=True, null=True, verbose_name='建立年份')
-    opening_hours = JSONField(verbose_name='营业时间', default=dict)
-    is_24_hours = models.BooleanField(default=False, verbose_name='是否24小时营业')
-    contact_phone = models.CharField(max_length=20, blank=True, verbose_name='联系电话')
-    contact_email = models.CharField(max_length=255, blank=True, verbose_name='联系邮箱')
-    website = models.CharField(max_length=500, blank=True, verbose_name='网站')
-    reservation_required = models.BooleanField(default=False, verbose_name='是否需要预订')
-    reservation_website = models.CharField(max_length=500, blank=True, verbose_name='预订网站')
+    tags = JSONField(verbose_name='标签', default=dict, db_comment='餐厅标签字典,存储关键词如商务、约会、家庭等')
+    description = models.TextField(blank=True, verbose_name='描述', db_comment='餐厅详细描述介绍')
+    signature_dishes = JSONField(verbose_name='招牌菜', default=dict, db_comment='招牌菜字典')
+    chef_name = models.CharField(max_length=100, blank=True, verbose_name='主厨名字', db_comment='主厨姓名')
+    year_established = models.IntegerField(blank=True, null=True, verbose_name='建立年份', db_comment='餐厅建立年份')
+    opening_hours = JSONField(verbose_name='营业时间', default=dict, db_comment='营业时间字典,包含每日营业时段')
+    is_24_hours = models.BooleanField(default=False, verbose_name='是否24小时营业', db_comment='标识餐厅是否24小时营业')
+    contact_phone = models.CharField(max_length=20, blank=True, verbose_name='联系电话', db_comment='餐厅联系电话')
+    contact_email = models.CharField(max_length=255, blank=True, verbose_name='联系邮箱', db_comment='餐厅联系邮箱')
+    website = models.CharField(max_length=500, blank=True, verbose_name='网站', db_comment='餐厅官方网站URL')
+    reservation_required = models.BooleanField(default=False, verbose_name='是否需要预订', db_comment='标识是否需要提前预订')
+    reservation_website = models.CharField(max_length=500, blank=True, verbose_name='预订网站', db_comment='预订网站URL')
     price_range = models.CharField(
         max_length=50,
         choices=PriceRange.choices,
-        verbose_name='价格范围'
+        verbose_name='价格范围',
+        db_comment='价格范围,如经济型、中档、高档、奢华'
     )
     avg_price_per_person = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         blank=True,
         null=True,
-        verbose_name='人均价格'
+        verbose_name='人均价格',
+        db_comment='人均消费价格'
     )
-    amenities = JSONField(verbose_name='设施', default=dict)
-    seating_capacity = models.IntegerField(blank=True, null=True, verbose_name='座位数')
-    private_rooms_available = models.BooleanField(default=False, verbose_name='是否有包间')
-    dietary_options = JSONField(verbose_name='饮食选项', default=dict)
-    alcohol_served = models.BooleanField(blank=True, null=True, verbose_name='是否提供酒精饮料')
+    amenities = JSONField(verbose_name='设施', default=dict, db_comment='餐厅设施字典,如WiFi、停车场、包间等')
+    seating_capacity = models.IntegerField(blank=True, null=True, verbose_name='座位数', db_comment='餐厅总座位数')
+    private_rooms_available = models.BooleanField(default=False, verbose_name='是否有包间', db_comment='标识是否有包间')
+    dietary_options = JSONField(verbose_name='饮食选项', default=dict, db_comment='饮食选项字典,如素食、无麸质等')
+    alcohol_served = models.BooleanField(blank=True, null=True, verbose_name='是否提供酒精饮料', db_comment='标识是否提供酒精饮料')
     popularity_score = models.DecimalField(
         max_digits=3,
         decimal_places=2,
         blank=True,
         null=True,
         validators=[MinValueValidator(0), MaxValueValidator(5)],
-        verbose_name='受欢迎度评分'
+        verbose_name='受欢迎度评分',
+        db_comment='餐厅受欢迎度评分,范围0-5'
     )
     food_rating = models.DecimalField(
         max_digits=3,
@@ -86,7 +90,8 @@ class Restaurant(BaseModel):
         blank=True,
         null=True,
         validators=[MinValueValidator(0), MaxValueValidator(5)],
-        verbose_name='食物评分'
+        verbose_name='食物评分',
+        db_comment='食物评分,范围0-5'
     )
     service_rating = models.DecimalField(
         max_digits=3,
@@ -94,25 +99,28 @@ class Restaurant(BaseModel):
         blank=True,
         null=True,
         validators=[MinValueValidator(0), MaxValueValidator(5)],
-        verbose_name='服务评分'
+        verbose_name='服务评分',
+        db_comment='服务评分,范围0-5'
     )
-    review_count = models.IntegerField(default=0, verbose_name='评论数')
-    main_image_url = models.CharField(max_length=500, blank=True, verbose_name='主图URL')
+    review_count = models.IntegerField(default=0, verbose_name='评论数', db_comment='累计评论数量')
+    main_image_url = models.CharField(max_length=500, blank=True, verbose_name='主图URL', db_comment='餐厅主图片URL')
     status = models.CharField(
         max_length=20,
         choices=Status.choices,
         default=Status.ACTIVE,
-        verbose_name='状态'
+        verbose_name='状态',
+        db_comment='餐厅当前状态,如营业中、未营业、临时关闭、永久关闭'
     )
-    created_by = models.CharField(max_length=50, blank=True, verbose_name='创建人')
-    updated_by = models.CharField(max_length=50, blank=True, verbose_name='更新人')
-    version = models.IntegerField(default=1, verbose_name='版本')
+    created_by = models.CharField(max_length=50, blank=True, verbose_name='创建人', db_comment='记录创建人用户名')
+    updated_by = models.CharField(max_length=50, blank=True, verbose_name='更新人', db_comment='记录更新人用户名')
+    version = models.IntegerField(default=1, verbose_name='版本', db_comment='数据版本号,用于版本控制')
     
     class Meta:
         db_table = 'restaurants'
         verbose_name = '餐厅数据'
         verbose_name_plural = '餐厅数据'
         ordering = ['-created_at']
+        db_table_comment = '餐厅信息表,存储全球餐厅餐饮的详细信息,包括餐厅基本信息、菜系类型、价格范围、评分评价等数据'
         indexes = [
             models.Index(fields=['restaurant_code']),
             models.Index(fields=['restaurant_name']),
