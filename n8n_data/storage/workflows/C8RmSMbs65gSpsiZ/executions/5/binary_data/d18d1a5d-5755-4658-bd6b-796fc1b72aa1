@@ -1,0 +1,342 @@
+#  attractions
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- attraction_id uuid 
+- attraction_code varchar(50) 
+- attraction_name varchar(200) 
+- country_code varchar(2) 
+- city_name varchar(100) 
+- region varchar(100) 
+- address longtext 
+- category varchar(50) 
+- subcategory varchar(50) 
+- tags longtext 
+- description longtext 
+- highlights longtext 
+- recommended_duration int(11) 
+- opening_hours longtext 
+- best_season longtext 
+- is_always_open tinyint(1) 
+- ticket_price decimal(10,2) 
+- currency varchar(3) 
+- ticket_type varchar(50) 
+- booking_required tinyint(1) 
+- booking_website varchar(500) 
+- facilities longtext 
+- popularity_score decimal(3,2) 
+- visitor_rating decimal(3,2) 
+- review_count int(11) 
+- main_image_url varchar(500) 
+- image_gallery longtext 
+- video_url varchar(500) 
+- status varchar(20) 
+- created_by varchar(50) 
+- updated_by varchar(50) 
+- version int(11) 
+
+#  auth_group
+- id int(11) 
+- name varchar(150) 
+
+#  auth_group_permissions
+- id bigint(20) 
+- group_id int(11) 
+- permission_id int(11) 
+
+#  auth_permission
+- id int(11) 
+- name varchar(255) 
+- content_type_id int(11) 
+- codename varchar(100) 
+
+#  auth_user
+- id int(11) 
+- password varchar(128) 
+- last_login datetime(6) 
+- is_superuser tinyint(1) 
+- username varchar(150) 
+- first_name varchar(150) 
+- last_name varchar(150) 
+- email varchar(254) 
+- is_staff tinyint(1) 
+- is_active tinyint(1) 
+- date_joined datetime(6) 
+
+#  auth_user_groups
+- id bigint(20) 
+- user_id int(11) 
+- group_id int(11) 
+
+#  auth_user_user_permissions
+- id bigint(20) 
+- user_id int(11) 
+- permission_id int(11) 
+
+#  daily_schedules
+- schedule_id uuid 
+- day_number int(11) 
+- schedule_date date 
+- activity_type varchar(30) 
+- activity_title varchar(200) 
+- activity_description longtext 
+- start_time time(6) 
+- end_time time(6) 
+- estimated_cost decimal(10,2) 
+- currency varchar(3) 
+- booking_status varchar(15) 
+- booking_reference varchar(100) 
+- notes longtext 
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- attraction_id_id uuid 
+- hotel_id_id uuid 
+- itinerary_id_id varchar(20) 
+- restaurant_id_id uuid 
+- destination_id_id uuid 
+
+#  destinations
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- destination_id uuid 
+- destination_order int(11) 
+- city_name varchar(100) 
+- country_code varchar(2) 
+- region varchar(100) 
+- latitude decimal(9,6) 
+- longitude decimal(9,6) 
+- arrival_date date 
+- departure_date date 
+- nights int(11) 
+- itinerary_id varchar(20) 
+
+#  django_admin_log
+- id int(11) 
+- action_time datetime(6) 
+- object_id longtext 
+- object_repr varchar(200) 
+- action_flag smallint(5) unsigned 
+- change_message longtext 
+- content_type_id int(11) 
+- user_id int(11) 
+
+#  django_content_type
+- id int(11) 
+- app_label varchar(100) 
+- model varchar(100) 
+
+#  django_migrations
+- id bigint(20) 
+- app varchar(255) 
+- name varchar(255) 
+- applied datetime(6) 
+
+#  django_q_ormq
+- id int(11) 
+- key varchar(100) 
+- payload longtext 
+- lock datetime(6) 
+
+#  django_q_schedule
+- id int(11) 
+- func varchar(256) 
+- hook varchar(256) 
+- args longtext 
+- kwargs longtext 
+- schedule_type varchar(2) 
+- repeats int(11) 
+- next_run datetime(6) 
+- task varchar(100) 
+- name varchar(100) 
+- minutes smallint(5) unsigned 
+- cron varchar(100) 
+- cluster varchar(100) 
+- intended_date_kwarg varchar(100) 
+
+#  django_q_task
+- name varchar(100) 
+- func varchar(256) 
+- hook varchar(256) 
+- args longtext 
+- kwargs longtext 
+- result longtext 
+- started datetime(6) 
+- stopped datetime(6) 
+- success tinyint(1) 
+- id varchar(32) 
+- group varchar(100) 
+- attempt_count int(11) 
+- cluster varchar(100) 
+
+#  django_session
+- session_key varchar(40) 
+- session_data longtext 
+- expire_date datetime(6) 
+
+#  hotels
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- hotel_id uuid 
+- hotel_code varchar(50) 
+- hotel_name varchar(200) 
+- brand_name varchar(100) 
+- country_code varchar(2) 
+- city_name varchar(100) 
+- district varchar(100) 
+- address longtext 
+- latitude decimal(9,6) 
+- longitude decimal(9,6) 
+- hotel_star int(11) 
+- hotel_type varchar(50) 
+- tags longtext 
+- description longtext 
+- check_in_time time(6) 
+- check_out_time time(6) 
+- contact_phone varchar(20) 
+- contact_email varchar(255) 
+- website varchar(500) 
+- amenities longtext 
+- room_facilities longtext 
+- business_facilities longtext 
+- room_types longtext 
+- price_range varchar(50) 
+- currency varchar(3) 
+- min_price decimal(10,2) 
+- max_price decimal(10,2) 
+- popularity_score decimal(3,2) 
+- guest_rating decimal(3,2) 
+- review_count int(11) 
+- main_image_url varchar(500) 
+- image_gallery longtext 
+- status varchar(20) 
+- created_by varchar(50) 
+- updated_by varchar(50) 
+- version int(11) 
+
+#  itinerary
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- itinerary_id varchar(20) 
+- itinerary_name varchar(100) 
+- description longtext 
+- travel_purpose varchar(20) 
+- start_date date 
+- end_date date 
+- total_days int(11) 
+- contact_person varchar(100) 
+- contact_phone varchar(20) 
+- contact_company varchar(100) 
+- departure_city varchar(100) 
+- return_city varchar(100) 
+- total_budget decimal(12,2) 
+- budget_flexibility varchar(10) 
+- current_status varchar(20) 
+- review_deadline datetime(6) 
+- expiration_date date 
+- confirmed_by varchar(50) 
+- confirmed_at datetime(6) 
+- is_template tinyint(1) 
+- template_name varchar(100) 
+- template_category varchar(20) 
+- usage_count int(11) 
+- last_used datetime(6) 
+- created_by varchar(50) 
+- updated_by varchar(50) 
+- version int(11) 
+- is_deleted tinyint(1) 
+- deleted_at datetime(6) 
+- itinerary_json_data longtext 
+
+#  requirements
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- requirement_id varchar(20) 
+- origin_name varchar(100) 
+- origin_code varchar(10) 
+- origin_type varchar(20) 
+- destination_cities longtext 
+- trip_days int(11) 
+- group_adults int(11) 
+- group_children int(11) 
+- group_seniors int(11) 
+- group_total int(11) 
+- travel_start_date date 
+- travel_end_date date 
+- travel_date_flexible tinyint(1) 
+- transportation_type varchar(20) 
+- transportation_notes longtext 
+- hotel_level varchar(20) 
+- hotel_requirements longtext 
+- trip_rhythm varchar(20) 
+- preference_tags longtext 
+- must_visit_spots longtext 
+- avoid_activities longtext 
+- budget_level varchar(20) 
+- budget_currency varchar(10) 
+- budget_min decimal(10,2) 
+- budget_max decimal(10,2) 
+- budget_notes longtext 
+- source_type varchar(20) 
+- status varchar(20) 
+- assumptions longtext 
+- created_by varchar(100) 
+- reviewed_by varchar(100) 
+- is_template tinyint(1) 
+- template_name varchar(200) 
+- template_category varchar(100) 
+- expires_at datetime(6) 
+- extension longtext 
+- origin_input longtext 
+- requirement_json_data longtext 
+
+#  restaurants
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- restaurant_id uuid 
+- restaurant_code varchar(50) 
+- restaurant_name varchar(200) 
+- country_code varchar(2) 
+- city_name varchar(100) 
+- district varchar(100) 
+- address longtext 
+- cuisine_type varchar(100) 
+- sub_cuisine_types longtext 
+- restaurant_type varchar(50) 
+- tags longtext 
+- description longtext 
+- signature_dishes longtext 
+- chef_name varchar(100) 
+- year_established int(11) 
+- opening_hours longtext 
+- is_24_hours tinyint(1) 
+- contact_phone varchar(20) 
+- contact_email varchar(255) 
+- website varchar(500) 
+- reservation_required tinyint(1) 
+- reservation_website varchar(500) 
+- price_range varchar(50) 
+- avg_price_per_person decimal(10,2) 
+- amenities longtext 
+- seating_capacity int(11) 
+- private_rooms_available tinyint(1) 
+- dietary_options longtext 
+- alcohol_served tinyint(1) 
+- popularity_score decimal(3,2) 
+- food_rating decimal(3,2) 
+- service_rating decimal(3,2) 
+- review_count int(11) 
+- main_image_url varchar(500) 
+- status varchar(20) 
+- created_by varchar(50) 
+- updated_by varchar(50) 
+- version int(11) 
+
+#  traveler_stats
+- created_at datetime(6) 
+- updated_at datetime(6) 
+- stat_id uuid 
+- adult_count int(11) 
+- child_count int(11) 
+- infant_count int(11) 
+- senior_count int(11) 
+- notes longtext 
+- itinerary_id varchar(20) 

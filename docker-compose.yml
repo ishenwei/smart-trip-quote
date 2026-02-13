@@ -1,8 +1,10 @@
+version: "3.9"
+
 services:
   web:
     container_name: stq_web
     build: .
-    command: python manage.py runserver ${WEB_HOST}:${WEB_PORT}
+    command: python manage.py runserver 0.0.0.0:${WEB_PORT}
     volumes:
       - .:/app
     ports:
@@ -11,24 +13,24 @@ services:
       mariadb:
         condition: service_healthy
     environment:
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      DATABASE_HOST: mariadb
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - stq_network
 
   frontend:
     container_name: stq_frontend
     image: node:20-alpine
-    ports:
-      - "5173:5173"
+    working_dir: /app
     volumes:
       - ./apps/web:/app
-    working_dir: /app
     command: sh -c "npm install && npm run dev"
+    ports:
+      - "5173:5173"
     environment:
-      - VITE_API_URL=http://web:${WEB_PORT}
+      VITE_API_URL: http://web:${WEB_PORT}
     depends_on:
       - web
     networks:
@@ -56,10 +58,10 @@ services:
     depends_on:
       - web
     environment:
-      - DATABASE_HOST=${DATABASE_HOST}
-      - DATABASE_NAME=${DATABASE_NAME}
-      - DATABASE_USER=${DATABASE_USER}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      DATABASE_HOST: mariadb
+      DATABASE_NAME: ${DATABASE_NAME}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - stq_network
 
@@ -68,10 +70,10 @@ services:
     image: mariadb:10.11
     command: --log-bin=mysql-bin
     environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - mariadb_data:/var/lib/mysql
     ports:
@@ -79,11 +81,30 @@ services:
     networks:
       - stq_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
       timeout: 10s
       retries: 5
       start_period: 10s
+
+  n8n:
+    container_name: n8n
+    image: docker.n8n.io/n8nio/n8n
+    ports:
+      - "62000:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      NODE_ENV: production
+      GENERIC_TIMEZONE: America/New_York
+      FILE_STORAGE_PATH: /files
+    volumes:
+      - ./n8n_data:/home/node/.n8n
+      - ./n8n_data/files:/files
+    restart: unless-stopped
+    networks:
+      - stq_network
 
 networks:
   stq_network:
@@ -91,3 +112,4 @@ networks:
 
 volumes:
   mariadb_data:
+  n8n_data:

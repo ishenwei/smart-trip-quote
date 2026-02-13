@@ -65,6 +65,7 @@ class Itinerary(BaseModel):
     version = models.IntegerField(default=1, verbose_name='版本号')
     is_deleted = models.BooleanField(default=False, verbose_name='是否删除')
     deleted_at = models.DateTimeField(null=True, blank=True, verbose_name='删除时间')
+    itinerary_json_data = models.JSONField(null=True, blank=True, verbose_name='行程结构化JSON数据')
 
     def save(self, *args, **kwargs):
         # 计算总天数
@@ -116,7 +117,121 @@ class Itinerary(BaseModel):
             if not self.current_status:
                 self.current_status = self.CurrentStatus.DRAFT
         
+        # 保存前更新JSON数据
+        self.update_itinerary_json_data()
+        
         super().save(*args, **kwargs)
+    
+    def update_itinerary_json_data(self):
+        """更新行程的结构化JSON数据"""
+        # 构建基础行程数据
+        itinerary_data = {
+            'itinerary_id': self.itinerary_id,
+            'itinerary_name': self.itinerary_name,
+            'description': self.description,
+            'travel_purpose': self.travel_purpose,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'total_days': self.total_days,
+            'contact_person': self.contact_person,
+            'contact_phone': self.contact_phone,
+            'contact_company': self.contact_company,
+            'departure_city': self.departure_city,
+            'return_city': self.return_city,
+            'total_budget': str(self.total_budget) if self.total_budget else None,
+            'budget_flexibility': self.budget_flexibility,
+            'current_status': self.current_status,
+            'review_deadline': self.review_deadline.isoformat() if self.review_deadline else None,
+            'expiration_date': self.expiration_date.isoformat() if self.expiration_date else None,
+            'confirmed_by': self.confirmed_by,
+            'confirmed_at': self.confirmed_at.isoformat() if self.confirmed_at else None,
+            'is_template': self.is_template,
+            'template_name': self.template_name,
+            'template_category': self.template_category,
+            'usage_count': self.usage_count,
+            'last_used': self.last_used.isoformat() if self.last_used else None,
+            'created_by': self.created_by,
+            'updated_by': self.updated_by,
+            'version': self.version,
+            'is_deleted': self.is_deleted,
+            'deleted_at': self.deleted_at.isoformat() if self.deleted_at else None,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+        
+        # 添加目的地数据
+        destinations = []
+        try:
+            for dest in self.destinations.all():
+                destination_data = {
+                    'destination_id': str(dest.destination_id),
+                    'destination_order': dest.destination_order,
+                    'city_name': dest.city_name,
+                    'country_code': dest.country_code,
+                    'region': dest.region,
+                    'latitude': str(dest.latitude) if dest.latitude else None,
+                    'longitude': str(dest.longitude) if dest.longitude else None,
+                    'arrival_date': dest.arrival_date.isoformat() if dest.arrival_date else None,
+                    'departure_date': dest.departure_date.isoformat() if dest.departure_date else None,
+                    'nights': dest.nights
+                }
+                destinations.append(destination_data)
+        except Exception:
+            pass
+        
+        itinerary_data['destinations'] = destinations
+        
+        # 添加每日行程数据
+        daily_schedules = []
+        try:
+            from .daily_schedule import DailySchedule
+            schedules = DailySchedule.objects.filter(itinerary_id=self.itinerary_id).order_by('day_number', 'start_time')
+            for schedule in schedules:
+                schedule_data = {
+                    'schedule_id': str(schedule.schedule_id),
+                    'day_number': schedule.day_number,
+                    'schedule_date': schedule.schedule_date.isoformat() if schedule.schedule_date else None,
+                    'destination_id': str(schedule.destination_id) if schedule.destination_id else None,
+                    'activity_type': schedule.activity_type,
+                    'activity_title': schedule.activity_title,
+                    'activity_description': schedule.activity_description,
+                    'start_time': schedule.start_time.isoformat() if schedule.start_time else None,
+                    'end_time': schedule.end_time.isoformat() if schedule.end_time else None,
+                    'attraction_id': str(schedule.attraction_id) if schedule.attraction_id else None,
+                    'hotel_id': str(schedule.hotel_id) if schedule.hotel_id else None,
+                    'restaurant_id': str(schedule.restaurant_id) if schedule.restaurant_id else None,
+                    'estimated_cost': str(schedule.estimated_cost) if schedule.estimated_cost else None,
+                    'currency': schedule.currency,
+                    'booking_status': schedule.booking_status,
+                    'booking_reference': schedule.booking_reference,
+                    'notes': schedule.notes
+                }
+                daily_schedules.append(schedule_data)
+        except Exception:
+            pass
+        
+        itinerary_data['daily_schedules'] = daily_schedules
+        
+        # 添加旅行者统计数据
+        traveler_stats = []
+        try:
+            for stat in self.traveler_stats.all():
+                stat_data = {
+                    'stat_id': str(stat.stat_id),
+                    'adult_count': stat.adult_count,
+                    'child_count': stat.child_count,
+                    'infant_count': stat.infant_count,
+                    'senior_count': stat.senior_count,
+                    'notes': stat.notes
+                }
+                traveler_stats.append(stat_data)
+        except Exception:
+            pass
+        
+        itinerary_data['traveler_stats'] = traveler_stats
+        
+        # 更新JSON数据字段
+        self.itinerary_json_data = itinerary_data
 
     class Meta:
         db_table = 'itinerary'

@@ -321,6 +321,127 @@
                 </div>
             {% endif %}
         </section>
+        
+        <!-- 行程JSON数据 -->
+        <section>
+            <h2>5. 行程结构化JSON数据</h2>
+            {% if itinerary.itinerary_json_data %}
+                <div class="info-card">
+                    <div class="json-container">
+                        <button class="json-toggle" onclick="toggleJson(this)">展开 JSON 数据</button>
+                        <div class="json-content" style="display: none;">
+                            <pre class="json-pre">{{ itinerary.itinerary_json_data }}</pre>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="info-card">
+                    <p>暂无JSON数据</p>
+                </div>
+            {% endif %}
+        </section>
     </div>
+    
+    <script>
+        function toggleJson(button) {
+            const content = button.nextElementSibling;
+            const pre = content.querySelector('.json-pre');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                button.textContent = '折叠 JSON 数据';
+                
+                // 确保JSON数据格式正确显示
+                if (pre.textContent) {
+                    try {
+                        // 检查是否已经是格式化的JSON
+                        if (pre.textContent.trim().startsWith('{') || pre.textContent.trim().startsWith('[')) {
+                            const jsonObj = JSON.parse(pre.textContent);
+                            pre.textContent = JSON.stringify(jsonObj, null, 2);
+                        } else {
+                            // 如果是对象字符串表示，尝试转换
+                            const jsonStr = pre.textContent.replace(/^Object\s+\{/, '{').replace(/\}$/, '');
+                            const jsonObj = JSON.parse(jsonStr);
+                            pre.textContent = JSON.stringify(jsonObj, null, 2);
+                        }
+                    } catch (e) {
+                        console.error('JSON parsing error:', e);
+                        // 如果解析失败，保持原始内容
+                    }
+                }
+            } else {
+                content.style.display = 'none';
+                button.textContent = '展开 JSON 数据';
+            }
+        }
+    </script>
+    
+    <style>
+        /* JSON数据展示样式 */
+        .json-container {
+            position: relative;
+        }
+        
+        .json-toggle {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .json-toggle:hover {
+            background-color: #2980b9;
+        }
+        
+        .json-content {
+            overflow: auto;
+            max-height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f8f9fa;
+        }
+        
+        .json-pre {
+            margin: 0;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        /* JSON语法高亮 */
+        .json-pre {
+            position: relative;
+        }
+        
+        .json-pre .json-key {
+            color: #0000ff;
+        }
+        
+        .json-pre .json-string {
+            color: #008000;
+        }
+        
+        .json-pre .json-number {
+            color: #ff0000;
+        }
+        
+        .json-pre .json-boolean {
+            color: #800080;
+        }
+        
+        .json-pre .json-null {
+            color: #808080;
+        }
+    </style>
 </body>
 </html>
