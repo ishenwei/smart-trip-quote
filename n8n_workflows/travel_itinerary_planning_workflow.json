@@ -1,0 +1,375 @@
+{
+  "name": "Travel Itinerary Planning Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "travel-itinerary-planning",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "validation-result",
+              "name": "validationResult",
+              "type": "object",
+              "value": "={\n  \"isValid\": true,\n  \"errors\": [],\n  \"warnings\": []\n}"
+            },
+            {
+              "id": "check-requirement-id",
+              "name": "requirement_id",
+              "type": "string",
+              "value": "={{ $json.body.requirement_id }}"
+            },
+            {
+              "id": "check-json-data",
+              "name": "requirement_json_data",
+              "type": "object",
+              "value": "={{ $json.body.requirement_json_data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "data-validation",
+      "name": "Data Validation",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\nfor (const item of items) {\n  const data = item.json;\n  const validationResult = {\n    isValid: true,\n    errors: [],\n    warnings: []\n  };\n  \n  // Check if requirement_id exists\n  if (!data.requirement_id) {\n    validationResult.isValid = false;\n    validationResult.errors.push('requirement_id is missing');\n  }\n  \n  // Check if requirement_json_data exists\n  if (!data.requirement_json_data) {\n    validationResult.isValid = false;\n    validationResult.errors.push('requirement_json_data is missing');\n  } else {\n    const json = data.requirement_json_data;\n    \n    // Validate base_info\n    if (!json.base_info) {\n      validationResult.isValid = false;\n      validationResult.errors.push('base_info is missing');\n    } else {\n      if (!json.base_info.origin) {\n        validationResult.isValid = false;\n        validationResult.errors.push('origin is missing from base_info');\n      }\n      if (!json.base_info.destination_cities || json.base_info.destination_cities.length === 0) {\n        validationResult.isValid = false;\n        validationResult.errors.push('destination_cities is empty');\n      }\n      if (!json.base_info.trip_days || json.base_info.trip_days < 1) {\n        validationResult.isValid = false;\n        validationResult.errors.push('trip_days must be at least 1');\n      }\n      if (!json.base_info.travel_date) {\n        validationResult.warnings.push('travel_date is missing');\n      }\n    }\n    \n    // Validate preferences\n    if (!json.preferences) {\n      validationResult.warnings.push('preferences is missing');\n    }\n    \n    // Validate budget\n    if (!json.budget) {\n      validationResult.warnings.push('budget information is missing');\n    }\n  }\n  \n  results.push({\n    json: {\n      ...data,\n      validationResult\n    }\n  });\n}\n\nreturn results;"
+      },
+      "id": "validate-schema",
+      "name": "Validate Schema",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "is-valid",
+              "leftValue": "={{ $json.validationResult.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        }
+      },
+      "id": "check-validation",
+      "name": "Check Validation",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "process-status",
+              "name": "processStatus",
+              "type": "string",
+              "value": "processing"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ new Date().toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "process-itinerary",
+      "name": "Process Itinerary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "api-response",
+              "name": "apiResponse",
+              "type": "object",
+              "value": "={\n  \"success\": true,\n  \"message\": \"Itinerary processing started\",\n  \"itinerary_id\": \"ITI-{{ $json.requirement_id }}\"\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-request",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1250, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "log-entry",
+              "name": "logEntry",
+              "type": "object",
+              "value": "={\n  \"requirement_id\": \"{{ $json.requirement_id }}\",\n  \"status\": \"success\",\n  \"timestamp\": \"{{ $json.timestamp }}\",\n  \"validation\": \"{{ JSON.stringify($json.validationResult) }}\"\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "log-processing",
+      "name": "Log Processing",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1450, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "success-data",
+              "name": "responseData",
+              "type": "object",
+              "value": "={\n  \"success\": true,\n  \"message\": \"旅游行程规划已成功启动\",\n  \"data\": {\n    \"requirement_id\": \"{{ $json.requirement_id }}\",\n    \"status\": \"processing\",\n    \"timestamp\": \"{{ $json.timestamp }}\"\n  }\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-success-response",
+      "name": "Set Success Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.responseData) }}",
+        "options": {}
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1850, 200]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error-message",
+              "name": "errorMessage",
+              "type": "string",
+              "value": "数据验证失败"
+            },
+            {
+              "id": "error-details",
+              "name": "errorDetails",
+              "type": "object",
+              "value": "={{ $json.validationResult.errors }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "error-handler",
+      "name": "Error Handler",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error-data",
+              "name": "errorResponse",
+              "type": "object",
+              "value": "={\n  \"success\": false,\n  \"message\": \"数据验证失败\",\n  \"errors\": \"{{ JSON.stringify($json.errorDetails) }}\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\"\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "set-error-response",
+      "name": "Set Error Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1250, 400]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.errorResponse) }}",
+        "options": {}
+      },
+      "id": "respond-error",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1450, 400]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Data Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Validation": {
+      "main": [
+        [
+          {
+            "node": "Validate Schema",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Schema": {
+      "main": [
+        [
+          {
+            "node": "Check Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Validation": {
+      "main": [
+        [
+          {
+            "node": "Process Itinerary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Handler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Itinerary": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Log Processing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Processing": {
+      "main": [
+        [
+          {
+            "node": "Set Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Success Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Handler": {
+      "main": [
+        [
+          {
+            "node": "Set Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Error Response": {
+      "main": [
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2026-02-14T00:00:00.000Z",
+  "versionId": 1
+}

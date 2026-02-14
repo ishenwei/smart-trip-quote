@@ -94,11 +94,9 @@ services:
       - "62000:5678"
     environment:
       N8N_HOST: n8n.ishenwei.online
-      N8N_PORT: 5678
       N8N_PROTOCOL: https
       NODE_ENV: production
       GENERIC_TIMEZONE: America/New_York
-      FILE_STORAGE_PATH: /files
     volumes:
       - ./n8n_data:/home/node/.n8n
       - ./n8n_data/files:/home/node/.n8n-files
