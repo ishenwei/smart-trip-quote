@@ -1,0 +1,343 @@
+{
+  "requirement_id": "REQ-2024-001",
+  "itinerary_name": "日本东京大阪5日游",
+  "start_date": "2024-10-01",
+  "end_date": "2024-10-05",
+  "destinations": [
+    {
+      "destination_order": 1,
+      "city_name": "东京",
+      "country_code": "JP",
+      "arrival_date": "2024-10-01",
+      "departure_date": "2024-10-03"
+    },
+    {
+      "destination_order": 2,
+      "city_name": "大阪",
+      "country_code": "JP",
+      "arrival_date": "2024-10-03",
+      "departure_date": "2024-10-05"
+    }
+  ],
+  "traveler_stats": {
+    "total_travelers": 2,
+    "adults": 2,
+    "children": 0,
+    "infants": 0,
+    "seniors": 0
+  },
+  "daily_schedules": [
+    {
+      "day": 1,
+      "date": "2024-10-01",
+      "city": "东京",
+      "activities": [
+        {
+          "activity_type": "FLIGHT",
+          "activity_title": "航班 NH926",
+          "activity_description": "上海浦东国际机场 -> 东京成田国际机场",
+          "start_time": "08:00",
+          "end_time": "11:30",
+          "flight_number": "NH926",
+          "departure_airport": "上海浦东国际机场",
+          "arrival_airport": "东京成田国际机场"
+        },
+        {
+          "activity_type": "TRANSPORT",
+          "activity_title": "机场接送",
+          "activity_description": "东京成田国际机场 -> 东京丽思卡尔顿酒店",
+          "start_time": "12:00",
+          "end_time": "13:00",
+          "transport_mode": "出租车",
+          "route": "东京成田国际机场 -> 东京丽思卡尔顿酒店"
+        },
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "浅草寺",
+          "activity_description": "东京最古老的寺庙",
+          "start_time": "14:00",
+          "end_time": "16:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440001",
+          "attraction_name": "浅草寺"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "午餐 - 寿司大",
+          "activity_description": "品尝正宗日式寿司",
+          "start_time": "16:30",
+          "end_time": "18:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440011",
+          "restaurant_name": "寿司大",
+          "meal_type": "午餐"
+        },
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "东京塔",
+          "activity_description": "东京的标志性建筑",
+          "start_time": "18:30",
+          "end_time": "20:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440002",
+          "attraction_name": "东京塔"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "晚餐 - 六本木寿司",
+          "activity_description": "享用高级日式料理",
+          "start_time": "20:30",
+          "end_time": "22:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440012",
+          "restaurant_name": "六本木寿司",
+          "meal_type": "晚餐"
+        },
+        {
+          "activity_type": "CHECK_IN",
+          "activity_title": "入住东京丽思卡尔顿酒店",
+          "activity_description": "办理入住手续",
+          "start_time": "22:30",
+          "end_time": "23:00",
+          "hotel_id": "550e8400-e29b-41d4-a716-446655440021",
+          "hotel_name": "东京丽思卡尔顿酒店"
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "date": "2024-10-02",
+      "city": "东京",
+      "activities": [
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "明治神宫",
+          "activity_description": "东京的重要神社",
+          "start_time": "09:00",
+          "end_time": "11:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440003",
+          "attraction_name": "明治神宫"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "午餐 - 筑地市场",
+          "activity_description": "品尝新鲜海鲜",
+          "start_time": "11:30",
+          "end_time": "13:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440013",
+          "restaurant_name": "筑地市场",
+          "meal_type": "午餐"
+        },
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "涩谷十字路口",
+          "activity_description": "世界最繁忙的十字路口",
+          "start_time": "14:00",
+          "end_time": "16:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440004",
+          "attraction_name": "涩谷十字路口"
+        },
+        {
+          "activity_type": "TRANSPORT",
+          "activity_title": "地铁出行",
+          "activity_description": "涩谷 -> 新宿",
+          "start_time": "16:30",
+          "end_time": "17:00",
+          "transport_mode": "地铁",
+          "route": "涩谷 -> 新宿"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "晚餐 - 新宿烤肉",
+          "activity_description": "享用日式烤肉",
+          "start_time": "18:00",
+          "end_time": "20:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440014",
+          "restaurant_name": "新宿烤肉",
+          "meal_type": "晚餐"
+        },
+        {
+          "activity_type": "FREE",
+          "activity_title": "自由活动",
+          "activity_description": "新宿地区自由活动",
+          "start_time": "20:30",
+          "end_time": "22:00"
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "date": "2024-10-03",
+      "city": "东京",
+      "activities": [
+        {
+          "activity_type": "CHECK_OUT",
+          "activity_title": "退房 - 东京丽思卡尔顿酒店",
+          "activity_description": "办理退房手续",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "hotel_id": "550e8400-e29b-41d4-a716-446655440021",
+          "hotel_name": "东京丽思卡尔顿酒店"
+        },
+        {
+          "activity_type": "TRANSPORT",
+          "activity_title": "机场接送",
+          "activity_description": "东京丽思卡尔顿酒店 -> 东京羽田国际机场",
+          "start_time": "09:30",
+          "end_time": "10:30",
+          "transport_mode": "出租车",
+          "route": "东京丽思卡尔顿酒店 -> 东京羽田国际机场"
+        },
+        {
+          "activity_type": "FLIGHT",
+          "activity_title": "航班 NH171",
+          "activity_description": "东京羽田国际机场 -> 大阪关西国际机场",
+          "start_time": "11:00",
+          "end_time": "11:45",
+          "flight_number": "NH171",
+          "departure_airport": "东京羽田国际机场",
+          "arrival_airport": "大阪关西国际机场"
+        },
+        {
+          "activity_type": "TRANSPORT",
+          "activity_title": "机场接送",
+          "activity_description": "大阪关西国际机场 -> 大阪威斯汀酒店",
+          "start_time": "12:30",
+          "end_time": "13:30",
+          "transport_mode": "出租车",
+          "route": "大阪关西国际机场 -> 大阪威斯汀酒店"
+        },
+        {
+          "activity_type": "CHECK_IN",
+          "activity_title": "入住大阪威斯汀酒店",
+          "activity_description": "办理入住手续",
+          "start_time": "14:00",
+          "end_time": "14:30",
+          "hotel_id": "550e8400-e29b-41d4-a716-446655440022",
+          "hotel_name": "大阪威斯汀酒店"
+        },
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "大阪城",
+          "activity_description": "大阪的标志性建筑",
+          "start_time": "15:00",
+          "end_time": "17:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440005",
+          "attraction_name": "大阪城"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "晚餐 - 大阪烧名店",
+          "activity_description": "品尝大阪特色美食",
+          "start_time": "18:00",
+          "end_time": "20:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440015",
+          "restaurant_name": "大阪烧名店",
+          "meal_type": "晚餐"
+        }
+      ]
+    },
+    {
+      "day": 4,
+      "date": "2024-10-04",
+      "city": "大阪",
+      "activities": [
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "环球影城",
+          "activity_description": "主题公园",
+          "start_time": "09:00",
+          "end_time": "14:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440006",
+          "attraction_name": "环球影城"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "午餐 - 环球影城餐厅",
+          "activity_description": "园区内用餐",
+          "start_time": "12:00",
+          "end_time": "13:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440016",
+          "restaurant_name": "环球影城餐厅",
+          "meal_type": "午餐"
+        },
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "道顿堀",
+          "activity_description": "大阪最繁华的商业区",
+          "start_time": "15:00",
+          "end_time": "17:00",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440007",
+          "attraction_name": "道顿堀"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "晚餐 - 道顿堀美食街",
+          "activity_description": "品尝大阪街头美食",
+          "start_time": "18:00",
+          "end_time": "20:00",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440017",
+          "restaurant_name": "道顿堀美食街",
+          "meal_type": "晚餐"
+        },
+        {
+          "activity_type": "FREE",
+          "activity_title": "自由活动",
+          "activity_description": "道顿堀地区自由活动",
+          "start_time": "20:30",
+          "end_time": "22:00"
+        }
+      ]
+    },
+    {
+      "day": 5,
+      "date": "2024-10-05",
+      "city": "大阪",
+      "activities": [
+        {
+          "activity_type": "CHECK_OUT",
+          "activity_title": "退房 - 大阪威斯汀酒店",
+          "activity_description": "办理退房手续",
+          "start_time": "08:00",
+          "end_time": "09:00",
+          "hotel_id": "550e8400-e29b-41d4-a716-446655440022",
+          "hotel_name": "大阪威斯汀酒店"
+        },
+        {
+          "activity_type": "ATTRACTION",
+          "activity_title": "心斋桥",
+          "activity_description": "大阪著名购物区",
+          "start_time": "09:30",
+          "end_time": "11:30",
+          "attraction_id": "550e8400-e29b-41d4-a716-446655440008",
+          "attraction_name": "心斋桥"
+        },
+        {
+          "activity_type": "MEAL",
+          "activity_title": "午餐 - 心斋桥餐厅",
+          "activity_description": "享用当地美食",
+          "start_time": "12:00",
+          "end_time": "13:30",
+          "restaurant_id": "550e8400-e29b-41d4-a716-446655440018",
+          "restaurant_name": "心斋桥餐厅",
+          "meal_type": "午餐"
+        },
+        {
+          "activity_type": "TRANSPORT",
+          "activity_title": "机场接送",
+          "activity_description": "大阪威斯汀酒店 -> 大阪关西国际机场",
+          "start_time": "14:00",
+          "end_time": "15:00",
+          "transport_mode": "出租车",
+          "route": "大阪威斯汀酒店 -> 大阪关西国际机场"
+        },
+        {
+          "activity_type": "FLIGHT",
+          "activity_title": "航班 NH927",
+          "activity_description": "大阪关西国际机场 -> 上海浦东国际机场",
+          "start_time": "16:00",
+          "end_time": "19:30",
+          "flight_number": "NH927",
+          "departure_airport": "大阪关西国际机场",
+          "arrival_airport": "上海浦东国际机场"
+        }
+      ]
+    }
+  ]
+}

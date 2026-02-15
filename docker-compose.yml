@@ -95,6 +95,7 @@ services:
     environment:
       N8N_HOST: n8n.ishenwei.online
       N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.ishenwei.online/
       NODE_ENV: production
       GENERIC_TIMEZONE: America/New_York
     volumes:
