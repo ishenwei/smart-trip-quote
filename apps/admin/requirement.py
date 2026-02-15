@@ -162,6 +162,94 @@ class RequirementAdmin(admin.ModelAdmin):
     
     readonly_fields = ['requirement_id', 'created_at', 'updated_at', 'origin_input_display', 'requirement_json_data_display']
     
+    def get_fieldsets(self, request, obj=None):
+        if obj is None:
+            return (
+                ('基本信息', {
+                    'fields': (
+                        'origin_name',
+                        'origin_code',
+                        'origin_type',
+                        'destination_cities'
+                    )
+                }),
+                ('原始输入与JSON数据', {
+                    'fields': (
+                        'origin_input_display',
+                        'requirement_json_data_display'
+                    ),
+                    'classes': ('collapse',),
+                }),
+                ('行程信息', {
+                    'fields': (
+                        'trip_days',
+                        'group_adults',
+                        'group_children',
+                        'group_seniors',
+                        'group_total',
+                        'travel_start_date',
+                        'travel_end_date',
+                        'travel_date_flexible'
+                    )
+                }),
+                ('交通偏好', {
+                    'fields': (
+                        'transportation_type',
+                        'transportation_notes'
+                    )
+                }),
+                ('住宿偏好', {
+                    'fields': (
+                        'hotel_level',
+                        'hotel_requirements'
+                    )
+                }),
+                ('行程节奏与偏好', {
+                    'fields': (
+                        'trip_rhythm',
+                        'preference_tags',
+                        'must_visit_spots',
+                        'avoid_activities'
+                    )
+                }),
+                ('预算信息', {
+                    'fields': (
+                        'budget_level',
+                        'budget_currency',
+                        'budget_min',
+                        'budget_max',
+                        'budget_notes'
+                    )
+                }),
+                ('需求状态', {
+                    'fields': (
+                        'source_type',
+                        'status',
+                        'assumptions'
+                    )
+                }),
+                ('审核信息', {
+                    'fields': (
+                        'created_by',
+                        'reviewed_by'
+                    )
+                }),
+                ('模板信息', {
+                    'fields': (
+                        'is_template',
+                        'template_name',
+                        'template_category'
+                    )
+                }),
+                ('其他信息', {
+                    'fields': (
+                        'expires_at',
+                        'extension'
+                    )
+                }),
+            )
+        return super().get_fieldsets(request, obj)
+    
     def destination_display(self, obj):
         cities = obj.destination_cities if isinstance(obj.destination_cities, list) else []
         if cities:
@@ -252,6 +340,11 @@ class RequirementAdmin(admin.ModelAdmin):
             obj.requirement_json_data = updated_json_data
             # 再次保存，只更新JSON数据字段
             super().save_model(request, obj, form, change=False)
+        else:
+            # 创建时，更新requirement_json_data中的requirement_id
+            if obj.requirement_json_data:
+                obj.requirement_json_data['requirement_id'] = obj.requirement_id
+                super().save_model(request, obj, form, change=False)
     
     def response_add(self, request, obj, post_url_continue=None):
         self.message_user(request, f'成功创建需求 {obj.requirement_id}。')

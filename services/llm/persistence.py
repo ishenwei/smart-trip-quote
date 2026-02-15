@@ -114,6 +114,9 @@ class RequirementService:
         
         requirement.save()
         
+        requirement.requirement_json_data['requirement_id'] = requirement.requirement_id
+        requirement.save(update_fields=['requirement_json_data'])
+        
         return requirement
     
     @staticmethod

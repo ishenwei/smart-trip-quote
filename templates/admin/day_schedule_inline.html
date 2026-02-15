@@ -27,6 +27,125 @@
   outline: 2px solid #007bff;
   outline-offset: 1px;
 }
+
+/* 表格样式优化 */
+.tabular table {
+  table-layout: fixed;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabular thead th {
+  text-align: left;
+  padding: 8px 12px;
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tabular tbody td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #dee2e6;
+  vertical-align: top;
+}
+
+/* 字段列宽度设置 */
+.field-day_number {
+  width: 80px;
+}
+
+.field-schedule_date {
+  width: 120px;
+}
+
+.field-start_time {
+  width: 100px;
+}
+
+.field-end_time {
+  width: 100px;
+}
+
+.field-destination_id {
+  width: 150px;
+}
+
+.field-activity_type {
+  width: 120px;
+}
+
+.field-activity_title {
+  width: 200px;
+}
+
+.field-activity_description {
+  min-width: 300px;
+}
+
+.field-attraction_id {
+  width: 150px;
+}
+
+.field-hotel_id {
+  width: 150px;
+}
+
+.field-restaurant_id {
+  width: 150px;
+}
+
+.field-estimated_cost {
+  width: 100px;
+}
+
+.field-currency {
+  width: 80px;
+}
+
+.field-booking_status {
+  width: 120px;
+}
+
+.field-booking_reference {
+  width: 150px;
+}
+
+.field-notes {
+  min-width: 250px;
+}
+
+/* 输入框样式优化 */
+.tabular input[type="text"],
+.tabular input[type="time"],
+.tabular input[type="datetime-local"],
+.tabular textarea {
+  width: 100%;
+  max-width: 100%;
+  padding: 4px 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.tabular textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* 删除列样式 */
+.delete {
+  width: 60px;
+  text-align: center;
+}
+
+/* 原始内容列样式 */
+.original {
+  width: 50px;
+  display: none;
+}
 </style>
 <div class="inline-group" id="{{ inline_admin_formset.formset.prefix }}-group">
   <div class="tabular inline-related {% if forloop.last %}last-related{% endif %}">

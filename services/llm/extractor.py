@@ -601,7 +601,6 @@ class RequirementExtractor:
 
 ```json
 {
-  "requirement_id": "唯一的需求ID（格式：REQ-YYYYMMDD-XXXX）",
   "base_info": {
     "origin": {
       "name": "出发地城市名称（必须准确提取，不能为null，如果未明确指定则设为'未指定'）",
@@ -905,7 +904,7 @@ class RequirementExtractor:
     def generate_requirement_id() -> str:
         today = datetime.now().strftime('%Y%m%d')
         import random
-        return f"REQ-{today}-{random.randint(1000, 9999)}"
+        return f"REQ_{today}_{random.randint(100, 999)}"
     
     @staticmethod
     def normalize_data(data: Dict[str, Any]) -> Dict[str, Any]:

@@ -58,3 +58,5 @@ reports/
 
 #n8n data config/files
 n8n_data/
+n8n_data/database.sqlite-shm
+n8n_data/database.sqlite-wal

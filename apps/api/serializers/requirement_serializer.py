@@ -107,7 +107,6 @@ class RequirementCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Requirement
         fields = [
-            'requirement_id',
             'origin_name',
             'origin_code',
             'origin_type',
@@ -138,6 +137,7 @@ class RequirementCreateSerializer(serializers.ModelSerializer):
             'assumptions',
             'extension'
         ]
+        read_only_fields = ['requirement_id']
         extra_kwargs = {
             'preference_tags': {'required': False, 'allow_blank': True},
             'must_visit_spots': {'required': False, 'allow_blank': True},
