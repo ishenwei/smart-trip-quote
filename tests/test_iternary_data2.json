@@ -1,0 +1,139 @@
+{
+  "output": {
+    "requirement_id": "REQ_20260302_002",
+    "itinerary_name": "上海本地两日游",
+    "start_date": "2026-05-01",
+    "end_date": "2026-05-02",
+    "destinations": [
+      {
+        "destination_order": 1,
+        "city_name": "上海",
+        "country_code": "CN",
+        "arrival_date": "2026-05-01",
+        "departure_date": "2026-05-02"
+      }
+    ],
+    "traveler_stats": {
+      "total_travelers": "5",
+      "adults": "3",
+      "children": "1",
+      "infants": 0,
+      "seniors": "1"
+    },
+    "daily_schedules": [
+      {
+        "day": 1,
+        "date": "2026-05-01",
+        "city": "上海",
+        "activities": [
+          {
+            "activity_type": "TRANSPORT",
+            "activity_title": "从家中出发",
+            "activity_description": "全家从家中出发开始上海两日游",
+            "start_time": "09:00",
+            "end_time": "09:30",
+            "id_reference": "",
+            "name_reference": ""
+          },
+          {
+            "activity_type": "ATTRACTION",
+            "activity_title": "游览豫园",
+            "activity_description": "参观上海著名的古典园林，欣赏传统建筑和园林艺术",
+            "start_time": "10:00",
+            "end_time": "12:00",
+            "id_reference": "d9eeb651-a131-451f-ae9e-2b3d8deec52f",
+            "name_reference": "豫园"
+          },
+          {
+            "activity_type": "MEAL",
+            "activity_title": "午餐",
+            "activity_description": "在上海海鲜餐厅享用午餐",
+            "start_time": "12:30",
+            "end_time": "13:30",
+            "id_reference": "afa6323a-0c1e-4970-a036-4c3829a95af3",
+            "name_reference": "上海海鲜餐厅"
+          },
+          {
+            "activity_type": "ATTRACTION",
+            "activity_title": "游览南京路",
+            "activity_description": "漫步上海最繁华的商业街，体验都市风情",
+            "start_time": "14:00",
+            "end_time": "16:00",
+            "id_reference": "97b0c363-29f4-46d2-8650-3f78e4c4ad49",
+            "name_reference": "南京路"
+          },
+          {
+            "activity_type": "CHECK_IN",
+            "activity_title": "办理入住",
+            "activity_description": "入住上海精品公寓",
+            "start_time": "16:30",
+            "end_time": "17:00",
+            "id_reference": "76b506cc-f20b-4dd9-84fb-955f8f84f0f4",
+            "name_reference": "上海精品公寓"
+          },
+          {
+            "activity_type": "MEAL",
+            "activity_title": "晚餐",
+            "activity_description": "在上海豪华酒楼享用晚餐",
+            "start_time": "18:30",
+            "end_time": "20:00",
+            "id_reference": "85dc0e53-8e0b-468a-b682-637644430b8c",
+            "name_reference": "上海豪华酒楼"
+          }
+        ]
+      },
+      {
+        "day": 2,
+        "date": "2026-05-02",
+        "city": "上海",
+        "activities": [
+          {
+            "activity_type": "ATTRACTION",
+            "activity_title": "游览外滩",
+            "activity_description": "欣赏黄浦江两岸的万国建筑博览群和现代摩天大楼",
+            "start_time": "09:00",
+            "end_time": "11:00",
+            "id_reference": "1830458b-ec94-4123-acb7-f21ca098c042",
+            "name_reference": "外滩"
+          },
+          {
+            "activity_type": "MEAL",
+            "activity_title": "午餐",
+            "activity_description": "在上海自助餐厅享用午餐",
+            "start_time": "12:00",
+            "end_time": "13:00",
+            "id_reference": "151b3174-3129-49c2-9d7f-f4376c5055a4",
+            "name_reference": "上海自助餐厅"
+          },
+          {
+            "activity_type": "ATTRACTION",
+            "activity_title": "游览迪士尼乐园",
+            "activity_description": "全家在上海迪士尼乐园享受欢乐时光，特别适合儿童",
+            "start_time": "14:00",
+            "end_time": "18:00",
+            "id_reference": "b21469ce-5e9f-427d-aa62-688100e8be5a",
+            "name_reference": "迪士尼乐园"
+          },
+          {
+            "activity_type": "CHECK_OUT",
+            "activity_title": "办理退房",
+            "activity_description": "从上海精品公寓退房",
+            "start_time": "18:30",
+            "end_time": "19:00",
+            "id_reference": "76b506cc-f20b-4dd9-84fb-955f8f84f0f4",
+            "name_reference": "上海精品公寓"
+          },
+          {
+            "activity_type": "TRANSPORT",
+            "activity_title": "返回家中",
+            "activity_description": "结束愉快的上海两日游，返回家中",
+            "start_time": "19:30",
+            "end_time": "20:00",
+            "id_reference": "",
+            "name_reference": ""
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -58,5 +58,10 @@ reports/
 
 #n8n data config/files
 n8n_data/
+n8n_data/files/
+n8n_data/storage/
+n8n_data/nodes/
+n8n_data/config
+n8n_data/database.sqlite
 n8n_data/database.sqlite-shm
 n8n_data/database.sqlite-wal

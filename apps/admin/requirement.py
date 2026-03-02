@@ -419,7 +419,7 @@ class RequirementAdmin(admin.ModelAdmin):
         html += '        btn.innerHTML = "处理中...";'
         html += '        messageDiv.style.display = "none";'
         html += '        const requirementId = btn.dataset.requirementId;'
-        html += '        fetch("/admin/apps/requirement/" + requirementId + "/generate-itinerary/", {'
+        html += '        fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {';
         html += '            method: "POST",'
         html += '            headers: {'
         html += '                "X-CSRFToken": getCookie("csrftoken"),'  
@@ -508,7 +508,7 @@ class RequirementAdmin(admin.ModelAdmin):
                 btn.innerHTML = "处理中...";
                 messageDiv.style.display = "none";
                 const requirementId = btn.dataset.requirementId;
-                fetch("/admin/apps/requirement/" + requirementId + "/generate-itinerary/", {
+                fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": getCookie("csrftoken"),  
@@ -601,7 +601,7 @@ class RequirementAdmin(admin.ModelAdmin):
                 btn.innerHTML = "处理中...";
                 messageDiv.style.display = "none";
                 const requirementId = btn.dataset.requirementId;
-                fetch("/admin/apps/requirement/" + requirementId + "/generate-itinerary/", {
+                fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {
                     method: "POST",
                     headers: {
                         "X-CSRFToken": getCookie("csrftoken"),  
