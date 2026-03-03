@@ -1,5 +1,5 @@
 {
-  "requirement_id": "REQ-2024-001",
+  "requirement_id": "REQ_20260302_001",
   "itinerary_name": "日本东京大阪5日游",
   "start_date": "2024-10-01",
   "end_date": "2024-10-05",
@@ -332,10 +332,7 @@
           "activity_title": "航班 NH927",
           "activity_description": "大阪关西国际机场 -> 上海浦东国际机场",
           "start_time": "16:00",
-          "end_time": "19:30",
-          "flight_number": "NH927",
-          "departure_airport": "大阪关西国际机场",
-          "arrival_airport": "上海浦东国际机场"
+          "end_time": "19:30"
         }
       ]
     }
