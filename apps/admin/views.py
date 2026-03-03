@@ -134,9 +134,6 @@ def generate_itinerary(request, requirement_id):
         if not n8n_webhook_url:
             return JsonResponse({'success': False, 'error': 'n8n webhook URL未配置'}, status=500)
         
-        if not n8n_api_key:
-            return JsonResponse({'success': False, 'error': 'n8n API密钥未配置'}, status=500)
-        
         # 生成请求ID
         request_id = str(uuid.uuid4())
         
@@ -144,9 +141,11 @@ def generate_itinerary(request, requirement_id):
         def send_webhook():
             headers = {
                 'Content-Type': 'application/json',
-                'X-API-Key': n8n_api_key,
                 'X-Request-ID': request_id
             }
+            
+            if n8n_api_key:
+                headers['X-API-Key'] = n8n_api_key
             
             retry_count = 0
             max_retries = 2

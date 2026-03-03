@@ -1,0 +1,44 @@
+# Application Configuration
+APP_NAME=smart_trip_quote
+APP_ENV=development
+APP_DEBUG=True
+
+# Database Configuration (MariaDB)
+MYSQL_ROOT_PASSWORD=!Abcde12345
+MYSQL_DATABASE=stq_db
+MYSQL_USER=stq_user
+MYSQL_PASSWORD=!Abcde12345
+MYSQL_HOST=mariadb
+MYSQL_PORT=3306
+
+# Application Database Settings
+# For local development: use localhost:3308 (requires Docker to be running)
+# For Docker container: use mariadb (Docker network alias)
+DATABASE_HOST=localhost
+DATABASE_PORT=3308
+DATABASE_NAME=stq_db
+DATABASE_USER=stq_user
+DATABASE_PASSWORD=!Abcde12345
+
+# Web Server Configuration
+WEB_PORT=7000
+WEB_HOST=0.0.0.0
+
+# Nginx Configuration
+NGINX_PORT=7777
+NGINX_HOST_PORT=7777
+NGINX_CONTAINER_PORT=80
+
+# Docker Configuration
+COMPOSE_PROJECT_NAME=stq
+
+# Security
+SECRET_KEY=lo+6zWkkosUq^1pm*bO=vH1oJh7pe0HU
+ALLOWED_HOSTS=localhost,127.0.0.1,web,stq-admin.ishenwei.online,stq.ishenwei.online
+
+# Logging
+LOG_LEVEL=INFO
+
+# n8n Webhook Configuration
+N8N_WEBHOOK_URL=https://n8n:5678/webhook-test/smart-trip-requirement
+N8N_API_KEY=your-n8n-api-key-here

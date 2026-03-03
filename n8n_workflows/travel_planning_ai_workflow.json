@@ -1,0 +1,930 @@
+{
+  "name": "旅游行程规划AI Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -352
+      ],
+      "id": "fca592a0-7143-4af0-99af-1cb1ef66dca7",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "Tz0eUXax4f19GS8D",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"sql\": \"SELECT attraction_id, attraction_name FROM attractions WHERE city_name = '东京' LIMIT 100;\",\n\t\"description\": \"查询东京的景点，返回景点ID和景点名称，限制100条结果。\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -352
+      ],
+      "id": "fa55c10a-eafd-49bc-a185-98a4b74bd832",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -16
+      ],
+      "id": "0673a00c-3f0f-4e5c-a49b-b2b4a75c2b03",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "Tz0eUXax4f19GS8D",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"sql\": \"SELECT attraction_id, attraction_name FROM attractions WHERE city_name = '东京' LIMIT 100;\",\n\t\"description\": \"查询东京的景点，返回景点ID和景点名称，限制100条结果。\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -16
+      ],
+      "id": "35fcf1a9-5abc-4328-9411-f480fcc4596d",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        272
+      ],
+      "id": "de30f767-459e-4129-8e2f-dc73104d02f3",
+      "name": "DeepSeek Chat Model2",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "Tz0eUXax4f19GS8D",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"sql\": \"SELECT attraction_id, attraction_name FROM attractions WHERE city_name = '东京' LIMIT 100;\",\n\t\"description\": \"查询东京的景点，返回景点ID和景点名称，限制100条结果。\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        272
+      ],
+      "id": "09e005d4-54fb-4394-b11d-df6727281462",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smart-trip-requirement",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "74ac6f83-9821-43ef-90de-586a7a0cc128",
+      "name": "获取旅游需求详细数据",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1360,
+        -112
+      ],
+      "webhookId": "81cea40d-1af6-4519-8aaa-08aac4ecede4"
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "05816699-b07d-485c-ae91-be43a6a6a476",
+      "name": "循环目的地城市",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -688,
+        -208
+      ],
+      "id": "6698960e-ffe5-4b21-bf60-443eec097ba7",
+      "name": "解析数据表数据"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/db.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -832,
+        -208
+      ],
+      "id": "fffeef71-b6b3-4591-bc6e-cc1e0da26926",
+      "name": "读取数据表结构文件"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior database query assistant.\n\nYour task is to follow pre-defined data structure, then convert user natural language and follow requests into safe, optimized, and syntactically correct SQL queries.\n\n#User Natural Input:\n查询{{ $('循环目的地城市').item.json.destinationCities[0].name }}的景点，返回景点ID, 景点名称\n\n## DATABASE DATA STRUCTURE\n{{ $json.data }}\n\nYou MUST follow these rules strictly\n## GENERAL RULES\n1. Only generate SQL.\n2. Do NOT include explanations unless explicitly requested.\n3. Always assume the database is MySQL 8+ compatible.\n4. Use readable formatting and indentation.\n5. Use explicit column names (never SELECT *).\n6. Use table aliases when helpful.\n## SECURITY RULES (CRITICAL)\n❌ NEVER generate:\n- DELETE\n- UPDATE\n- INSERT\n- DROP\n- TRUNCATE\n- ALTER\n- GRANT\n- REVOKE\n❌ NEVER modify data.\nOnly generate SELECT queries.\n## QUERY SAFETY\n✔ Always include LIMIT when result size may be large.\n✔ Use ORDER BY when user implies ranking or recency.\n✔ Use WHERE filters whenever possible.\n✔ If date range is unclear, assume last 30 days.\n## AMBIGUITY HANDLING\nIf the request is ambiguous:\n- choose the most logical interpretation\n- add reasonable filters\n- keep results useful and concise\n## OUTPUT FORMAT\nReturn output in JSON format, output SQL as a single-line query without line breaks.\n\n{\n  \"sql\": \"SQL query here\",\n  \"description\": \"short explanation\"\n}\n\n## QUERY SCENARIOS\n\n用户：查询三亚的景点，返回景点ID, 景点名称\n回答：\n```SQL\nSELECT attraction_id, attraction_name FROM attractions WHERE city_name = '三亚';\n```\n\n\n用户：查询三亚的景点，不包含景点‘西岛’，返回景点ID, 景点名称\n回答：\n```SQL\nSELECT attraction_id, attraction_name FROM attractions WHERE city_name = '三亚' AND attraction_name NOT IN ('西岛')\n```\n\n\n用户：查询三亚的热门景点，不包含景点‘西岛’，但必须包含‘蜈支洲岛’，返回景点ID, 景点名称\n回答：\n```SQL\nSELECT DISTINCT *\nFROM (\n  SELECT attraction_id, attraction_name\n  FROM attractions\n  WHERE city_name = '三亚'\n    AND popularity_score >= 4.0\n    AND attraction_name NOT IN ('西岛')\n\n  UNION\n\n  SELECT *\n  FROM attractions\n  WHERE attraction_name = '蜈支洲岛'\n) t\nORDER BY popularity_score DESC;\n```\n\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -400,
+        -528
+      ],
+      "id": "9f3e1779-a448-40b4-93f2-7eeb3c652b67",
+      "name": "筛选目的地城市景点"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior database query assistant.\n\nYour task is to follow pre-defined data structure, then convert user natural language and follow requests into safe, optimized, and syntactically correct SQL queries.\n\n#User Natural Input:\n查询{{ $('循环目的地城市').item.json.destinationCities[0].name }}的酒店，返回酒店ID, 酒店名称\n\n## DATABASE DATA STRUCTURE\n{{ $json.data }}\n\nYou MUST follow these rules strictly\n## GENERAL RULES\n1. Only generate SQL.\n2. Do NOT include explanations unless explicitly requested.\n3. Always assume the database is MySQL 8+ compatible.\n4. Use readable formatting and indentation.\n5. Use explicit column names (never SELECT *).\n6. Use table aliases when helpful.\n## SECURITY RULES (CRITICAL)\n❌ NEVER generate:\n- DELETE\n- UPDATE\n- INSERT\n- DROP\n- TRUNCATE\n- ALTER\n- GRANT\n- REVOKE\n❌ NEVER modify data.\nOnly generate SELECT queries.\n## QUERY SAFETY\n✔ Always include LIMIT when result size may be large.\n✔ Use ORDER BY when user implies ranking or recency.\n✔ Use WHERE filters whenever possible.\n✔ If date range is unclear, assume last 30 days.\n## AMBIGUITY HANDLING\nIf the request is ambiguous:\n- choose the most logical interpretation\n- add reasonable filters\n- keep results useful and concise\n## OUTPUT FORMAT\nReturn output in JSON format, output SQL as a single-line query without line breaks.\n\n{\n  \"sql\": \"SQL query here\",\n  \"description\": \"short explanation\"\n}\n\n## QUERY SCENARIOS\n\n用户：查询三亚的酒店，返回酒店ID, 酒店名称\n回答：\n```SQL\nSELECT hotel_id, hotel_name FROM hotels WHERE city_name = '三亚';\n```\n\n\n用户：查询三亚的酒店，不包含酒店‘AA’，返回酒店ID, 酒店名称\n回答：\n```SQL\nSELECT hotel_id, hotel_name FROM hotels WHERE city_name = '三亚' AND hotel_name NOT IN ('AA')\n```\n\n\n用户：查询三亚的热门酒店，不包含酒店‘AA’，但必须包含‘BB’，返回酒店ID, 酒店名称\n回答：\n```SQL\nSELECT DISTINCT *\nFROM (\n  SELECT hotel_id, hotel_name\n  FROM hotels\n  WHERE city_name = '三亚'\n    AND popularity_score >= 4.0\n    AND hotel_name NOT IN ('AA')\n\n  UNION\n\n  SELECT *\n  FROM hotels\n  WHERE hotel_name = 'BB'\n) t\nORDER BY popularity_score DESC;\n```\n\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -400,
+        -192
+      ],
+      "id": "5c1540b0-ef09-4c85-bbf2-653e3568d3f7",
+      "name": "筛选目的地城市酒店"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a senior database query assistant.\n\nYour task is to follow pre-defined data structure, then convert user natural language and follow requests into safe, optimized, and syntactically correct SQL queries.\n\n#User Natural Input:\n查询{{ $('循环目的地城市').item.json.destinationCities[0].name }}的餐厅，返回餐厅ID, 餐厅名称\n\n## DATABASE DATA STRUCTURE\n{{ $json.data }}\n\nYou MUST follow these rules strictly\n## GENERAL RULES\n1. Only generate SQL.\n2. Do NOT include explanations unless explicitly requested.\n3. Always assume the database is MySQL 8+ compatible.\n4. Use readable formatting and indentation.\n5. Use explicit column names (never SELECT *).\n6. Use table aliases when helpful.\n## SECURITY RULES (CRITICAL)\n❌ NEVER generate:\n- DELETE\n- UPDATE\n- INSERT\n- DROP\n- TRUNCATE\n- ALTER\n- GRANT\n- REVOKE\n❌ NEVER modify data.\nOnly generate SELECT queries.\n## QUERY SAFETY\n✔ Always include LIMIT when result size may be large.\n✔ Use ORDER BY when user implies ranking or recency.\n✔ Use WHERE filters whenever possible.\n✔ If date range is unclear, assume last 30 days.\n## AMBIGUITY HANDLING\nIf the request is ambiguous:\n- choose the most logical interpretation\n- add reasonable filters\n- keep results useful and concise\n## OUTPUT FORMAT\nReturn output in JSON format, output SQL as a single-line query without line breaks.\n\n{\n  \"sql\": \"SQL query here\",\n  \"description\": \"short explanation\"\n}\n\n## QUERY SCENARIOS\n\n用户：查询三亚的餐厅，返回餐厅ID, 餐厅名称\n回答：\n```SQL\nSELECT restaurant_id, restaurant_name FROM restaurants WHERE city_name = '三亚';\n```\n\n\n用户：查询三亚的餐厅，不包含餐厅‘AA’，返回餐厅ID, 餐厅名称\n回答：\n```SQL\nSELECT restaurant_id, restaurant_name FROM restaurants WHERE city_name = '三亚' AND restaurant_name NOT IN ('AA')\n```\n\n\n用户：查询三亚的热门餐厅，不包含餐厅‘AA’，但必须包含‘BB’，返回餐厅ID, 餐厅名称\n回答：\n```SQL\nSELECT DISTINCT *\nFROM (\n  SELECT restaurant_id, restaurant_name\n  FROM restaurants\n  WHERE city_name = '三亚'\n    AND popularity_score >= 4.0\n    AND restaurant_name NOT IN ('AA')\n\n  UNION\n\n  SELECT *\n  FROM restaurants\n  WHERE restaurant_name = 'BB'\n) t\nORDER BY popularity_score DESC;\n```\n\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -400,
+        128
+      ],
+      "id": "2d9abee8-2c3f-403a-b70d-4a7ababc5802",
+      "name": "筛选目的地城市餐厅"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.output.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -112,
+        -192
+      ],
+      "id": "e59908da-c913-43c8-bebf-441b32f16d4e",
+      "name": "查询数据库2",
+      "credentials": {
+        "mySql": {
+          "id": "Vreq71Uz1BGXsw7X",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.output.sql }}",
+        "options": {
+          "detailedOutput": false
+        }
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -112,
+        -528
+      ],
+      "id": "8c2ee34e-bf38-4bd4-9816-415bb56a7ee0",
+      "name": "查询数据库1",
+      "credentials": {
+        "mySql": {
+          "id": "Vreq71Uz1BGXsw7X",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.output.sql }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        -112,
+        128
+      ],
+      "id": "0683beac-1241-4c22-9484-697f8e2a82e4",
+      "name": "查询数据库3",
+      "credentials": {
+        "mySql": {
+          "id": "Vreq71Uz1BGXsw7X",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "itinerary-result",
+              "name": "itineraryResult",
+              "type": "object",
+              "value": "={\n  \"success\": true,\n  \"message\": \"旅游行程规划完成\",\n  \"data\": {\n    \"requirement\": {{ $json.requirementData }},\n    \"itinerary\": {{ $json.response.choices[0].message.content }},\n    \"cityData\": {{ $json.cityData }},\n    \"generatedAt\": \"{{ new Date().toISOString() }}\n  }\n}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cf792b51-72db-43bd-a42d-9620bbbb5019",
+      "name": "准备旅游行程规划返回数据",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.itineraryResult) }}",
+        "options": {}
+      },
+      "id": "dc52e189-2c40-4176-9de7-fbe01905690b",
+      "name": "数据返回成功",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\n// 使用 map 方法直接返回处理后的新数组，符合函数式编程范式\nreturn items.map(item => {\n  const data = item.json;\n  const validationResult = {\n    isValid: true,\n    errors: [],\n    warnings: []\n  };\n\n  // 闭包辅助函数：集中处理状态变更，减少代码冗余\n  const addError = (message) => {\n    validationResult.isValid = false;\n    validationResult.errors.push(message);\n  };\n\n  // 1. 结构校验：使用可选链 (?.) 安全提取深层嵌套对象\n  const baseInfo = data.requirementData.requirement_json_data.base_info\n\n  if (!data.requirementData) {\n    addError('requirementData is missing');\n  } else if (!baseInfo) {\n    addError('base_info is missing');\n  } else {\n    // 2. 字段层级校验\n    \n    // 校验 origin\n    if (!baseInfo.origin) {\n      addError('origin is missing from base_info');\n    }\n\n    // 校验 destination_cities：增加 Array 类型检查\n    const destCities = baseInfo.destination_cities;\n    if (!destCities) {\n      addError('destination_cities is missing, not an array, or empty');\n    }\n\n    // 校验 trip_days：增加 Number 类型检查\n    const tripDays = baseInfo.trip_days;\n    if (typeof tripDays !== 'number') {\n      addError('trip_days must be a valid number');\n    } else if (tripDays < 1) {\n      addError('trip_days must be at least 1');\n    }\n  }\n\n  // 3. 返回重构后的数据对象\n  return {\n    json: {\n      ...data,\n      validationResult\n    }\n  };\n});"
+      },
+      "id": "89bdfa3a-9e3c-49be-afbb-2096c220c2df",
+      "name": "校验旅游需求必要数据",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -896,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "requirement-data",
+              "name": "requirementData",
+              "type": "object",
+              "value": "={{ $json.body }}"
+            },
+            {
+              "id": "destination-cities",
+              "name": "destinationCities",
+              "type": "array",
+              "value": "={{ $json.body.requirement_json_data.base_info.destination_cities }}"
+            },
+            {
+              "id": "trip-days",
+              "name": "tripDays",
+              "type": "number",
+              "value": "={{ $json.body.requirement_json_data.base_info.trip_days }}"
+            },
+            {
+              "id": "budget",
+              "name": "budget",
+              "type": "object",
+              "value": "={{ $json.body.budget || {} }}"
+            },
+            {
+              "id": "preferences",
+              "name": "preferences",
+              "type": "object",
+              "value": "={{ $json.body.preferences || {} }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bcd52b3b-94c5-41fa-9b0d-823c747c1c9c",
+      "name": "解析旅游需求数据2",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1120,
+        368
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "destination-cities",
+              "name": "destinationCities",
+              "type": "array",
+              "value": "={{ $json.body.requirement_json_data.base_info.destination_cities }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "be2f07a7-f03c-4180-98b4-b85ed67e3631",
+      "name": "解析旅游需求数据1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1120,
+        -208
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-valid",
+              "leftValue": "={{ $json.validationResult.isValid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "51897b4a-b591-41c4-9e0f-4215f862bc20",
+      "name": "检查数据校验是否成功",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -736,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "error-response",
+              "name": "errorResponse",
+              "type": "object",
+              "value": "={\n                \"success\": false,\n                \"message\": \"数据验证失败\",\n                \"errors\": {{ $json.validationResult.errors }},\n                \"timestamp\": \"{{ new Date().toISOString() }}\n              }"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0496235f-0c25-4484-aa76-6da7f4b85647",
+      "name": "错误处理",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -592,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json.errorResponse) }}",
+        "options": {}
+      },
+      "id": "4ea64373-1814-450c-8e37-06097ba03aba",
+      "name": "返回错误消息",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取所有输入的 items\nconst items = $input.all();\n\n// 提取每个 item 中的 json 数据部分\nconst hotels = items.map(item => item.json);\n\n// 返回 n8n 要求的标准格式：一个包含单个对象的数组\nreturn [\n  {\n    json: {\n      hotels: hotels\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -192
+      ],
+      "id": "57e2cde6-dac5-4e67-9a7d-823e777af0e4",
+      "name": "酒店列表"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取所有输入的 items\nconst items = $input.all();\n\n// 提取每个 item 中的 json 数据部分\nconst restaurants = items.map(item => item.json);\n\n// 返回 n8n 要求的标准格式：一个包含单个对象的数组\nreturn [\n  {\n    json: {\n      restaurants: restaurants\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        128
+      ],
+      "id": "d4339e3c-d270-4a66-95b7-87ce02a71530",
+      "name": "餐厅列表"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        528,
+        480
+      ],
+      "id": "71859163-e7d6-4e6c-bc6d-3238b8d61d86",
+      "name": "DeepSeek Chat Model3",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "Tz0eUXax4f19GS8D",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取所有输入的 items\nconst items = $input.all();\n\n// 提取每个 item 中的 json 数据部分\nconst attractions = items.map(item => item.json);\n\n// 返回 n8n 要求的标准格式：一个包含单个对象的数组\nreturn [\n  {\n    json: {\n      attractions: attractions\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        48,
+        -528
+      ],
+      "id": "6a7b8af4-ddf6-42d9-8e4e-5fb3aeafd053",
+      "name": "景点列表"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## Role\n你是一个专业且严谨的“高级旅游行程规划专家”Agent。你的核心任务是根据用户提供的结构化旅游需求数据，以及严格限定的候选资源列表（景点、酒店、餐厅），生成一份精确到小时的每日行程规划。\n\n## Input Data\n在每次请求中，你将接收到以下四份数据：\n- Requirements (JSON): 包含基础信息、出行人统计、偏好（交通、住宿、节奏）和预算等。\nRequirements: {{ JSON.stringify($json.requirementData) }}\n- Attractions List (JSON/Array): 经过筛选的候选景点列表，包含景点ID、名称。\nAttractions List：{{ JSON.stringify($json.attractions) }}\n- Hotels List (JSON/Array): 经过筛选的候选酒店列表，包含酒店ID、名称等。\nHotels List：{{ JSON.stringify($json.hotels) }}\n- Restaurants List (JSON/Array): 经过筛选的候选餐厅列表，包含餐厅ID、名称、餐饮类型等。\nRestaurants List：{{ JSON.stringify($json.restaurants) }}\n\n\n## Strict Rules & Constraints\n你必须绝对遵守以下规则，任何违反都将导致任务失败：\n- 绝对数据边界 (Zero Hallucination): - 行程中出现的所有 Attraction(景点), Hotel(酒店), 和 Restaurant(餐厅) 必须且只能从提供的 Input Data (候选资源列表) 中选取。\n- 严禁自行捏造、假设或引入任何不在列表中的地点、实体或 ID。\n\n## 严格响应需求 (Requirement Fidelity):\n- 必须完全按照 User Requirements 规划行程。例如：如果 transportation.type 包含 \"RoundTripFlight\"，你必须在行程的第一天安排去程航班 (FLIGHT) 和接机 (TRANSPORT)，在最后一天安排送机 (TRANSPORT) 和回程航班 (FLIGHT)。\n- 严格遵守 travel_date 的天数限制和 destination_cities 的城市顺序。\n- 必须根据 itinerary.rhythm (如 Moderate) 合理安排每天的活动密度，禁止天马行空或物理上无法实现的紧凑安排。\n\n## 行程逻辑连续性 (Logical Flow):\n- 每天的活动必须遵循时间顺序（start_time 到 end_time），不能出现时间重叠。\n- 必须包含必要的后勤节点：到达当天的 CHECK_IN，离开当天的 CHECK_OUT，以及每日的三餐 (MEAL，除非明确标注为自由活动)。\n- 跨城市移动时，必须安排相应的 TRANSPORT 或 FLIGHT / TRAIN 活动。\n\n## 强制 JSON 输出格式 (Output Formatting):\n你的唯一输出必须是一个合法的、可解析的 JSON 对象。\n严禁在 JSON 前后输出任何解释性文本、寒暄或 Markdown 代码块标记（除非你的环境要求使用 json  进行包裹，但内部必须纯净）。\n\n必须完全匹配提供的目标 JSON Schema。\n\n### Target JSON Output Schema Example (Agent，你必须严格仿照以下结构输出)\n{\n  \"requirement_id\": \"<从Requirements 中提取>\",\n  \"itinerary_name\": \"<根据目的地和天数生成，例如：日本东京大阪5日游>\",\n  \"start_date\": \"YYYY-MM-DD\",\n  \"end_date\": \"YYYY-MM-DD\",\n  \"destinations\": [\n    {\n      \"destination_order\": 1,\n      \"city_name\": \"城市名\",\n      \"country_code\": \"国家代码\",\n      \"arrival_date\": \"YYYY-MM-DD\",\n      \"departure_date\": \"YYYY-MM-DD\"\n    }\n  ],\n  \"traveler_stats\": {\n    \"total_travelers\": \"<根据 group_size 计算>\",\n    \"adults\": \"<匹配Requirements中group_size里的adults>\",\n    \"children\": \"<匹配Requirements中group_size里的children>\",\n    \"infants\": 0,\n    \"seniors\": \"<匹配Requirements中group_size里的seniors>\"\n  },\n  \"daily_schedules\": [\n    {\n      \"day\": 1,\n      \"date\": \"YYYY-MM-DD\",\n      \"city\": \"城市名\",\n      \"activities\": [\n        {\n          \"activity_type\": \"<必须是 FLIGHT, TRANSPORT, ATTRACTION, MEAL, CHECK_IN, CHECK_OUT, FREE 之一>\",\n          \"activity_title\": \"<活动标题>\",\n          \"activity_description\": \"<活动简述>\",\n          \"start_time\": \"HH:MM\",\n          \"end_time\": \"HH:MM\",\n          \"id_reference\": \"<对应的景点/酒店/餐厅ID，若为交通或自由活动则省略>\",\n          \"name_reference\": \"<对应的景点/酒店/餐厅名称>\"\n        }\n      ]\n    }\n  ]\n}\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        528,
+        272
+      ],
+      "id": "9919d097-63d2-4664-a462-eade75b584e8",
+      "name": "旅游行程规划"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 4,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        336,
+        240
+      ],
+      "id": "634a57ab-22bf-4026-85c1-6fa0c7371518",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"requirement_id\": \"<从Requirements 中提取>\",\n  \"itinerary_name\": \"<根据目的地和天数生成，例如：日本东京大阪5日游>\",\n  \"start_date\": \"YYYY-MM-DD\",\n  \"end_date\": \"YYYY-MM-DD\",\n  \"destinations\": [\n    {\n      \"destination_order\": 1,\n      \"city_name\": \"城市名\",\n      \"country_code\": \"国家代码\",\n      \"arrival_date\": \"YYYY-MM-DD\",\n      \"departure_date\": \"YYYY-MM-DD\"\n    }\n  ],\n  \"traveler_stats\": {\n    \"total_travelers\": \"<根据 group_size 计算>\",\n    \"adults\": \"<匹配Requirements中group_size里的adults>\",\n    \"children\": \"<匹配Requirements中group_size里的children>\",\n    \"infants\": 0,\n    \"seniors\": \"<匹配Requirements中group_size里的seniors>\"\n  },\n  \"daily_schedules\": [\n    {\n      \"day\": 1,\n      \"date\": \"YYYY-MM-DD\",\n      \"city\": \"城市名\",\n      \"activities\": [\n        {\n          \"activity_type\": \"<必须是 FLIGHT, TRANSPORT, ATTRACTION, MEAL, CHECK_IN, CHECK_OUT, FREE 之一>\",\n          \"activity_title\": \"<活动标题>\",\n          \"activity_description\": \"<活动简述>\",\n          \"start_time\": \"HH:MM\",\n          \"end_time\": \"HH:MM\",\n          \"id_reference\": \"<对应的景点/酒店/餐厅ID，若为交通或自由活动则省略>\",\n          \"name_reference\": \"<对应的景点/酒店/餐厅名称>\"\n        }\n      ]\n    }\n  ]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        480
+      ],
+      "id": "3193ff62-497c-4c6c-9041-ae2f40df4742",
+      "name": "旅游行程规划结构化输出"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "筛选目的地城市景点",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "筛选目的地城市景点",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "筛选目的地城市酒店",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "筛选目的地城市酒店",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "筛选目的地城市餐厅",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "筛选目的地城市餐厅",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取旅游需求详细数据": {
+      "main": [
+        [
+          {
+            "node": "解析旅游需求数据2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "解析旅游需求数据1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "循环目的地城市": {
+      "main": [
+        [
+          {
+            "node": "读取数据表结构文件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析数据表数据": {
+      "main": [
+        [
+          {
+            "node": "筛选目的地城市景点",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "筛选目的地城市酒店",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "筛选目的地城市餐厅",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "读取数据表结构文件": {
+      "main": [
+        [
+          {
+            "node": "解析数据表数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "筛选目的地城市景点": {
+      "main": [
+        [
+          {
+            "node": "查询数据库1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "筛选目的地城市酒店": {
+      "main": [
+        [
+          {
+            "node": "查询数据库2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "筛选目的地城市餐厅": {
+      "main": [
+        [
+          {
+            "node": "查询数据库3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "查询数据库2": {
+      "main": [
+        [
+          {
+            "node": "酒店列表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "查询数据库1": {
+      "main": [
+        [
+          {
+            "node": "景点列表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "查询数据库3": {
+      "main": [
+        [
+          {
+            "node": "餐厅列表",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "准备旅游行程规划返回数据": {
+      "main": [
+        [
+          {
+            "node": "数据返回成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "校验旅游需求必要数据": {
+      "main": [
+        [
+          {
+            "node": "检查数据校验是否成功",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "解析旅游需求数据2": {
+      "main": [
+        [
+          {
+            "node": "校验旅游需求必要数据",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "解析旅游需求数据1": {
+      "main": [
+        [
+          {
+            "node": "循环目的地城市",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "检查数据校验是否成功": {
+      "main": [
+        [],
+        [
+          {
+            "node": "错误处理",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "错误处理": {
+      "main": [
+        [
+          {
+            "node": "返回错误消息",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "酒店列表": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "餐厅列表": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "旅游行程规划",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "景点列表": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "返回错误消息": {
+      "main": [
+        []
+      ]
+    },
+    "旅游行程规划": {
+      "main": [
+        [
+          {
+            "node": "准备旅游行程规划返回数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "旅游行程规划",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "旅游行程规划结构化输出": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "旅游行程规划",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8af7b086-c11c-4c41-b194-dafdcf1e87a6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6329af58c4e77403d0e3d70e1ed1d1d7b2334d153a80ea1328846692b72c2a6e"
+  },
+  "id": "qRBa1ZDsjvGj0y0r",
+  "tags": []
+}
