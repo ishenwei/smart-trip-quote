@@ -238,7 +238,7 @@ class RequirementAdmin(admin.ModelAdmin):
                 }),
                 ('需求状态', {
                     'fields': (
-                        'status'
+                        'status',
                     )
                 }),
                 ('审核信息', {
