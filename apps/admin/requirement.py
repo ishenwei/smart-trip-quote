@@ -167,7 +167,7 @@ class RequirementAdmin(admin.ModelAdmin):
         }),
     )
     
-    readonly_fields = ['requirement_id', 'created_at', 'updated_at', 'origin_input_display', 'requirement_json_data_display', 'origin_type', 'destination_cities', 'group_total', 'travel_end_date', 'source_type', 'assumptions']
+    readonly_fields = ['requirement_id', 'created_at', 'updated_at', 'origin_input_display', 'requirement_json_data_display', 'origin_type', 'group_total', 'travel_end_date', 'source_type', 'assumptions']
     
     def get_fieldsets(self, request, obj=None):
         if obj is None:
