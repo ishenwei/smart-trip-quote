@@ -12,6 +12,7 @@ from apps.models.destinations import Destination
 from apps.models.traveler_stats import TravelerStats
 from apps.models.daily_schedule import DailySchedule
 from apps.models.requirement import Requirement
+from apps.models.requirement_itinerary import RequirementItinerary
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -104,6 +105,18 @@ class ItineraryWebhookView(View):
                 with transaction.atomic():
                     # 创建行程主表
                     itinerary = self.create_itinerary(data, requirement)
+                    
+                    # 创建需求与行程的关联关系
+                    try:
+                        requirement_itinerary = RequirementItinerary(
+                            requirement=requirement,
+                            itinerary=itinerary
+                        )
+                        requirement_itinerary.save()
+                        logger.info(f'创建需求与行程关联关系成功: requirement_id={requirement.requirement_id}, itinerary_id={itinerary.itinerary_id}')
+                    except Exception as e:
+                        logger.error(f'创建需求与行程关联关系失败: {e}', exc_info=True)
+                        raise
                     
                     # 创建目的地信息
                     self.create_destinations(itinerary, data)

@@ -604,14 +604,11 @@ class RequirementExtractor:
   "base_info": {
     "origin": {
       "name": "出发地城市名称（必须准确提取，不能为null，如果未明确指定则设为'未指定'）",
-      "code": "出发地代码（可选，如PEK、SHA等）",
       "type": "出发地类型（可选，Domestic/International）"
     },
     "destination_cities": [
       {
-        "name": "目的地城市名称（必须准确提取，不能为空列表，如果未明确指定则设为['未指定']）",
-        "code": "城市代码（可选）",
-        "country": "国家（可选）"
+        "name": "目的地城市名称（必须准确提取，不能为空列表，如果未明确指定则设为['未指定']）"
       }
     ],
     "trip_days": 出行天数（整数，1-365，如果未明确指定则为null）,

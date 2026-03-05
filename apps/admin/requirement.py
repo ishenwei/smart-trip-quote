@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Count
@@ -21,19 +22,18 @@ class RequirementAdmin(admin.ModelAdmin):
         'requirement_id',
         'origin_name',
         'destination_display',
-        'trip_days',
         'group_total',
         'travel_date_range',
-        'status',
+        'trip_days',
+        'contact_person',
+        'contact_phone',
+        'contact_company',
         'status_badge',
-        'source_type',
-        'is_template_badge',
+        'created_by',
         'created_at'
     ]
     
     list_filter = [
-        StatusFilter,
-        SourceTypeFilter,
         TransportationTypeFilter,
         HotelLevelFilter,
         TripRhythmFilter,
@@ -51,10 +51,13 @@ class RequirementAdmin(admin.ModelAdmin):
         'destination_cities',
         'created_by',
         'reviewed_by',
-        'template_name'
+        'template_name',
+        'contact_person',
+        'contact_phone',
+        'contact_company'
     ]
     
-    list_editable = ['status']
+    list_editable = []
     
     list_per_page = 25
     
@@ -79,25 +82,24 @@ class RequirementAdmin(admin.ModelAdmin):
             'fields': (
                 'requirement_id',
                 'origin_name',
-                'origin_code',
                 'origin_type',
-                'destination_cities'
+                'destination_cities',
+                'contact_person',
+                'contact_phone',
+                'contact_company'
             )
         }),
-        ('原始输入与JSON数据', {
+        ('团队人数', {
             'fields': (
-                'origin_input_display',
-                'requirement_json_data_display'
-            ),
-            'classes': ('collapse',),
+                'group_adults',
+                'group_children',
+                'group_seniors',
+                'group_total'
+            )
         }),
         ('行程信息', {
             'fields': (
                 'trip_days',
-                'group_adults',
-                'group_children',
-                'group_seniors',
-                'group_total',
                 'travel_start_date',
                 'travel_end_date',
                 'travel_date_flexible'
@@ -132,35 +134,40 @@ class RequirementAdmin(admin.ModelAdmin):
                 'budget_notes'
             )
         }),
-        ('需求状态', {
-            'fields': (
-                'source_type',
-                'status',
-                'assumptions'
-            )
-        }),
         ('审核信息', {
             'fields': (
+                'status',
                 'created_by',
                 'reviewed_by'
             )
         }),
-        ('模板信息', {
+        
+        #('模板信息', {
+        #    'fields': (
+        #        'is_template',
+        #        'template_name',
+        #        'template_category'
+        #    )
+        #}),
+        #('其他信息', {
+        #    'fields': (
+        #        'expires_at',
+        #        'extension'
+        #    )
+        #}),
+
+        ('原始输入与JSON数据', {
             'fields': (
-                'is_template',
-                'template_name',
-                'template_category'
-            )
-        }),
-        ('其他信息', {
-            'fields': (
-                'expires_at',
-                'extension'
-            )
+                'source_type',
+                'assumptions',
+                'origin_input_display',
+                'requirement_json_data_display'
+            ),
+            'classes': ('collapse',),
         }),
     )
     
-    readonly_fields = ['requirement_id', 'created_at', 'updated_at', 'origin_input_display', 'requirement_json_data_display']
+    readonly_fields = ['requirement_id', 'created_at', 'updated_at', 'origin_input_display', 'requirement_json_data_display', 'origin_type', 'destination_cities', 'group_total', 'travel_end_date', 'source_type', 'assumptions']
     
     def get_fieldsets(self, request, obj=None):
         if obj is None:
@@ -168,25 +175,33 @@ class RequirementAdmin(admin.ModelAdmin):
                 ('基本信息', {
                     'fields': (
                         'origin_name',
-                        'origin_code',
                         'origin_type',
-                        'destination_cities'
+                        'destination_cities',
+                        'contact_person',
+                        'contact_phone',
+                        'contact_company'
                     )
                 }),
                 ('原始输入与JSON数据', {
                     'fields': (
                         'origin_input_display',
-                        'requirement_json_data_display'
+                        'requirement_json_data_display',
+                        'source_type',
+                        'assumptions'
                     ),
                     'classes': ('collapse',),
+                }),
+                ('团队人数', {
+                    'fields': (
+                        'group_adults',
+                        'group_children',
+                        'group_seniors',
+                        'group_total'
+                    )
                 }),
                 ('行程信息', {
                     'fields': (
                         'trip_days',
-                        'group_adults',
-                        'group_children',
-                        'group_seniors',
-                        'group_total',
                         'travel_start_date',
                         'travel_end_date',
                         'travel_date_flexible'
@@ -223,9 +238,7 @@ class RequirementAdmin(admin.ModelAdmin):
                 }),
                 ('需求状态', {
                     'fields': (
-                        'source_type',
-                        'status',
-                        'assumptions'
+                        'status'
                     )
                 }),
                 ('审核信息', {
@@ -234,19 +247,19 @@ class RequirementAdmin(admin.ModelAdmin):
                         'reviewed_by'
                     )
                 }),
-                ('模板信息', {
-                    'fields': (
-                        'is_template',
-                        'template_name',
-                        'template_category'
-                    )
-                }),
-                ('其他信息', {
-                    'fields': (
-                        'expires_at',
-                        'extension'
-                    )
-                }),
+                #('模板信息', {
+                #    'fields': (
+                #        'is_template',
+                #        'template_name',
+                #        'template_category'
+                #    )
+                #}),
+                #('其他信息', {
+                #    'fields': (
+                #        'expires_at',
+                #        'extension'
+                #    )
+                #}),
             )
         return super().get_fieldsets(request, obj)
     
@@ -259,7 +272,7 @@ class RequirementAdmin(admin.ModelAdmin):
                     city_names.append(city.get('name', str(city)))
                 else:
                     city_names.append(str(city))
-            return ', '.join(city_names) + ('...' if len(cities) > 3 else '')
+            return '，'.join(city_names) + ('...' if len(cities) > 3 else '')
         return '-'
     destination_display.short_description = '目的地'
     
@@ -324,6 +337,11 @@ class RequirementAdmin(admin.ModelAdmin):
         return request.user.has_perm('apps.view_requirement')
     
     def save_model(self, request, obj, form, change):
+        # 计算出行结束日期
+        if obj.travel_start_date and obj.trip_days:
+            from datetime import timedelta
+            obj.travel_end_date = obj.travel_start_date + timedelta(days=obj.trip_days - 1)
+        
         if not change:
             obj.created_by = request.user.username if request.user.is_authenticated else None
         
@@ -352,7 +370,7 @@ class RequirementAdmin(admin.ModelAdmin):
     
     def response_change(self, request, obj):
         self.message_user(request, f'成功更新需求 {obj.requirement_id}。')
-        return super().response_change(request, obj)
+        return HttpResponseRedirect(request.path)
     
     def origin_input_display(self, obj):
         """格式化展示原始输入"""

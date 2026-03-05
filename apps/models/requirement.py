@@ -45,7 +45,11 @@ class Requirement(BaseModel):
     
     origin_name = models.CharField(max_length=100, verbose_name='出发地名称', db_comment='出发地城市名称')
     origin_code = models.CharField(max_length=10, blank=True, verbose_name='出发地代码', db_comment='出发地城市代码')
-    origin_type = models.CharField(max_length=20, blank=True, verbose_name='出发地类型', db_comment='出发地类型')
+    class OriginType(models.TextChoices):
+        DOMESTIC = 'Domestic', '国内'
+        INTERNATIONAL = 'International', '国际'
+    
+    origin_type = models.CharField(max_length=20, blank=True, choices=OriginType.choices, verbose_name='出发地类型', db_comment='出发地类型')
     
     destination_cities = JSONField(verbose_name='目的地城市列表', default=list, db_comment='目的地城市列表')
     
@@ -155,6 +159,10 @@ class Requirement(BaseModel):
     
     assumptions = JSONField(verbose_name='系统推断说明', default=list, db_comment='系统推断说明列表')
     
+    contact_person = models.CharField(max_length=100, blank=True, default='', verbose_name='联系人', db_comment='联系人姓名')
+    contact_phone = models.CharField(max_length=20, blank=True, default='', verbose_name='联系电话', db_comment='联系人电话')
+    contact_company = models.CharField(max_length=100, null=True, blank=True, verbose_name='联系人单位', db_comment='联系人所在单位或公司')
+    
     created_by = models.CharField(max_length=100, blank=True, null=True, verbose_name='创建人', db_comment='需求创建人用户名')
     reviewed_by = models.CharField(max_length=100, blank=True, null=True, verbose_name='审核人', db_comment='需求审核人用户名')
     
@@ -184,6 +192,9 @@ class Requirement(BaseModel):
         return f"{self.requirement_id} - {self.origin_name} 至 {self.destination_cities}"
     
     def save(self, *args, **kwargs):
+        # 重新计算总人数
+        self.group_total = self.group_adults + self.group_children + self.group_seniors
+        
         # 新创建记录，生成requirement_id
         if not self.pk:
             if not self.requirement_id:
@@ -229,15 +240,8 @@ class Requirement(BaseModel):
             if self.travel_end_date < self.travel_start_date:
                 raise ValidationError({'travel_end_date': '结束日期不能早于开始日期'})
         
-        if self.trip_days and self.travel_start_date and self.travel_end_date:
-            calculated_days = (self.travel_end_date - self.travel_start_date).days + 1
-            if calculated_days != self.trip_days:
-                raise ValidationError({'trip_days': f'出行天数({self.trip_days})与日期范围({calculated_days}天)不一致'})
         
-        total_people = self.group_adults + self.group_children + self.group_seniors
-        if total_people != self.group_total:
-            raise ValidationError({'group_total': f'总人数({self.group_total})与各类型人数之和({total_people})不一致'})
-        
+
         if self.budget_min and self.budget_max:
             if self.budget_min > self.budget_max:
                 raise ValidationError({'budget_min': '最低预算不能高于最高预算'})

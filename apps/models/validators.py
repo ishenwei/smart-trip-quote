@@ -53,16 +53,6 @@ class RequirementValidator:
             raise ValidationError({'trip_days': '出行天数必须是正整数'})
         if trip_days > 365:
             raise ValidationError({'trip_days': '出行天数不能超过365天'})
-        
-        if travel_start_date and travel_end_date:
-            if isinstance(travel_start_date, str):
-                travel_start_date = datetime.strptime(travel_start_date, '%Y-%m-%d').date()
-            if isinstance(travel_end_date, str):
-                travel_end_date = datetime.strptime(travel_end_date, '%Y-%m-%d').date()
-            
-            calculated_days = (travel_end_date - travel_start_date).days + 1
-            if calculated_days != trip_days:
-                raise ValidationError({'trip_days': f'出行天数({trip_days})与日期范围({calculated_days}天)不一致'})
     
     @staticmethod
     def validate_group_size(adults, children, seniors, total):

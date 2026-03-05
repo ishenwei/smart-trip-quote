@@ -111,6 +111,11 @@ def generate_itinerary(request, requirement_id):
         # 获取需求对象
         requirement = get_object_or_404(Requirement, requirement_id=requirement_id)
         
+        # 校验需求状态是否为已确认
+        if requirement.status != Requirement.Status.CONFIRMED:
+            logger.warning(f"需求状态未确认，无法生成行程规划 - 需求ID: {requirement.requirement_id}, 状态: {requirement.status}")
+            return JsonResponse({'success': False, 'error': '当前旅游需求需要审核，并更新状态为已确认后才能进行旅游行程规划'}, status=400)
+        
         # 验证数据完整性
         if not requirement.destination_cities:
             return JsonResponse({'success': False, 'error': '目的地城市不能为空'}, status=400)
