@@ -73,7 +73,7 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
-      - mariadb_data:/var/lib/mysql
+      - ./mariadb_data:/var/lib/mysql
     ports:
       - "3308:3306"
     networks:
@@ -96,7 +96,6 @@ services:
       #WEBHOOK_URL: https://n8n.ishenwei.online/
       WEBHOOK_URL: http://127.0.0.1:62000/
       NODE_ENV: production
-      GENERIC_TIMEZONE: America/New_York
     volumes:
       - ./n8n_data:/home/node/.n8n
       - ./n8n_data/files:/home/node/.n8n-files

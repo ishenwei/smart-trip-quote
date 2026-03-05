@@ -189,7 +189,38 @@ class Requirement(BaseModel):
         ]
     
     def __str__(self):
-        return f"{self.requirement_id} - {self.origin_name} 至 {self.destination_cities}"
+        import json
+        import ast
+        cities = self.destination_cities
+        
+        # 如果是字符串，尝试解析为列表（支持 JSON 和 Python 字面量格式）
+        if isinstance(cities, str):
+            try:
+                # 先尝试 JSON 解析
+                cities = json.loads(cities)
+            except json.JSONDecodeError:
+                try:
+                    # 再尝试 Python 字面量解析（处理单引号的情况）
+                    cities = ast.literal_eval(cities)
+                except (ValueError, SyntaxError):
+                    cities = None
+        
+        # 确保 cities 是列表
+        if not isinstance(cities, list):
+            cities = []
+        
+        # 提取城市名称
+        city_names = []
+        for city in cities:
+            if isinstance(city, dict):
+                city_names.append(city.get('name', str(city)))
+            else:
+                city_names.append(str(city))
+        
+        # 格式化城市名称
+        destination_str = ','.join(city_names)
+        
+        return f"{self.requirement_id} - {self.origin_name} 至 {destination_str}"
     
     def save(self, *args, **kwargs):
         # 重新计算总人数

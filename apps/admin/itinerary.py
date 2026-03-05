@@ -232,10 +232,10 @@ class ItineraryAdmin(admin.ModelAdmin):
         'contact_person',
         'contact_phone',
         'start_date',
-        'end_date',
+        'departure_city',
+        'return_city',
         'total_days',
-        'current_status',
-        'created_by',
+        'status_badge',
         'created_at'
     )
     
@@ -435,6 +435,25 @@ class ItineraryAdmin(admin.ModelAdmin):
     
     preview_itinerary.short_description = '预览操作'
     preview_itinerary.allow_tags = True
+    
+    def status_badge(self, obj):
+        colors = {
+            'DRAFT': '#17a2b8',  # 草稿 - 蓝绿色
+            'PENDING_REVIEW': '#ffc107',  # 待审核 - 黄色
+            'CONFIRMED': '#28a745',  # 已确认 - 绿色
+            'EXPIRED': '#6c757d',  # 已过期 - 灰色
+            'CANCELLED': '#dc3545',  # 已取消 - 红色
+            'COMPLETED': '#6f42c1'  # 已完成 - 紫色
+        }
+        color = colors.get(obj.current_status, '#007bff')
+        return format_html(
+            '<span style="background-color: {}; color: white; padding: 3px 8px; '  
+            'border-radius: 3px; font-size: 11px; font-weight: 600;">{}</span>',
+            color,
+            obj.get_current_status_display()
+        )
+    status_badge.short_description = '状态'
+    status_badge.allow_tags = True
 
 # 为DailySchedule创建Admin类
 class DailyScheduleAdmin(admin.ModelAdmin):

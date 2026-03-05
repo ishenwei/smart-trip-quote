@@ -223,7 +223,9 @@ class RequirementAdminTest(TestCase):
         destination_display = self.admin.destination_display(self.requirement)
         self.assertIn('西安', destination_display)
         self.assertIn('成都', destination_display)
-        print("✓ destination_display方法工作正常")
+        self.assertIn(',', destination_display)
+        self.assertNotIn('，', destination_display)
+        print("✓ destination_display方法工作正常，使用英文逗号分隔")
         
         travel_date_range = self.admin.travel_date_range(self.requirement)
         self.assertIn('2026-05-01', travel_date_range)

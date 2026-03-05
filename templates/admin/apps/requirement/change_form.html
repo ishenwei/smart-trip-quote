@@ -5,5 +5,32 @@
     <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
         {{ itinerary_plan_button|safe }}
     </div>
+    
+    {% if itineraries %}
+    <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px;">
+        <h2 style="margin-top: 0; margin-bottom: 15px; font-size: 18px; font-weight: 600;">关联行程规划</h2>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+            <thead>
+                <tr style="background-color: #e9ecef;">
+                    <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">行程ID</th>
+                    <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">行程名称</th>
+                    <th style="padding: 8px; text-align: left; border: 1px solid #dee2e6;">创建日期</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for itinerary in itineraries %}
+                <tr style="border: 1px solid #dee2e6;">
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">
+                        <a href="{% url 'smart_trip_admin:apps_itinerary_change' itinerary.itinerary_id %}">{{ itinerary.itinerary_id }}</a>
+                    </td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">{{ itinerary.itinerary_name }}</td>
+                    <td style="padding: 8px; border: 1px solid #dee2e6;">{{ itinerary.created_at }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
     {{ block.super }}
 {% endblock %}

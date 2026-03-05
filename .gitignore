@@ -66,3 +66,6 @@ n8n_data/config
 n8n_data/database.sqlite
 n8n_data/database.sqlite-shm
 n8n_data/database.sqlite-wal
+
+#mariadb_data
+mariadb_data/

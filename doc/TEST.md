@@ -310,3 +310,15 @@ python tests/test_api.py
 本项目采用了全面的测试策略，覆盖了 LLM 服务、API、行程解析等核心功能。通过 pytest 框架和模拟技术，确保了测试的可靠性和效率。测试套件不仅验证了功能的正确性，还测试了各种边界情况和异常场景，为系统的稳定性和可靠性提供了保障。
 
 定期运行测试套件、监控测试覆盖率、及时修复测试失败，是确保系统质量的重要措施。通过持续的测试维护和优化，可以不断提高系统的稳定性和可靠性。
+
+
+docker compose exec web python manage.py import_excel_data --attractions tests/景点集合信息.xlsx --restaurants tests/餐厅集合信息.xlsx
+
+docker compose exec web python manage.py import_excel_data --hotels "/app/tests/上冰雪世界皇冠酒店信息表.xlsx"
+docker compose exec web python manage.py import_excel_data --hotels "/app/tests/上海卓越铂尔曼酒店信息表_完整版.xlsx"
+docker compose exec web python manage.py import_excel_data --hotels "/app/tests/上海南汇百思特酒店信息表.xlsx"
+docker compose exec web python manage.py import_excel_data --hotels "/app/tests/松江凯悦酒店单独信息表.xlsx" 
+docker compose exec web python manage.py import_excel_data --hotels "/app/tests/松江开元酒店信息.xlsx"
+docker compose exec web python manage.py import_excel_data --hotels "/app/tests/金山皇冠假日单独信息表.xlsx" 
+
+docker exec stq_web python manage.py generate_japan_test_data'

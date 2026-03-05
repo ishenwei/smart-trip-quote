@@ -4,6 +4,8 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Count
 from django.utils import timezone
+import json
+import ast
 from apps.models import Requirement
 from apps.admin_ext.filters import (
     StatusFilter, SourceTypeFilter, TransportationTypeFilter,
@@ -264,7 +266,24 @@ class RequirementAdmin(admin.ModelAdmin):
         return super().get_fieldsets(request, obj)
     
     def destination_display(self, obj):
-        cities = obj.destination_cities if isinstance(obj.destination_cities, list) else []
+        cities = obj.destination_cities
+        
+        # 如果是字符串，尝试解析为列表（支持 JSON 和 Python 字面量格式）
+        if isinstance(cities, str):
+            try:
+                # 先尝试 JSON 解析
+                cities = json.loads(cities)
+            except json.JSONDecodeError:
+                try:
+                    # 再尝试 Python 字面量解析（处理单引号的情况）
+                    cities = ast.literal_eval(cities)
+                except (ValueError, SyntaxError):
+                    cities = None
+        
+        # 确保 cities 是列表
+        if not isinstance(cities, list):
+            cities = []
+        
         if cities:
             city_names = []
             for city in cities[:3]:
@@ -272,7 +291,7 @@ class RequirementAdmin(admin.ModelAdmin):
                     city_names.append(city.get('name', str(city)))
                 else:
                     city_names.append(str(city))
-            return '，'.join(city_names) + ('...' if len(cities) > 3 else '')
+            return ','.join(city_names) + ('...' if len(cities) > 3 else '')
         return '-'
     destination_display.short_description = '目的地'
     
@@ -584,6 +603,31 @@ class RequirementAdmin(admin.ModelAdmin):
         # 直接将按钮HTML添加到extra_context
         extra_context['itinerary_plan_button'] = simple_button_html
         
+        # 获取与当前需求关联的行程规划
+        from apps.models.requirement_itinerary import RequirementItinerary
+        from apps.models import Itinerary
+        
+        try:
+            # 获取当前需求对象
+            requirement = Requirement.objects.get(requirement_id=object_id)
+            
+            # 获取与该需求关联的行程规划
+            requirement_itineraries = RequirementItinerary.objects.filter(requirement=requirement)
+            itineraries = []
+            
+            for ri in requirement_itineraries:
+                itinerary = ri.itinerary
+                itineraries.append({
+                    'itinerary_id': itinerary.itinerary_id,
+                    'itinerary_name': itinerary.itinerary_name,
+                    'created_at': itinerary.created_at
+                })
+            
+            # 将行程规划列表添加到extra_context
+            extra_context['itineraries'] = itineraries
+        except Requirement.DoesNotExist:
+            extra_context['itineraries'] = []
+        
         # 调用父类的change_view方法
         return super().change_view(request, object_id, form_url, extra_context)
     
@@ -676,6 +720,31 @@ class RequirementAdmin(admin.ModelAdmin):
         
         # 将按钮HTML添加到context
         context['itinerary_plan_button'] = simple_button_html
+        
+        # 获取与当前需求关联的行程规划
+        if obj:
+            from apps.models.requirement_itinerary import RequirementItinerary
+            from apps.models import Itinerary
+            
+            try:
+                # 获取与该需求关联的行程规划
+                requirement_itineraries = RequirementItinerary.objects.filter(requirement=obj)
+                itineraries = []
+                
+                for ri in requirement_itineraries:
+                    itinerary = ri.itinerary
+                    itineraries.append({
+                        'itinerary_id': itinerary.itinerary_id,
+                        'itinerary_name': itinerary.itinerary_name,
+                        'created_at': itinerary.created_at
+                    })
+                
+                # 将行程规划列表添加到context
+                context['itineraries'] = itineraries
+            except Exception:
+                context['itineraries'] = []
+        else:
+            context['itineraries'] = []
         
         # 调用父类的render_change_form方法
         return super().render_change_form(request, context, add, change, form_url, obj)
