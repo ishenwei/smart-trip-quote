@@ -69,9 +69,9 @@ class DailySchedule(BaseModel):
         if self.activity_type == self.ActivityType.ATTRACTION and not self.attraction_id:
             raise ValidationError('活动类型为景点时必须关联景点ID')
         
-        # 验证activity_type为MEAL时建议关联restaurant_id
-        if self.activity_type == self.ActivityType.MEAL and not self.restaurant_id:
-            raise ValidationError('活动类型为餐饮时建议关联餐厅ID')
+        # 验证activity_type为MEAL时建议关联restaurant_id，但不强制
+        # if self.activity_type == self.ActivityType.MEAL and not self.restaurant_id:
+        #     raise ValidationError('活动类型为餐饮时建议关联餐厅ID')
         
         # 验证activity_type为CHECK_IN或CHECK_OUT时建议关联hotel_id
         if self.activity_type in [self.ActivityType.CHECK_IN, self.ActivityType.CHECK_OUT] and not self.hotel_id:

@@ -1,5 +1,7 @@
 from django.contrib.admin import AdminSite
 from django.conf import settings
+from django.contrib.auth.models import User, Group
+from django.contrib.auth.admin import UserAdmin, GroupAdmin
 from .requirement import RequirementAdmin
 from .attraction import AttractionAdmin
 from .hotel import HotelAdmin
@@ -30,5 +32,8 @@ admin_site.register(Hotel, HotelAdmin)
 admin_site.register(Restaurant, RestaurantAdmin)
 admin_site.register(Itinerary, ItineraryAdmin)
 admin_site.register(DailySchedule, DailyScheduleAdmin)
+# 注册用户和组模型
+admin_site.register(User, UserAdmin)
+admin_site.register(Group, GroupAdmin)
 
 __all__ = ['RequirementAdmin', 'AttractionAdmin', 'HotelAdmin', 'RestaurantAdmin', 'ItineraryAdmin', 'DailyScheduleAdmin', 'admin_site']

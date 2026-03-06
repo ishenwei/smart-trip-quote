@@ -44,6 +44,16 @@
                 var destinationId = $(this).val();
                 console.log('Selected destination ID:', destinationId);
                 
+                // 保存当前选中的值
+                var currentAttractionValue = attractionField.val();
+                var currentRestaurantValue = restaurantField.val();
+                var currentHotelValue = hotelField.val();
+                console.log('Current selected values:', {
+                    attraction: currentAttractionValue,
+                    restaurant: currentRestaurantValue,
+                    hotel: currentHotelValue
+                });
+                
                 // 清空现有的选项
                 console.log('Clearing existing options...');
                 attractionField.empty().append('<option value="">---------</option>');
@@ -64,10 +74,15 @@
                             if (data.attractions.length > 0) {
                                 console.log('Updating attractions with ' + data.attractions.length + ' options');
                                 $.each(data.attractions, function(index, attraction) {
-                                    attractionField.append($('<option>', {
+                                    var option = $('<option>', {
                                         value: attraction.attraction_id,
                                         text: attraction.attraction_name
-                                    }));
+                                    });
+                                    // 恢复选中状态
+                                    if (attraction.attraction_id === currentAttractionValue) {
+                                        option.prop('selected', true);
+                                    }
+                                    attractionField.append(option);
                                 });
                             } else {
                                 console.log('No attractions found for this destination');
@@ -77,10 +92,15 @@
                             if (data.restaurants.length > 0) {
                                 console.log('Updating restaurants with ' + data.restaurants.length + ' options');
                                 $.each(data.restaurants, function(index, restaurant) {
-                                    restaurantField.append($('<option>', {
+                                    var option = $('<option>', {
                                         value: restaurant.restaurant_id,
                                         text: restaurant.restaurant_name
-                                    }));
+                                    });
+                                    // 恢复选中状态
+                                    if (restaurant.restaurant_id === currentRestaurantValue) {
+                                        option.prop('selected', true);
+                                    }
+                                    restaurantField.append(option);
                                 });
                             } else {
                                 console.log('No restaurants found for this destination');
@@ -90,10 +110,15 @@
                             if (data.hotels.length > 0) {
                                 console.log('Updating hotels with ' + data.hotels.length + ' options');
                                 $.each(data.hotels, function(index, hotel) {
-                                    hotelField.append($('<option>', {
+                                    var option = $('<option>', {
                                         value: hotel.hotel_id,
                                         text: hotel.hotel_name
-                                    }));
+                                    });
+                                    // 恢复选中状态
+                                    if (hotel.hotel_id === currentHotelValue) {
+                                        option.prop('selected', true);
+                                    }
+                                    hotelField.append(option);
                                 });
                             } else {
                                 console.log('No hotels found for this destination');
@@ -107,6 +132,16 @@
                             attractionField.html(originalAttractionOptions);
                             restaurantField.html(originalRestaurantOptions);
                             hotelField.html(originalHotelOptions);
+                            // 恢复选中状态
+                            if (currentAttractionValue) {
+                                attractionField.val(currentAttractionValue);
+                            }
+                            if (currentRestaurantValue) {
+                                restaurantField.val(currentRestaurantValue);
+                            }
+                            if (currentHotelValue) {
+                                hotelField.val(currentHotelValue);
+                            }
                         }
                     });
                 } else {
@@ -115,6 +150,16 @@
                     attractionField.html(originalAttractionOptions);
                     restaurantField.html(originalRestaurantOptions);
                     hotelField.html(originalHotelOptions);
+                    // 恢复选中状态
+                    if (currentAttractionValue) {
+                        attractionField.val(currentAttractionValue);
+                    }
+                    if (currentRestaurantValue) {
+                        restaurantField.val(currentRestaurantValue);
+                    }
+                    if (currentHotelValue) {
+                        hotelField.val(currentHotelValue);
+                    }
                 }
             });
             

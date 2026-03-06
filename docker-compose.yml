@@ -2,7 +2,7 @@ services:
   web:
     container_name: stq_web
     build: .
-    command: python manage.py runserver 0.0.0.0:${WEB_PORT}
+    command: python manage.py runserver 0.0.0.0:${WEB_PORT} --verbosity 2
     volumes:
       - .:/app
     ports:
@@ -15,6 +15,8 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      LOG_LEVEL: INFO
+      PYTHONUNBUFFERED: 1
     networks:
       - stq_network
 

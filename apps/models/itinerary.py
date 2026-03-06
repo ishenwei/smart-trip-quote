@@ -185,7 +185,7 @@ class Itinerary(BaseModel):
         daily_schedules = []
         try:
             from .daily_schedule import DailySchedule
-            schedules = DailySchedule.objects.filter(itinerary_id=self.itinerary_id).order_by('day_number', 'start_time')
+            schedules = DailySchedule.objects.filter(itinerary_id=self).order_by('day_number', 'start_time')
             for schedule in schedules:
                 schedule_data = {
                     'schedule_id': str(schedule.schedule_id),
@@ -207,7 +207,10 @@ class Itinerary(BaseModel):
                     'notes': schedule.notes
                 }
                 daily_schedules.append(schedule_data)
-        except Exception:
+        except Exception as e:
+            import logging
+            logger = logging.getLogger('itinerary')
+            logger.error(f"Error fetching daily schedules: {str(e)}")
             pass
         
         itinerary_data['daily_schedules'] = daily_schedules
@@ -232,6 +235,11 @@ class Itinerary(BaseModel):
         
         # 更新JSON数据字段
         self.itinerary_json_data = itinerary_data
+
+    def get_absolute_url(self):
+        """返回行程的编辑链接"""
+        from django.urls import reverse
+        return reverse('smart_trip_admin:apps_itinerary_change', args=[self.itinerary_id])
 
     class Meta:
         db_table = 'itinerary'

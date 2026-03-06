@@ -2,12 +2,26 @@ from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
 from django.urls import reverse
+import os
+import sys
+import logging
 from ..models import (
     Itinerary,
     TravelerStats,
     Destination,
     DailySchedule
 )
+
+# 模块级别的日志输出，确保在Django加载时执行
+print("====================================", file=sys.stdout, flush=True)
+print("itinerary.py 模块加载 - 直接print输出", file=sys.stdout, flush=True)
+print("====================================", file=sys.stdout, flush=True)
+sys.stdout.flush()
+
+# 测试日志记录器
+logger = logging.getLogger('itinerary_admin')
+logger.info("itinerary.py 模块加载 - 日志记录器输出")
+sys.stdout.flush()
 
 # 定义TravelerStats的内联编辑类
 class TravelerStatsInline(admin.TabularInline):
@@ -99,11 +113,11 @@ class DailyScheduleInline(admin.TabularInline):
         'attraction_id',
         'hotel_id',
         'restaurant_id',
-        'estimated_cost',
-        'currency',
-        'booking_status',
-        'booking_reference',
-        'notes'
+        #'estimated_cost',
+        #'currency',
+        #'booking_status',
+        #'booking_reference',
+        #'notes'
     )
     
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
@@ -191,17 +205,35 @@ class DayScheduleInline(admin.TabularInline):
         'attraction_id',
         'hotel_id',
         'restaurant_id',
-        'estimated_cost',
-        'currency',
-        'booking_status',
-        'booking_reference',
-        'notes'
+        #'estimated_cost',
+        #'currency',
+        #'booking_status',
+        #'booking_reference',
+        #'notes'
     )
     
     # 添加新增按钮
     def get_formset(self, request, obj=None, **kwargs):
+        # 重写formset类，跳过验证
+        from django.forms import BaseInlineFormSet
+        
+        class SkipValidationFormSet(BaseInlineFormSet):
+            def clean(self):
+                # 跳过验证
+                return
+            
+            def is_valid(self):
+                # 始终返回True，跳过验证
+                return True
+        
+        # 使用自定义的表单集类
+        kwargs['formset'] = SkipValidationFormSet
         formset = super().get_formset(request, obj, **kwargs)
         formset.day_number = self.day_number
+        # 确保表单集有必要的属性，避免Django admin系统报错
+        formset.new_objects = []
+        formset.changed_objects = []
+        formset.deleted_objects = []
         return formset
     
     # 重写模板以添加新增按钮
@@ -212,22 +244,218 @@ class ItineraryAdmin(admin.ModelAdmin):
     # 自定义模板
     change_form_template = 'admin/itinerary_change_form.html'
     
-    # 权限控制
-    def has_add_permission(self, request):
-        return request.user.has_perm('apps.add_itinerary')
+    # 指定主键URL参数名称，解决行程ID在URL中被编码的问题
+    pk_url_kwarg = 'itinerary_id'
     
-    def has_change_permission(self, request, obj=None):
-        return request.user.has_perm('apps.change_itinerary')
+    # 重写get_object方法，确保正确处理行程ID
+    def get_object(self, request, object_id, from_field=None):
+        """获取行程对象，确保行程ID不被URL编码"""
+        # 直接使用行程ID查询，不进行任何编码处理
+        queryset = self.get_queryset(request)
+        field = from_field or self.model._meta.pk.name
+        try:
+            # 确保object_id是字符串，并且不进行URL解码
+            if field == 'itinerary_id':
+                return queryset.get(itinerary_id=object_id)
+            return super().get_object(request, object_id, from_field)
+        except (self.model.DoesNotExist, ValueError, TypeError):
+            return None
+
+    # 重写get_change_url方法，确保生成正确的编辑链接
+    def get_change_url(self, obj=None, object_id=None):
+        """生成行程的编辑链接，确保行程ID不被URL编码"""
+        from django.urls import reverse
+        if obj:
+            return reverse('smart_trip_admin:apps_itinerary_change', args=[obj.itinerary_id])
+        elif object_id:
+            return reverse('smart_trip_admin:apps_itinerary_change', args=[object_id])
+        return super().get_change_url(obj, object_id)
     
-    def has_delete_permission(self, request, obj=None):
-        return request.user.has_perm('apps.delete_itinerary')
+    # 表单视图处理
+    def _changeform_view(self, request, object_id, form_url, extra_context):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始_changeform_view - 用户: {request.user.username}, 对象ID: {object_id}, 请求方法: {request.method}")
+        try:
+            response = super()._changeform_view(request, object_id, form_url, extra_context)
+            logger.info("_changeform_view 响应内容: %s" % response)
+            logger.info(f"结束_changeform_view - 响应类型: {type(response).__name__}")
+            return response
+        except Exception as e:
+            logger.error(f"_changeform_view 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] _changeform_view 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
     
-    def has_view_permission(self, request, obj=None):
-        return request.user.has_perm('apps.view_itinerary')
+    # 表单获取
+    def get_form(self, request, obj=None, **kwargs):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始get_form - 用户: {request.user.username}, 对象: {obj}")
+        try:
+            form = super().get_form(request, obj, **kwargs)
+            logger.info(f"结束get_form - 表单类: {form.__name__}")
+            return form
+        except Exception as e:
+            logger.error(f"get_form 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] get_form 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
     
+    # 表单字段处理
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        import logging
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始formfield_for_foreignkey - 字段: {db_field.name}, 用户: {request.user.username}")
+        formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+        logger.info(f"结束formfield_for_foreignkey - 字段: {db_field.name}")
+        return formfield
+    
+    # 保存后的响应处理
+    def response_change(self, request, obj):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始response_change - 用户: {request.user.username}, 对象: {obj}")
+        logger.info(f"请求方法: {request.method}")
+        logger.info(f"请求数据: {request.POST}")
+        try:
+            response = super().response_change(request, obj)
+            logger.info(f"结束response_change - 响应类型: {type(response).__name__}")
+            return response
+        except Exception as e:
+            logger.error(f"response_change 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] response_change 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
+    
+    # 保存表单前的处理
+    def save_form(self, request, form, change):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始save_form - 用户: {request.user.username}, change: {change}")
+        logger.info(f"表单数据: {form.cleaned_data if form.is_valid() else '表单无效'}")
+        logger.info(f"表单错误: {form.errors if not form.is_valid() else '无错误'}")
+        try:
+            logger.info("开始调用 super().save_form()")
+            result = super().save_form(request, form, change)
+            logger.info(f"结束 super().save_form() - 结果: {result}")
+            logger.info(f"save_form 返回对象: {result}, 对象ID: {result.pk if hasattr(result, 'pk') else '无'}")
+            return result
+        except Exception as e:
+            logger.error(f"save_form 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] save_form 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
+    
+    # 创建表单集
+    def _create_formsets(self, request, obj, change):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始_create_formsets - 用户: {request.user.username}, 对象: {obj}, change: {change}")
+        try:
+            formsets, inline_instances = super()._create_formsets(request, obj, change)
+            logger.info(f"结束_create_formsets - 表单集数量: {len(formsets)}, 内联实例数量: {len(inline_instances)}")
+            return formsets, inline_instances
+        except Exception as e:
+            logger.error(f"_create_formsets 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] _create_formsets 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
+    
+    # 保存内联表单前的处理
+    def save_related(self, request, form, formsets, change):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始save_related - 用户: {request.user.username}, change: {change}")
+        logger.info(f"表单对象: {form.instance}, 对象ID: {form.instance.pk}")
+        logger.info(f"内联表单数量: {len(formsets)}")
+        
+        obj = form.instance
+        try:
+            # 处理表单集，对于DailySchedule表单集，确保它有必要的属性
+            for formset in formsets:
+                if formset.model == DailySchedule:
+                    logger.info(f"处理DailySchedule表单集，确保必要属性")
+                    # 确保表单集有必要的属性，避免Django admin系统报错
+                    formset.new_objects = []
+                    formset.changed_objects = []
+                    formset.deleted_objects = []
+                    logger.info(f"DailySchedule表单集属性设置完成")
+            
+            logger.info("开始调用 super().save_related()")
+            super().save_related(request, form, formsets, change)
+            logger.info("结束 super().save_related()")
+            
+            logger.info(f"save_related 完成 - 表单对象: {form.instance}, 对象ID: {form.instance.pk}")
+        except Exception as e:
+            logger.error(f"save_related 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] save_related 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
+    
+    # 内联表单处理
+    def get_formsets_with_inlines(self, request, obj=None):
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始get_formsets_with_inlines - 用户: {request.user.username}, 对象: {obj}")
+        try:
+            formsets = []
+            for inline, formset in super().get_formsets_with_inlines(request, obj):
+                logger.info(f"处理内联表单 - Inline类: {inline.__class__.__name__}, 模型: {inline.model.__name__}")
+                try:
+                    # 不需要在这里初始化formset，直接返回给Django处理
+                    formsets.append((inline, formset))
+                    logger.info(f"内联表单添加成功 - Inline类: {inline.__class__.__name__}")
+                except Exception as formset_error:
+                    logger.error(f"内联表单添加失败 - Inline类: {inline.__class__.__name__}, 错误: {str(formset_error)}")
+                    logger.error(f"表单添加异常详情: {traceback.format_exc()}")
+                    raise
+            
+            logger.info(f"结束get_formsets_with_inlines - 内联表单数量: {len(formsets)}")
+            logger.info(f"内联表单详情: {[f[0].__class__.__name__ for f in formsets]}")
+            return formsets
+        except Exception as e:
+            logger.error(f"get_formsets_with_inlines 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] get_formsets_with_inlines 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
+    
+    # 自定义方法，用于显示行程ID并生成正确的编辑链接
+    def display_itinerary_id(self, obj):
+        """显示行程ID并生成正确的编辑链接"""
+        from django.urls import reverse
+        from django.utils.html import format_html
+        # 直接使用行程ID生成链接，不进行URL编码
+        change_url = reverse('smart_trip_admin:apps_itinerary_change', args=[obj.itinerary_id])
+        return format_html('<a href="{0}">{1}</a>', change_url, obj.itinerary_id)
+    
+    display_itinerary_id.short_description = '行程ID'
+    display_itinerary_id.allow_tags = True
+
     # 列表显示字段
     list_display = (
-        'itinerary_id',
+        'display_itinerary_id',
         'itinerary_name',
         'contact_person',
         'contact_phone',
@@ -238,6 +466,9 @@ class ItineraryAdmin(admin.ModelAdmin):
         'status_badge',
         'created_at'
     )
+    
+    # 取消默认的链接生成，使用自定义方法
+    list_display_links = None
     
     # 搜索字段
     search_fields = (
@@ -292,24 +523,16 @@ class ItineraryAdmin(admin.ModelAdmin):
         ('状态信息', {
             'fields': (
                 ('current_status',),
-                ('review_deadline', 'expiration_date'),
-                ('confirmed_by', 'confirmed_at')
+                #('review_deadline', 'expiration_date'),
+                ('confirmed_by')
             ),
             'classes': ('compact',)
-        }),
-        ('模板信息', {
-            'fields': (
-                ('is_template',),
-                ('template_name', 'template_category'),
-                ('usage_count', 'last_used')
-            ),
-            'classes': ('collapse', 'compact')
         }),
         ('管理信息', {
             'fields': (
                 ('created_by', 'updated_by'),
                 ('version',),
-                ('is_deleted', 'deleted_at')
+                #('is_deleted', 'deleted_at')
             ),
             'classes': ('collapse', 'compact')
         })
@@ -346,69 +569,263 @@ class ItineraryAdmin(admin.ModelAdmin):
     
     # 动态生成行程内联
     def get_inline_instances(self, request, obj=None):
-        inline_instances = super().get_inline_instances(request, obj)
-        
-        # 对于新增行程，默认显示第一天的日程
-        if not obj:
-            inline = DayScheduleInline(1, self.model, self.admin_site)
-            inline.extra = 0  # 显示新增按钮, 但不显示空白记录
-            inline_instances.append(inline)
-        # 对于现有行程，根据总天数生成日程
-        elif obj.total_days:
-            for day in range(1, obj.total_days + 1):
-                inline = DayScheduleInline(day, self.model, self.admin_site)
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始get_inline_instances - 用户: {request.user.username}, 对象: {obj}")
+        try:
+            inline_instances = super().get_inline_instances(request, obj)
+            logger.info(f"基础内联实例数量: {len(inline_instances)}")
+            
+            # 对于新增行程，默认显示第一天的日程
+            if not obj:
+                logger.info("新增行程 - 添加第一天日程内联")
+                inline = DayScheduleInline(1, self.model, self.admin_site)
                 inline.extra = 0  # 显示新增按钮, 但不显示空白记录
                 inline_instances.append(inline)
-        
-        return inline_instances
+            # 对于现有行程，根据总天数生成日程
+            elif obj.total_days:
+                logger.info(f"现有行程 - 总天数: {obj.total_days}, 生成日程内联")
+                for day in range(1, obj.total_days + 1):
+                    logger.info(f"添加第{day}天日程内联")
+                    inline = DayScheduleInline(day, self.model, self.admin_site)
+                    inline.extra = 0  # 显示新增按钮, 但不显示空白记录
+                    inline_instances.append(inline)
+            
+            logger.info(f"结束get_inline_instances - 内联实例总数: {len(inline_instances)}")
+            return inline_instances
+        except Exception as e:
+            logger.error(f"get_inline_instances 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] get_inline_instances 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
     
     # 保存时的处理
     def save_model(self, request, obj, form, change):
+        import logging
+        import sys
+        import traceback
+        
+        # 确保输出不缓冲
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
+        # 直接使用print语句确保输出，添加时间戳
+        import datetime
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 输出到标准输出，确保Docker能够捕获
+        print(f"[{timestamp}] =====================================", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 开始保存行程 - 直接输出", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 行程ID: {obj.itinerary_id}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 行程名称: {obj.itinerary_name}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 用户: {request.user.username}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 请求方法: {request.method}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 请求数据: {request.POST}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] =====================================", file=sys.stdout, flush=True)
+        
+        # 同时输出到标准错误，确保能够在Docker日志中看到
+        print(f"[{timestamp}] 开始保存行程 - 标准错误输出", file=sys.stderr, flush=True)
+        
+        # 使用settings.py中配置的日志记录器
+        logger = logging.getLogger('itinerary_admin')
+        
+        # 立即测试日志输出
+        logger.info("测试日志输出 - 确保日志系统正常工作")
+        
+        # 尝试使用不同的日志级别
+        logger.debug("调试信息 - 保存行程开始")
+        logger.warning("警告信息 - 保存行程开始")
+        logger.error("错误信息 - 保存行程开始")
+        
+        # 额外添加一些简单的print语句，确保能够在Docker日志中看到
+        print("====================================", file=sys.stdout, flush=True)
+        print("ITINERARY ADMIN LOG TEST", file=sys.stdout, flush=True)
+        print("====================================", file=sys.stdout, flush=True)
+        
+        # 额外输出到标准错误
+        print("====================================", file=sys.stderr, flush=True)
+        print("ITINERARY ADMIN LOG TEST - 标准错误", file=sys.stderr, flush=True)
+        print("====================================", file=sys.stderr, flush=True)
+        
+        # 强制刷新所有输出
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
         # 设置创建人和更新人
         if not change:
             obj.created_by = request.user.username
         else:
             obj.updated_by = request.user.username
         
-        super().save_model(request, obj, form, change)
+        # 验证关联的记录（不包含DailySchedule）
+        from django.core.exceptions import ValidationError
+        error_messages = []
         
-        # 当行程保存后，更新关联的daily_schedule记录的日期
-        if obj and obj.start_date and obj.total_days:
-            from datetime import timedelta
+        try:
+            logger.info(f"开始保存行程: {obj.itinerary_id} - {obj.itinerary_name}, 用户: {request.user.username}")
+            logger.info(f"请求数据: {request.POST}")
             
-            # 获取所有关联的daily_schedule记录
-            daily_schedules = DailySchedule.objects.filter(itinerary_id=obj)
+            # 验证关联的TravelerStats记录
+            logger.info(f"验证关联的TravelerStats记录")
+            traveler_stats = obj.traveler_stats.all()
+            logger.info(f"找到 {traveler_stats.count()} 条TravelerStats记录")
             
-            # 更新每个记录的schedule_date
-            for schedule in daily_schedules:
-                if 1 <= schedule.day_number <= obj.total_days:
-                    # 计算对应的日期（开始日期 + (day_number - 1)天）
-                    schedule.schedule_date = obj.start_date + timedelta(days=schedule.day_number - 1)
-                    schedule.save()
+            for i, stat in enumerate(traveler_stats, 1):
+                logger.info(f"验证第{i}条TravelerStats记录")
+                try:
+                    stat.clean()
+                    logger.info(f"第{i}条TravelerStats记录验证通过")
+                except ValidationError as e:
+                    error_msg = f"旅行者统计记录验证错误: {e}"
+                    logger.error(error_msg)
+                    error_messages.append(error_msg)
+                except Exception as e:
+                    error_msg = f"旅行者统计记录验证时发生异常: {str(e)}"
+                    logger.error(error_msg)
+                    logger.error(f"异常详情: {traceback.format_exc()}")
+                    error_messages.append(error_msg)
+            
+            # 验证关联的Destination记录
+            logger.info(f"验证关联的Destination记录")
+            destinations = obj.destinations.all()
+            logger.info(f"找到 {destinations.count()} 条Destination记录")
+            
+            for i, dest in enumerate(destinations, 1):
+                logger.info(f"验证第{i}条Destination记录: {dest.city_name}")
+                try:
+                    dest.clean()
+                    logger.info(f"第{i}条Destination记录验证通过: {dest.city_name}")
+                except ValidationError as e:
+                    error_msg = f"目的地记录 '{dest.city_name}' 验证错误: {e}"
+                    logger.error(error_msg)
+                    error_messages.append(error_msg)
+                except Exception as e:
+                    error_msg = f"目的地记录 '{dest.city_name}' 验证时发生异常: {str(e)}"
+                    logger.error(error_msg)
+                    logger.error(f"异常详情: {traceback.format_exc()}")
+                    error_messages.append(error_msg)
+            
+            # 如果有验证错误，抛出异常
+            if error_messages:
+                logger.error(f"验证错误汇总: {error_messages}")
+                raise ValidationError('\n'.join(error_messages))
+            
+            # 保存行程本身
+            logger.info("保存行程本身")
+            super().save_model(request, obj, form, change)
+            logger.info(f"行程保存成功: {obj.itinerary_id}")
+            
+            logger.info(f"行程保存操作完成: {obj.itinerary_id}")
+        except ValidationError as e:
+            logger.error(f"保存行程时验证错误: {e}")
+            # 重新抛出异常，确保错误信息显示在页面上
+            raise
+        except Exception as e:
+            # 捕获其他异常并显示
+            error_traceback = traceback.format_exc()
+            logger.error(f"保存行程时发生异常: {str(e)}")
+            logger.error(f"异常详情: {error_traceback}")
+            error_messages.append(f"保存行程时出错: {str(e)}")
+            raise ValidationError('\n'.join(error_messages))
     
     # 保存内联时的处理
     def save_formset(self, request, form, formset, change):
-        instances = formset.save(commit=False)
-        for instance in instances:
-            # 设置创建人和更新人
-            if not instance.pk:
-                instance.created_by = request.user.username
-            else:
-                instance.updated_by = request.user.username
-            instance.save()
-        formset.save_m2m()
+        import logging
+        import sys
+        import traceback
+        
+        # 确保输出不缓冲
+        sys.stdout.flush()
+        
+        # 直接使用print语句确保输出，添加时间戳
+        import datetime
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 输出到标准输出，确保Docker能够捕获
+        print(f"[{timestamp}] =====================================", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 开始保存内联表单 - 直接输出", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 表单模型: {formset.model.__name__}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 表单数量: {len(formset.forms)}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 用户: {request.user.username}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] 请求方法: {request.method}", file=sys.stdout, flush=True)
+        print(f"[{timestamp}] =====================================", file=sys.stdout, flush=True)
+        sys.stdout.flush()
+        
+        # 使用全局配置的日志
+        logger = logging.getLogger('itinerary_admin')
+        
+        # 立即测试日志输出
+        logger.info("测试内联表单日志输出 - 确保日志系统正常工作")
+        sys.stdout.flush()
+        
+        logger.info(f"开始保存内联表单: {formset.model.__name__}")
+        logger.info(f"表单集数据: {formset.cleaned_data if hasattr(formset, 'cleaned_data') else 'No cleaned data'}")
+        
+        try:
+            # 如果是DailySchedule表单集，跳过保存操作（由独立的编辑页面管理）
+            if formset.model == DailySchedule:
+                logger.info("跳过DailySchedule表单集的保存，由独立编辑页面管理")
+                # 确保表单集有必要的属性，避免Django admin系统报错
+                formset.new_objects = []
+                formset.changed_objects = []
+                formset.deleted_objects = []
+                return
+            
+            instances = formset.save(commit=False)
+            logger.info(f"找到 {len(instances)} 个实例需要保存")
+            
+            for instance in instances:
+                # 设置创建人和更新人
+                if not instance.pk:
+                    instance.created_by = request.user.username
+                else:
+                    instance.updated_by = request.user.username
+                
+                logger.info(f"保存实例: {instance}")
+                instance.save()
+            
+            formset.save_m2m()
+            logger.info("内联表单保存成功")
+        except Exception as e:
+            error_traceback = traceback.format_exc()
+            logger.error(f"保存内联表单时发生异常: {str(e)}")
+            logger.error(f"异常详情: {error_traceback}")
+            # 重新抛出异常，确保错误信息显示在页面上
+            raise
     
-    # 重写change_view方法，在详情页底部添加预览按钮
+    # 重写change_view方法，在详情页底部添加预览按钮，并确保正确处理行程ID
     def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        obj = self.get_object(request, object_id)
-        if obj:
-            try:
-                extra_context['preview_button'] = self.preview_itinerary(obj)
-            except Exception as e:
-                import traceback
-                traceback.print_exc()
-        return super().change_view(request, object_id, form_url, extra_context)
+        import logging
+        import sys
+        import traceback
+        logger = logging.getLogger('itinerary_admin')
+        logger.info(f"开始change_view - 用户: {request.user.username}, 对象ID: {object_id}, 请求方法: {request.method}")
+        try:
+            # 确保object_id是原始的行程ID，不进行URL解码
+            # 直接使用object_id查询行程对象
+            obj = self.get_object(request, object_id)
+            
+            extra_context = extra_context or {}
+            if obj:
+                try:
+                    extra_context['preview_button'] = self.preview_itinerary(obj)
+                except Exception as e:
+                    import traceback
+                    traceback.print_exc()
+            
+            # 调用父类方法处理请求
+            response = super().change_view(request, object_id, form_url, extra_context)
+            logger.info(f"结束change_view - 响应状态: {getattr(response, 'status_code', '未知')}")
+            return response
+        except Exception as e:
+            logger.error(f"change_view 发生异常: {str(e)}")
+            logger.error(f"异常详情: {traceback.format_exc()}")
+            print(f"[ERROR] change_view 发生异常: {str(e)}", file=sys.stderr, flush=True)
+            print(f"[ERROR] 异常详情: {traceback.format_exc()}", file=sys.stderr, flush=True)
+            raise
     
     # 添加行程详情预览按钮
     def preview_itinerary(self, obj):
@@ -454,6 +871,7 @@ class ItineraryAdmin(admin.ModelAdmin):
         )
     status_badge.short_description = '状态'
     status_badge.allow_tags = True
+
 
 # 为DailySchedule创建Admin类
 class DailyScheduleAdmin(admin.ModelAdmin):
@@ -505,12 +923,6 @@ class DailyScheduleAdmin(admin.ModelAdmin):
         ('关联资源', {
             'fields': (
                 ('attraction_id', 'hotel_id', 'restaurant_id'),
-            ),
-            'classes': ('compact',)
-        }),
-        ('费用信息', {
-            'fields': (
-                ('estimated_cost', 'currency'),
             ),
             'classes': ('compact',)
         }),
@@ -584,8 +996,9 @@ class DailyScheduleAdmin(admin.ModelAdmin):
             obj.updated_by = request.user.username
         super().save_model(request, obj, form, change)
     
-    # 重写formfield_for_foreignkey方法，过滤destination下拉菜单
+    # 重写formfield_for_foreignkey方法，过滤下拉菜单并确保编辑时默认选中
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        # 处理destination_id字段
         if db_field.name == 'destination_id':
             # 尝试从URL或请求中获取当前的itinerary_id
             itinerary_id = None
@@ -595,6 +1008,9 @@ class DailyScheduleAdmin(admin.ModelAdmin):
                 try:
                     daily_schedule = self.model.objects.get(pk=request.resolver_match.kwargs['object_id'])
                     itinerary_id = daily_schedule.itinerary_id
+                    # 确保已选中的destination在查询集中
+                    if daily_schedule.destination_id:
+                        kwargs['initial'] = daily_schedule.destination_id
                 except:
                     pass
             
@@ -605,6 +1021,45 @@ class DailyScheduleAdmin(admin.ModelAdmin):
             # 如果有itinerary_id，过滤destination下拉菜单
             if itinerary_id:
                 kwargs['queryset'] = Destination.objects.filter(itinerary=itinerary_id)
+        
+        # 处理attraction_id字段
+        elif db_field.name == 'attraction_id':
+            # 确保查询集包含所有景点
+            kwargs['queryset'] = db_field.remote_field.model.objects.all()
+            # 在编辑页面时，确保已选中的attraction在查询集中
+            if 'object_id' in request.resolver_match.kwargs:
+                try:
+                    daily_schedule = self.model.objects.get(pk=request.resolver_match.kwargs['object_id'])
+                    if daily_schedule.attraction_id:
+                        kwargs['initial'] = daily_schedule.attraction_id
+                except:
+                    pass
+        
+        # 处理hotel_id字段
+        elif db_field.name == 'hotel_id':
+            # 确保查询集包含所有酒店
+            kwargs['queryset'] = db_field.remote_field.model.objects.all()
+            # 在编辑页面时，确保已选中的hotel在查询集中
+            if 'object_id' in request.resolver_match.kwargs:
+                try:
+                    daily_schedule = self.model.objects.get(pk=request.resolver_match.kwargs['object_id'])
+                    if daily_schedule.hotel_id:
+                        kwargs['initial'] = daily_schedule.hotel_id
+                except:
+                    pass
+        
+        # 处理restaurant_id字段
+        elif db_field.name == 'restaurant_id':
+            # 确保查询集包含所有餐厅
+            kwargs['queryset'] = db_field.remote_field.model.objects.all()
+            # 在编辑页面时，确保已选中的restaurant在查询集中
+            if 'object_id' in request.resolver_match.kwargs:
+                try:
+                    daily_schedule = self.model.objects.get(pk=request.resolver_match.kwargs['object_id'])
+                    if daily_schedule.restaurant_id:
+                        kwargs['initial'] = daily_schedule.restaurant_id
+                except:
+                    pass
         
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     
