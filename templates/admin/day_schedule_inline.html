@@ -161,12 +161,13 @@
             <!-- 添加新增按钮 -->
             {% url 'admin:apps_dailyschedule_add' as add_url %}
             {% if inline_admin_formset.formset.instance %}
+              新增行程活动
               <a href="{{ add_url }}?itinerary_id={{ inline_admin_formset.formset.instance.itinerary_id }}&day_number={{ inline_admin_formset.formset.day_number }}" 
                  class="admin-icon-button" 
                  title="新增" 
                  aria-label="新增行程活动"
                  style="float: right; margin-left: 10px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">
-                +
+                ➕
               </a>
             {% endif %}
           </th>

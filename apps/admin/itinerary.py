@@ -9,18 +9,14 @@ from ..models import (
     Itinerary,
     TravelerStats,
     Destination,
-    DailySchedule
+    DailySchedule,
+    RequirementItinerary
 )
 
 # 模块级别的日志输出，确保在Django加载时执行
 print("====================================", file=sys.stdout, flush=True)
-print("itinerary.py 模块加载 - 直接print输出", file=sys.stdout, flush=True)
+print("itinerary.py 模块加载 ", file=sys.stdout, flush=True)
 print("====================================", file=sys.stdout, flush=True)
-sys.stdout.flush()
-
-# 测试日志记录器
-logger = logging.getLogger('itinerary_admin')
-logger.info("itinerary.py 模块加载 - 日志记录器输出")
 sys.stdout.flush()
 
 # 定义TravelerStats的内联编辑类
@@ -38,92 +34,11 @@ class DestinationInline(admin.TabularInline):
     verbose_name = '目的地'
     verbose_name_plural = '目的地'
     classes = ('compact',)
+    fields = ('destination_order', 'city_name', 'arrival_date', 'departure_date', 'nights')
+    readonly_fields = ('nights',)
+    ordering = ('destination_order',)
 
 # 定义DailySchedule的内联编辑类
-class DailyScheduleInline(admin.TabularInline):
-    model = DailySchedule
-    extra = 0
-    verbose_name = '每日行程活动'
-    verbose_name_plural = '每日行程活动'
-    classes = ('compact',)
-    
-    # 添加编辑和删除按钮
-    def edit_daily_schedule(self, obj):
-        if obj:
-            edit_url = reverse('admin:apps_dailyschedule_change', args=[obj.schedule_id])
-            return format_html(
-                '<a href="{0}" class="admin-icon-button" title="编辑" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✏️</a>',
-                edit_url
-            )
-        return ''
-    
-    def delete_daily_schedule(self, obj):
-        if obj:
-            delete_url = reverse('admin:apps_dailyschedule_delete', args=[obj.schedule_id])
-            return format_html(
-                '<a href="{0}" class="admin-icon-button" title="删除" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✕</a>',
-                delete_url
-            )
-        return ''
-    
-    edit_daily_schedule.short_description = '操作'
-    edit_daily_schedule.allow_tags = True
-    
-    delete_daily_schedule.short_description = '删除'
-    delete_daily_schedule.allow_tags = True
-    
-    # 将自定义方法添加到只读字段
-    readonly_fields = (
-        'edit_daily_schedule',
-        'delete_daily_schedule',
-        'day_number',
-        'schedule_date',
-        'start_time',
-        'end_time',
-        'destination_id',
-        'activity_type',
-        'activity_title',
-        'activity_description',
-        'attraction_id',
-        'hotel_id',
-        'restaurant_id',
-        'estimated_cost',
-        'currency',
-        'booking_status',
-        'booking_reference',
-        'notes',
-        'created_by',
-        'updated_by',
-        'created_at',
-        'updated_at'
-    )
-    
-    # 定义显示的字段
-    fields = (
-        'edit_daily_schedule',
-        'delete_daily_schedule',
-        'day_number',
-        'schedule_date',
-        'start_time',
-        'end_time',
-        'destination_id',
-        'activity_type',
-        'activity_title',
-        'activity_description',
-        'attraction_id',
-        'hotel_id',
-        'restaurant_id',
-        #'estimated_cost',
-        #'currency',
-        #'booking_status',
-        #'booking_reference',
-        #'notes'
-    )
-    
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        return super().formfield_for_foreignkey(db_field, request, **kwargs)
-
-# 动态生成每天的行程内联类
 class DayScheduleInline(admin.TabularInline):
     model = DailySchedule
     extra = 0
@@ -153,7 +68,7 @@ class DayScheduleInline(admin.TabularInline):
         if obj:
             delete_url = reverse('admin:apps_dailyschedule_delete', args=[obj.schedule_id])
             return format_html(
-                '<a href="{0}" class="admin-icon-button" title="删除" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">✕</a>',
+                '<a href="{0}" class="admin-icon-button" title="删除" style="margin-right: 4px; display: inline-block; width: 20px; height: 20px; text-align: center; line-height: 20px; border: 1px solid #ccc; border-radius: 3px; background-color: #f8f9fa; color: #333; text-decoration: none;">❌</a>',
                 delete_url
             )
         return ''
@@ -193,18 +108,18 @@ class DayScheduleInline(admin.TabularInline):
     # 定义显示的字段
     fields = (
         'edit_daily_schedule',
-        'delete_daily_schedule',
         'day_number',
         'schedule_date',
         'destination_id',
+        'start_time',
+        'end_time',
         'activity_type',
         'activity_title',
         'activity_description',
-        'start_time',
-        'end_time',
         'attraction_id',
         'hotel_id',
         'restaurant_id',
+        'delete_daily_schedule',
         #'estimated_cost',
         #'currency',
         #'booking_status',
@@ -238,6 +153,75 @@ class DayScheduleInline(admin.TabularInline):
     
     # 重写模板以添加新增按钮
     template = 'admin/day_schedule_inline.html'
+
+# 定义RequirementItinerary的内联编辑类
+class RequirementItineraryInline(admin.TabularInline):
+    model = RequirementItinerary
+    extra = 0
+    verbose_name = '关联需求'
+    verbose_name_plural = '关联需求'
+    classes = ('compact',)
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+    def display_requirement_id(self, obj):
+        """显示需求ID并生成可点击的链接"""
+        if obj.requirement:
+            change_url = reverse('smart_trip_admin:apps_requirement_change', args=[obj.requirement.requirement_id])
+            return format_html(
+                '<a href="{0}" style="color: #4178be; text-decoration: none; font-weight: 500;">{1}</a>',
+                change_url,
+                obj.requirement.requirement_id
+            )
+        return '-'
+    
+    display_requirement_id.short_description = '需求ID'
+    display_requirement_id.allow_tags = True
+    
+    def display_requirement_name(self, obj):
+        """显示需求名称"""
+        if obj.requirement:
+            return obj.requirement.origin_name or '-'
+        return '-'
+    
+    display_requirement_name.short_description = '需求名称'
+    
+    def display_origin_city(self, obj):
+        """显示出发地"""
+        if obj.requirement:
+            return obj.requirement.origin_name or '-'
+        return '-'
+    
+    display_origin_city.short_description = '出发地'
+    
+    def display_created_at(self, obj):
+        """显示创建时间"""
+        if obj.requirement:
+            return obj.requirement.created_at.strftime('%Y-%m-%d %H:%M') if obj.requirement.created_at else '-'
+        return '-'
+    
+    display_created_at.short_description = '创建时间'
+    
+    readonly_fields = (
+        'display_requirement_id',
+        'display_requirement_name',
+        'display_origin_city',
+        'display_created_at',
+        'created_at',
+        'updated_at'
+    )
+    
+    fields = (
+        'display_requirement_id',
+        'display_created_at'
+    )
 
 # 自定义Itinerary的Admin类
 class ItineraryAdmin(admin.ModelAdmin):
@@ -532,6 +516,7 @@ class ItineraryAdmin(admin.ModelAdmin):
             'fields': (
                 ('created_by', 'updated_by'),
                 ('version',),
+                ('itinerary_json_data')
                 #('is_deleted', 'deleted_at')
             ),
             'classes': ('collapse', 'compact')
@@ -540,6 +525,7 @@ class ItineraryAdmin(admin.ModelAdmin):
     
     # 基本内联编辑
     inlines = [
+        RequirementItineraryInline,
         TravelerStatsInline,
         DestinationInline
     ]
@@ -555,7 +541,8 @@ class ItineraryAdmin(admin.ModelAdmin):
         'updated_by',
         'created_at',
         'updated_at',
-        'version'
+        'version',
+        'itinerary_json_data'
     )
     
     # 表单字段尺寸调整
@@ -778,7 +765,6 @@ class ItineraryAdmin(admin.ModelAdmin):
             logger.info(f"找到 {len(instances)} 个实例需要保存")
             
             for instance in instances:
-                # 设置创建人和更新人
                 if not instance.pk:
                     instance.created_by = request.user.username
                 else:
@@ -786,6 +772,10 @@ class ItineraryAdmin(admin.ModelAdmin):
                 
                 logger.info(f"保存实例: {instance}")
                 instance.save()
+            
+            for obj in formset.deleted_objects:
+                logger.info(f"删除实例: {obj}")
+                obj.delete()
             
             formset.save_m2m()
             logger.info("内联表单保存成功")
@@ -972,7 +962,7 @@ class DailyScheduleAdmin(admin.ModelAdmin):
         
         return super().add_view(request, form_url, extra_context)
     
-    # 重写get_form方法，设置默认值
+    # 重写get_form方法，设置默认值和移除管理图标
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
         
@@ -985,6 +975,16 @@ class DailyScheduleAdmin(admin.ModelAdmin):
                 form.base_fields['itinerary_id'].initial = itinerary_id
             if day_number:
                 form.base_fields['day_number'].initial = day_number
+        
+        # 移除关联字段的管理图标
+        for field_name in ['attraction_id', 'hotel_id', 'restaurant_id']:
+            if field_name in form.base_fields:
+                field = form.base_fields[field_name]
+                if hasattr(field, 'widget'):
+                    field.widget.can_add_related = False
+                    field.widget.can_change_related = False
+                    field.widget.can_delete_related = False
+                    field.widget.can_view_related = False
         
         return form
     
@@ -1034,6 +1034,14 @@ class DailyScheduleAdmin(admin.ModelAdmin):
                         kwargs['initial'] = daily_schedule.attraction_id
                 except:
                     pass
+            # 设置formfield，移除管理图标
+            formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+            # 移除添加、编辑、删除和查看按钮
+            formfield.widget.can_add_related = False
+            formfield.widget.can_change_related = False
+            formfield.widget.can_delete_related = False
+            formfield.widget.can_view_related = False
+            return formfield
         
         # 处理hotel_id字段
         elif db_field.name == 'hotel_id':
@@ -1047,6 +1055,15 @@ class DailyScheduleAdmin(admin.ModelAdmin):
                         kwargs['initial'] = daily_schedule.hotel_id
                 except:
                     pass
+            # 设置formfield，显示酒店名称并移除管理图标
+            formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+            formfield.label_from_instance = lambda obj: f"{obj.hotel_name}" if hasattr(obj, 'hotel_name') else str(obj)
+            # 移除添加、编辑、删除和查看按钮
+            formfield.widget.can_add_related = False
+            formfield.widget.can_change_related = False
+            formfield.widget.can_delete_related = False
+            formfield.widget.can_view_related = False
+            return formfield
         
         # 处理restaurant_id字段
         elif db_field.name == 'restaurant_id':
@@ -1060,6 +1077,15 @@ class DailyScheduleAdmin(admin.ModelAdmin):
                         kwargs['initial'] = daily_schedule.restaurant_id
                 except:
                     pass
+            # 设置formfield，显示餐厅名称并移除管理图标
+            formfield = super().formfield_for_foreignkey(db_field, request, **kwargs)
+            formfield.label_from_instance = lambda obj: f"{obj.restaurant_name}" if hasattr(obj, 'restaurant_name') else str(obj)
+            # 移除添加、编辑、删除和查看按钮
+            formfield.widget.can_add_related = False
+            formfield.widget.can_change_related = False
+            formfield.widget.can_delete_related = False
+            formfield.widget.can_view_related = False
+            return formfield
         
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
     

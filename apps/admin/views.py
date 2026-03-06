@@ -67,10 +67,18 @@ def get_filtered_resources(request):
         destination = Destination.objects.get(destination_id=destination_id)
         city_name = destination.city_name
         
-        # 根据city_name过滤资源
-        attractions = Attraction.objects.filter(city_name=city_name).values('attraction_id', 'attraction_name')
-        restaurants = Restaurant.objects.filter(city_name=city_name).values('restaurant_id', 'restaurant_name')
-        hotels = Hotel.objects.filter(city_name=city_name).values('hotel_id', 'hotel_name')
+        # 检查city_name是否为空
+        if not city_name:
+            return JsonResponse({
+                'attractions': [],
+                'restaurants': [],
+                'hotels': []
+            })
+        
+        # 根据city_name过滤资源，并按名称排序
+        attractions = Attraction.objects.filter(city_name=city_name).order_by('attraction_name').values('attraction_id', 'attraction_name')
+        restaurants = Restaurant.objects.filter(city_name=city_name).order_by('restaurant_name').values('restaurant_id', 'restaurant_name')
+        hotels = Hotel.objects.filter(city_name=city_name).order_by('hotel_name').values('hotel_id', 'hotel_name')
         
         # 转换为列表格式
         attraction_list = list(attractions)
@@ -85,6 +93,16 @@ def get_filtered_resources(request):
         })
     except Destination.DoesNotExist:
         # 如果destination不存在，返回空结果
+        return JsonResponse({
+            'attractions': [],
+            'restaurants': [],
+            'hotels': []
+        })
+    except Exception as e:
+        # 捕获其他异常，返回空结果并记录错误
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error in get_filtered_resources: {str(e)}")
         return JsonResponse({
             'attractions': [],
             'restaurants': [],
