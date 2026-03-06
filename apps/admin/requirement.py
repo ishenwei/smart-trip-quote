@@ -20,8 +20,11 @@ from apps.admin_ext.actions import (
 
 
 class RequirementAdmin(admin.ModelAdmin):
+    # 指定主键URL参数名称，解决需求ID在URL中被编码的问题
+    pk_url_kwarg = 'requirement_id'
+    
     list_display = [
-        'requirement_id',
+        'display_requirement_id',
         'origin_name',
         'destination_display',
         'group_total',
@@ -34,6 +37,9 @@ class RequirementAdmin(admin.ModelAdmin):
         'created_by',
         'created_at'
     ]
+    
+    # 取消默认的链接生成，使用自定义方法
+    list_display_links = None
     
     list_filter = [
         TransportationTypeFilter,
@@ -355,6 +361,42 @@ class RequirementAdmin(admin.ModelAdmin):
     def has_view_permission(self, request, obj=None):
         return request.user.has_perm('apps.view_requirement')
     
+    # 重写get_object方法，确保正确处理需求ID
+    def get_object(self, request, object_id, from_field=None):
+        """获取需求对象，确保需求ID不被URL编码"""
+        # 直接使用需求ID查询，不进行任何编码处理
+        queryset = self.get_queryset(request)
+        field = from_field or self.model._meta.pk.name
+        try:
+            # 确保object_id是字符串，并且不进行URL解码
+            if field == 'requirement_id':
+                return queryset.get(requirement_id=object_id)
+            return super().get_object(request, object_id, from_field)
+        except (self.model.DoesNotExist, ValueError, TypeError):
+            return None
+    
+    # 重写get_change_url方法，确保生成正确的编辑链接
+    def get_change_url(self, obj=None, object_id=None):
+        """生成需求的编辑链接，确保需求ID不被URL编码"""
+        from django.urls import reverse
+        if obj:
+            return reverse('smart_trip_admin:apps_requirement_change', args=[obj.requirement_id])
+        elif object_id:
+            return reverse('smart_trip_admin:apps_requirement_change', args=[object_id])
+        return super().get_change_url(obj, object_id)
+    
+    # 自定义方法，用于显示需求ID并生成正确的编辑链接
+    def display_requirement_id(self, obj):
+        """显示需求ID并生成正确的编辑链接"""
+        from django.urls import reverse
+        from django.utils.html import format_html
+        # 直接使用需求ID生成链接，不进行URL编码
+        change_url = reverse('smart_trip_admin:apps_requirement_change', args=[obj.requirement_id])
+        return format_html('<a href="{0}">{1}</a>', change_url, obj.requirement_id)
+    
+    display_requirement_id.short_description = '需求ID'
+    display_requirement_id.allow_tags = True
+    
     def save_model(self, request, obj, form, change):
         # 计算出行结束日期
         if obj.travel_start_date and obj.trip_days:
@@ -552,7 +594,12 @@ class RequirementAdmin(admin.ModelAdmin):
                         "Content-Type": "application/json"  
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         messageDiv.style.backgroundColor = "#d4edda";
@@ -571,7 +618,7 @@ class RequirementAdmin(admin.ModelAdmin):
                     messageDiv.style.backgroundColor = "#f8d7da";
                     messageDiv.style.color = "#721c24";
                     messageDiv.style.border = "1px solid #f5c6cb";
-                    messageDiv.innerHTML = "网络错误: 请稍后重试";
+                    messageDiv.innerHTML = "网络错误: " + (error.message || "请稍后重试");
                     messageDiv.style.display = "block";
                 })
                 .finally(() => {
@@ -670,7 +717,12 @@ class RequirementAdmin(admin.ModelAdmin):
                         "Content-Type": "application/json"  
                     }
                 })
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     if (data.success) {
                         messageDiv.style.backgroundColor = "#d4edda";
@@ -689,7 +741,7 @@ class RequirementAdmin(admin.ModelAdmin):
                     messageDiv.style.backgroundColor = "#f8d7da";
                     messageDiv.style.color = "#721c24";
                     messageDiv.style.border = "1px solid #f5c6cb";
-                    messageDiv.innerHTML = "网络错误: 请稍后重试";
+                    messageDiv.innerHTML = "网络错误: " + (error.message || "请稍后重试");
                     messageDiv.style.display = "block";
                 })
                 .finally(() => {

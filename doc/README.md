@@ -321,17 +321,17 @@ npm install
 cd ../..
 
 # 运行数据库迁移
-python manage.py migrate
+docker compose exec web python manage.py migrate
 
 # 创建超级用户（用于管理后台）
-python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 #### 6. 启动开发服务器
 
 ##### 启动后端服务器
 ```bash
-python manage.py runserver
+docker compose exec web python manage.py runserver 0.0.0.0:7000
 ```
 
 ##### 启动前端开发服务器

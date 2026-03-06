@@ -19,7 +19,7 @@ from apps.models.traveler_stats import TravelerStats
 from apps.models.daily_schedule import DailySchedule
 
 # 测试webhook URL
-webhook_url = "https://n8n.ishenwei.online/webhook-test/smart-trip-requirement"
+webhook_url = "http://127.0.0.1:62000/webhook-test/smart-trip-requirement"
 
 # 简单的JSON数据
 json_data = {
