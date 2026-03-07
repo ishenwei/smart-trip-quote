@@ -437,6 +437,23 @@ class ItineraryAdmin(admin.ModelAdmin):
     display_itinerary_id.short_description = '行程ID'
     display_itinerary_id.allow_tags = True
 
+    # 自定义方法，用于显示目的地城市名称
+    def display_destinations(self, obj):
+        """显示行程关联的目的地城市名称，多个城市用逗号分隔"""
+        from django.utils.html import format_html
+        try:
+            destinations = obj.destinations.all().order_by('destination_order')
+            if not destinations:
+                return '-'
+            city_names = [dest.city_name for dest in destinations if dest.city_name]
+            if not city_names:
+                return '-'
+            return '，'.join(city_names)
+        except Exception:
+            return '-'
+
+    display_destinations.short_description = '目的地'
+
     # 列表显示字段
     list_display = (
         'display_itinerary_id',
@@ -445,7 +462,7 @@ class ItineraryAdmin(admin.ModelAdmin):
         'contact_phone',
         'start_date',
         'departure_city',
-        'return_city',
+        'display_destinations',
         'total_days',
         'status_badge',
         'created_at'

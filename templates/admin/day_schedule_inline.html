@@ -241,12 +241,61 @@
 <script type="text/javascript">
 (function($) {
   $(document).ready(function($) {
+    // 保存当前滚动位置到localStorage
+    function saveScrollPosition() {
+      localStorage.setItem('itinerary_scroll_position', window.scrollY);
+    }
+
+    // 恢复滚动位置
+    function restoreScrollPosition() {
+      var savedPosition = localStorage.getItem('itinerary_scroll_position');
+      if (savedPosition !== null) {
+        window.scrollTo(0, parseInt(savedPosition));
+        localStorage.removeItem('itinerary_scroll_position');
+      }
+    }
+
+    // 刷新页面
+    function refreshPage() {
+      saveScrollPosition();
+      window.location.reload();
+    }
+
+    // 检查是否需要刷新（从localStorage）
+    function checkAndRefresh() {
+      var needRefresh = localStorage.getItem('daily_schedule_need_refresh');
+      if (needRefresh === 'true') {
+        localStorage.removeItem('daily_schedule_need_refresh');
+        refreshPage();
+      }
+    }
+
+    // 页面加载时恢复滚动位置
+    restoreScrollPosition();
+
+    // 监听来自子窗口的消息
+    $(window).on('message', function(event) {
+      if (event.data && event.data.type === 'daily_schedule_saved') {
+        refreshPage();
+      }
+    });
+
+    // 监听localStorage变化（跨标签页通信）
+    $(window).on('storage', function(event) {
+      if (event.key === 'daily_schedule_need_refresh' && event.newValue === 'true') {
+        refreshPage();
+      }
+    });
+
     // 为所有图标按钮添加点击事件处理
     $('.admin-icon-button').click(function(e) {
       e.preventDefault();
       var url = $(this).attr('href');
       var title = $(this).attr('title');
-      
+
+      // 保存当前滚动位置
+      saveScrollPosition();
+
       // 根据标题判断按钮类型，执行不同的操作
       if (title === '删除') {
         if (confirm('确定要删除这条行程记录吗？')) {
@@ -258,6 +307,23 @@
         window.open(url, 'edit_daily_schedule', 'width=800,height=600,top=100,left=100,scrollbars=yes');
       }
     });
+
+    // 监听页面可见性变化（当用户从子窗口返回时）
+    $(document).on('visibilitychange', function() {
+      if (!document.hidden) {
+        checkAndRefresh();
+      }
+    });
+
+    // 也监听窗口获得焦点事件
+    $(window).on('focus', function() {
+      checkAndRefresh();
+    });
+
+    // 定期检查是否需要刷新（作为备用机制）
+    setInterval(function() {
+      checkAndRefresh();
+    }, 1000);
   });
 })(django.jQuery);
 </script>

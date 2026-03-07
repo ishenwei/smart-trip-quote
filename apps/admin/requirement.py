@@ -22,6 +22,158 @@ from apps.admin_ext.actions import (
 class RequirementAdmin(admin.ModelAdmin):
     # 指定主键URL参数名称，解决需求ID在URL中被编码的问题
     pk_url_kwarg = 'requirement_id'
+
+    # ==================== 重构提取的公共方法 ====================
+
+    def _get_itinerary_plan_js(self):
+        """
+        生成旅游行程规划按钮的JavaScript代码
+        提取公共的fetch请求和消息处理逻辑
+        """
+        return '''
+        document.addEventListener("DOMContentLoaded", function() {
+            const btn = document.getElementById("itinerary-plan-btn");
+            const messageDiv = document.getElementById("itinerary-plan-message");
+            let isSubmitting = false;
+            btn.addEventListener("click", function() {
+                if (isSubmitting) return;
+                isSubmitting = true;
+                btn.disabled = true;
+                btn.style.opacity = "0.6";
+                btn.innerHTML = "处理中...";
+                messageDiv.style.display = "none";
+                const requirementId = btn.dataset.requirementId;
+                fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": getCookie("csrftoken"),
+                        "Content-Type": "application/json"
+                    }
+                })
+                .then(response => {
+                    return response.json().then(data => {
+                        if (!response.ok) {
+                            throw { status: response.status, data: data };
+                        }
+                        return data;
+                    });
+                })
+                .then(data => {
+                    if (data.success) {
+                        messageDiv.style.backgroundColor = "#d4edda";
+                        messageDiv.style.color = "#155724";
+                        messageDiv.style.border = "1px solid #c3e6cb";
+                        messageDiv.innerHTML = "旅游行程规划设计中，该操作可能需要一些时间，请稍后在旅游行程规划页面查看";
+                    } else {
+                        messageDiv.style.backgroundColor = "#f8d7da";
+                        messageDiv.style.color = "#721c24";
+                        messageDiv.style.border = "1px solid #f5c6cb";
+                        messageDiv.innerHTML = "错误: " + (data.error || "生成行程规划失败");
+                    }
+                    messageDiv.style.display = "block";
+                })
+                .catch(error => {
+                    messageDiv.style.backgroundColor = "#f8d7da";
+                    messageDiv.style.color = "#721c24";
+                    messageDiv.style.border = "1px solid #f5c6cb";
+                    if (error.data && error.data.error) {
+                        messageDiv.innerHTML = "错误: " + error.data.error;
+                    } else {
+                        messageDiv.innerHTML = "网络错误: " + (error.message || "请稍后重试");
+                    }
+                    messageDiv.style.display = "block";
+                })
+                .finally(() => {
+                    isSubmitting = false;
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.innerHTML = "旅游行程规划";
+                });
+            });
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== "") {
+                    const cookies = document.cookie.split("; ");
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+        '''
+
+    def _get_itinerary_plan_button_html(self, requirement_id):
+        """
+        生成旅游行程规划按钮的HTML结构
+        
+        Args:
+            requirement_id: 需求ID
+            
+        Returns:
+            包含按钮和消息容器的HTML字符串
+        """
+        return f'''
+        <button type="button" id="itinerary-plan-btn" data-requirement-id="{requirement_id}"
+        style="background-color: #007bff; color: white; padding: 8px 16px;
+        border: none; border-radius: 4px; font-size: 14px; cursor: pointer;
+        transition: background-color 0.2s ease;">
+        旅游行程规划
+        </button>
+        <div id="itinerary-plan-message" style="margin-top: 10px; padding: 10px;
+        border-radius: 4px; display: none;"></div>
+        '''
+
+    def _get_itinerary_plan_script(self, requirement_id):
+        """
+        生成完整的旅游行程规划按钮HTML和JavaScript
+        
+        Args:
+            requirement_id: 需求ID
+            
+        Returns:
+            完整的HTML+JavaScript字符串
+        """
+        html = self._get_itinerary_plan_button_html(requirement_id)
+        html += '<script type="text/javascript">'
+        html += '//<![CDATA['
+        html += self._get_itinerary_plan_js()
+        html += '//]]>'
+        html += '</script>'
+        return html
+
+    def _get_related_itineraries(self, requirement):
+        """
+        获取与需求关联的行程规划列表
+        
+        Args:
+            requirement: Requirement对象
+            
+        Returns:
+            行程规划字典列表
+        """
+        from apps.models.requirement_itinerary import RequirementItinerary
+
+        if not requirement:
+            return []
+
+        try:
+            requirement_itineraries = RequirementItinerary.objects.filter(requirement=requirement)
+            itineraries = []
+            for ri in requirement_itineraries:
+                itinerary = ri.itinerary
+                itineraries.append({
+                    'itinerary_id': itinerary.itinerary_id,
+                    'itinerary_name': itinerary.itinerary_name,
+                    'created_at': itinerary.created_at
+                })
+            return itineraries
+        except Exception:
+            return []
     
     list_display = [
         'display_requirement_id',
@@ -473,331 +625,38 @@ class RequirementAdmin(admin.ModelAdmin):
     
     def itinerary_plan_button(self, obj):
         """生成旅游行程规划按钮"""
-        # 先创建HTML按钮和消息容器
-        html = '<button type="button" id="itinerary-plan-btn" data-requirement-id="' + str(obj.pk) + '" '
-        html += 'style="background-color: #007bff; color: white; padding: 8px 16px; '
-        html += 'border: none; border-radius: 4px; font-size: 14px; cursor: pointer; '
-        html += 'transition: background-color 0.2s ease;">'
-        html += '旅游行程规划'
-        html += '</button>'
-        html += '<div id="itinerary-plan-message" style="margin-top: 10px; padding: 10px; '
-        html += 'border-radius: 4px; display: none;"></div>'
-        
-        # 创建JavaScript代码，使用CDATA包装以避免与Django模板冲突
-        html += '<script type="text/javascript">'
-        html += '//<![CDATA['
-        html += 'document.addEventListener("DOMContentLoaded", function() {'
-        html += '    const btn = document.getElementById("itinerary-plan-btn");'
-        html += '    const messageDiv = document.getElementById("itinerary-plan-message");'
-        html += '    let isSubmitting = false;'
-        html += '    btn.addEventListener("click", function() {'
-        html += '        if (isSubmitting) return;'
-        html += '        isSubmitting = true;'
-        html += '        btn.disabled = true;'
-        html += '        btn.style.opacity = "0.6";'
-        html += '        btn.innerHTML = "处理中...";'
-        html += '        messageDiv.style.display = "none";'
-        html += '        const requirementId = btn.dataset.requirementId;'
-        html += '        fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {';
-        html += '            method: "POST",'
-        html += '            headers: {'
-        html += '                "X-CSRFToken": getCookie("csrftoken"),'  
-        html += '                "Content-Type": "application/json"'  
-        html += '            }'
-        html += '        })'
-        html += '        .then(response => response.json())'
-        html += '        .then(data => {'
-        html += '            if (data.success) {'
-        html += '                messageDiv.style.backgroundColor = "#d4edda";'
-        html += '                messageDiv.style.color = "#155724";'
-        html += '                messageDiv.style.border = "1px solid #c3e6cb";'
-        html += '                messageDiv.innerHTML = "旅游行程规划设计中，该操作可能需要一些时间，请稍后在旅游行程规划页面查看";'
-        html += '            } else {'
-        html += '                messageDiv.style.backgroundColor = "#f8d7da";'
-        html += '                messageDiv.style.color = "#721c24";'
-        html += '                messageDiv.style.border = "1px solid #f5c6cb";'
-        html += '                messageDiv.innerHTML = "错误: " + (data.error || "生成行程规划失败");'
-        html += '            }'
-        html += '            messageDiv.style.display = "block";'
-        html += '        })'
-        html += '        .catch(error => {'
-        html += '            messageDiv.style.backgroundColor = "#f8d7da";'
-        html += '            messageDiv.style.color = "#721c24";'
-        html += '            messageDiv.style.border = "1px solid #f5c6cb";'
-        html += '            messageDiv.innerHTML = "网络错误: 请稍后重试";'
-        html += '            messageDiv.style.display = "block";'
-        html += '        })'
-        html += '        .finally(() => {'
-        html += '            isSubmitting = false;'
-        html += '            btn.disabled = false;'
-        html += '            btn.style.opacity = "1";'
-        html += '            btn.innerHTML = "旅游行程规划";'
-        html += '        });'
-        html += '    });'
-        html += '    function getCookie(name) {'
-        html += '        let cookieValue = null;'
-        html += '        if (document.cookie && document.cookie !== "") {'
-        html += '            const cookies = document.cookie.split(";" );'
-        html += '            for (let i = 0; i < cookies.length; i++) {'
-        html += '                const cookie = cookies[i].trim();'
-        html += '                if (cookie.substring(0, name.length + 1) === (name + "=")) {'
-        html += '                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));'
-        html += '                    break;'
-        html += '                }'
-        html += '            }'
-        html += '        }'
-        html += '        return cookieValue;'
-        html += '    }'
-        html += '});'
-        html += '//]]>'
-        html += '</script>'
-        
-        # 直接返回HTML字符串，不使用format_html
-        return html
+        return self._get_itinerary_plan_script(str(obj.pk))
     itinerary_plan_button.short_description = '操作'
     itinerary_plan_button.allow_tags = True
 
     # 添加按钮到详情页面顶部
     def change_view(self, request, object_id, form_url='', extra_context=None):
         extra_context = extra_context or {}
-        
-        # 直接生成一个简单的按钮HTML，不依赖于requirement对象
-        # 这样即使找不到requirement对象，按钮也能显示
-        simple_button_html = '''
-        <button type="button" id="itinerary-plan-btn" data-requirement-id="''' + object_id + '''" 
-        style="background-color: #007bff; color: white; padding: 8px 16px; 
-        border: none; border-radius: 4px; font-size: 14px; cursor: pointer; 
-        transition: background-color 0.2s ease;">
-        旅游行程规划
-        </button>
-        <div id="itinerary-plan-message" style="margin-top: 10px; padding: 10px; 
-        border-radius: 4px; display: none;"></div>
-        
-        <script type="text/javascript">
-        //<![CDATA[
-        document.addEventListener("DOMContentLoaded", function() {
-            const btn = document.getElementById("itinerary-plan-btn");
-            const messageDiv = document.getElementById("itinerary-plan-message");
-            let isSubmitting = false;
-            btn.addEventListener("click", function() {
-                if (isSubmitting) return;
-                isSubmitting = true;
-                btn.disabled = true;
-                btn.style.opacity = "0.6";
-                btn.innerHTML = "处理中...";
-                messageDiv.style.display = "none";
-                const requirementId = btn.dataset.requirementId;
-                fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCookie("csrftoken"),  
-                        "Content-Type": "application/json"  
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        messageDiv.style.backgroundColor = "#d4edda";
-                        messageDiv.style.color = "#155724";
-                        messageDiv.style.border = "1px solid #c3e6cb";
-                        messageDiv.innerHTML = "旅游行程规划设计中，该操作可能需要一些时间，请稍后在旅游行程规划页面查看";
-                    } else {
-                        messageDiv.style.backgroundColor = "#f8d7da";
-                        messageDiv.style.color = "#721c24";
-                        messageDiv.style.border = "1px solid #f5c6cb";
-                        messageDiv.innerHTML = "错误: " + (data.error || "生成行程规划失败");
-                    }
-                    messageDiv.style.display = "block";
-                })
-                .catch(error => {
-                    messageDiv.style.backgroundColor = "#f8d7da";
-                    messageDiv.style.color = "#721c24";
-                    messageDiv.style.border = "1px solid #f5c6cb";
-                    messageDiv.innerHTML = "网络错误: " + (error.message || "请稍后重试");
-                    messageDiv.style.display = "block";
-                })
-                .finally(() => {
-                    isSubmitting = false;
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.innerHTML = "旅游行程规划";
-                });
-            });
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== "") {
-                    const cookies = document.cookie.split("; ");
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            }
-        });
-        //]]>
-        </script>
-        '''
-        
-        # 直接将按钮HTML添加到extra_context
-        extra_context['itinerary_plan_button'] = simple_button_html
-        
+
+        # 使用公共方法生成按钮HTML和JavaScript
+        extra_context['itinerary_plan_button'] = self._get_itinerary_plan_script(object_id)
+
         # 获取与当前需求关联的行程规划
-        from apps.models.requirement_itinerary import RequirementItinerary
-        from apps.models import Itinerary
-        
         try:
-            # 获取当前需求对象
             requirement = Requirement.objects.get(requirement_id=object_id)
-            
-            # 获取与该需求关联的行程规划
-            requirement_itineraries = RequirementItinerary.objects.filter(requirement=requirement)
-            itineraries = []
-            
-            for ri in requirement_itineraries:
-                itinerary = ri.itinerary
-                itineraries.append({
-                    'itinerary_id': itinerary.itinerary_id,
-                    'itinerary_name': itinerary.itinerary_name,
-                    'created_at': itinerary.created_at
-                })
-            
-            # 将行程规划列表添加到extra_context
-            extra_context['itineraries'] = itineraries
+            extra_context['itineraries'] = self._get_related_itineraries(requirement)
         except Requirement.DoesNotExist:
             extra_context['itineraries'] = []
-        
+
         # 调用父类的change_view方法
         return super().change_view(request, object_id, form_url, extra_context)
     
     # 另一种添加按钮的方法，通过render_change_form
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
-        # 直接生成一个简单的按钮HTML
-        if obj:
-            object_id = obj.requirement_id
-        else:
-            object_id = ''
-        
-        simple_button_html = '''
-        <button type="button" id="itinerary-plan-btn" data-requirement-id="''' + object_id + '''" 
-        style="background-color: #007bff; color: white; padding: 8px 16px; 
-        border: none; border-radius: 4px; font-size: 14px; cursor: pointer; 
-        transition: background-color 0.2s ease;">
-        旅游行程规划
-        </button>
-        <div id="itinerary-plan-message" style="margin-top: 10px; padding: 10px; 
-        border-radius: 4px; display: none;"></div>
-        
-        <script type="text/javascript">
-        //<![CDATA[
-        document.addEventListener("DOMContentLoaded", function() {
-            const btn = document.getElementById("itinerary-plan-btn");
-            const messageDiv = document.getElementById("itinerary-plan-message");
-            let isSubmitting = false;
-            btn.addEventListener("click", function() {
-                if (isSubmitting) return;
-                isSubmitting = true;
-                btn.disabled = true;
-                btn.style.opacity = "0.6";
-                btn.innerHTML = "处理中...";
-                messageDiv.style.display = "none";
-                const requirementId = btn.dataset.requirementId;
-                fetch("/admin/requirement/" + requirementId + "/generate-itinerary/", {
-                    method: "POST",
-                    headers: {
-                        "X-CSRFToken": getCookie("csrftoken"),  
-                        "Content-Type": "application/json"  
-                    }
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        messageDiv.style.backgroundColor = "#d4edda";
-                        messageDiv.style.color = "#155724";
-                        messageDiv.style.border = "1px solid #c3e6cb";
-                        messageDiv.innerHTML = "旅游行程规划设计中，该操作可能需要一些时间，请稍后在旅游行程规划页面查看";
-                    } else {
-                        messageDiv.style.backgroundColor = "#f8d7da";
-                        messageDiv.style.color = "#721c24";
-                        messageDiv.style.border = "1px solid #f5c6cb";
-                        messageDiv.innerHTML = "错误: " + (data.error || "生成行程规划失败");
-                    }
-                    messageDiv.style.display = "block";
-                })
-                .catch(error => {
-                    messageDiv.style.backgroundColor = "#f8d7da";
-                    messageDiv.style.color = "#721c24";
-                    messageDiv.style.border = "1px solid #f5c6cb";
-                    messageDiv.innerHTML = "网络错误: " + (error.message || "请稍后重试");
-                    messageDiv.style.display = "block";
-                })
-                .finally(() => {
-                    isSubmitting = false;
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.innerHTML = "旅游行程规划";
-                });
-            });
-            function getCookie(name) {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== "") {
-                    const cookies = document.cookie.split("; ");
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + "=")) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            }
-        });
-        //]]>
-        </script>
-        '''
-        
-        # 将按钮HTML添加到context
-        context['itinerary_plan_button'] = simple_button_html
-        
+        # 获取需求ID
+        object_id = obj.requirement_id if obj else ''
+
+        # 使用公共方法生成按钮HTML和JavaScript
+        context['itinerary_plan_button'] = self._get_itinerary_plan_script(object_id)
+
         # 获取与当前需求关联的行程规划
-        if obj:
-            from apps.models.requirement_itinerary import RequirementItinerary
-            from apps.models import Itinerary
-            
-            try:
-                # 获取与该需求关联的行程规划
-                requirement_itineraries = RequirementItinerary.objects.filter(requirement=obj)
-                itineraries = []
-                
-                for ri in requirement_itineraries:
-                    itinerary = ri.itinerary
-                    itineraries.append({
-                        'itinerary_id': itinerary.itinerary_id,
-                        'itinerary_name': itinerary.itinerary_name,
-                        'created_at': itinerary.created_at
-                    })
-                
-                # 将行程规划列表添加到context
-                context['itineraries'] = itineraries
-            except Exception:
-                context['itineraries'] = []
-        else:
-            context['itineraries'] = []
-        
+        context['itineraries'] = self._get_related_itineraries(obj)
+
         # 调用父类的render_change_form方法
         return super().render_change_form(request, context, add, change, form_url, obj)
 

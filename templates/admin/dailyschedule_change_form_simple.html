@@ -123,39 +123,57 @@
             setTimeout(function() {
                 messages.fadeOut(1000);
             }, 3000);
+            // 有成功消息表示保存成功，需要刷新父窗口
+            // 使用localStorage持久化刷新标记
+            localStorage.setItem('daily_schedule_need_refresh', 'true');
+            // 立即通知父窗口刷新
+            notifyParentRefresh();
         }
-        
+
         // 监听表单提交
         $('form').submit(function() {
           // 显示加载状态
           $('#submit-row input[type="submit"]').attr('disabled', true).val('保存中...');
+          // 使用localStorage标记需要刷新父窗口
+          localStorage.setItem('daily_schedule_need_refresh', 'true');
         });
-        
-        // 监听保存按钮点击
-        $('#submit-row input[name="_save"]').click(function() {
-          // 保存成功后刷新父窗口
-          window.onbeforeunload = function() {
-            if (window.opener) {
-              window.opener.location.reload();
-            }
-          };
-        });
-        
-        // 监听保存并继续编辑按钮点击
-        $('#submit-row input[name="_continue"]').click(function() {
-          // 保存成功后刷新父窗口
-          window.onbeforeunload = function() {
-            if (window.opener) {
-              window.opener.location.reload();
-            }
-          };
-        });
-        
+
         // 监听取消按钮点击
         $('#submit-row a.deletelink, #submit-row a.cancel-link').click(function() {
           // 关闭窗口
           window.close();
           return false;
+        });
+
+        // 通知父窗口刷新
+        function notifyParentRefresh() {
+          if (window.opener) {
+            try {
+              // 使用 postMessage 通知父窗口
+              window.opener.postMessage({
+                type: 'daily_schedule_saved',
+                timestamp: Date.now()
+              }, '*');
+            } catch (e) {
+              console.error('无法通知父窗口刷新:', e);
+            }
+          }
+        }
+
+        // 窗口关闭前通知父窗口刷新
+        $(window).on('beforeunload', function() {
+          var needRefresh = localStorage.getItem('daily_schedule_need_refresh');
+          if (needRefresh === 'true') {
+            notifyParentRefresh();
+          }
+        });
+
+        // 监听页面卸载
+        $(window).on('unload', function() {
+          var needRefresh = localStorage.getItem('daily_schedule_need_refresh');
+          if (needRefresh === 'true') {
+            notifyParentRefresh();
+          }
         });
       });
     })(django.jQuery);
