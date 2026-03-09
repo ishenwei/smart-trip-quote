@@ -173,6 +173,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://172.18.0.6:5173',
     'https://stq.ishenwei.online',
     'https://stq-admin.ishenwei.online',
+    'https://n8n.ishenwei.online',
 ]
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = [
@@ -193,6 +194,7 @@ CORS_ORIGIN_WHITELIST = [
     'http://172.18.0.6:5173',
     'https://stq.ishenwei.online',
     'https://stq-admin.ishenwei.online',
+    'https://n8n.ishenwei.online',
 ]
 
 # CSRF trusted origins
@@ -202,6 +204,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://172.18.0.6:5173',
     'https://stq.ishenwei.online',
     'https://stq-admin.ishenwei.online',
+    'https://n8n.ishenwei.online',
 ]
 
 # Admin Site Configuration
@@ -211,6 +214,7 @@ ADMIN_INDEX_TITLE = '智能旅游规划系统管理'
 
 # n8n Webhook Configuration
 N8N_WEBHOOK_URL = os.getenv('N8N_WEBHOOK_URL', '')
+N8N_REQUIREMENT_WEBHOOK_URL = os.getenv('N8N_REQUIREMENT_WEBHOOK_URL', '')
 N8N_API_KEY = os.getenv('N8N_API_KEY', '')
 
 # Webhook Request Configuration
@@ -255,11 +259,6 @@ LOGGING = {
             'propagate': False,
         },
         'itinerary_admin': {
-            'handlers': ['console'],
-            'level': LOG_LEVEL,
-            'propagate': False,
-        },
-        'llm_service': {
             'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,

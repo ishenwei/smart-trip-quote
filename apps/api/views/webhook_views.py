@@ -6,6 +6,12 @@ import json
 import logging
 from datetime import date, time
 from django.db import transaction
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from apps.models.itinerary import Itinerary
 from apps.models.destinations import Destination
@@ -292,3 +298,346 @@ class ItineraryWebhookView(View):
             'OTHER': DailySchedule.ActivityType.OTHER
         }
         return activity_type_map.get(activity_type_str, DailySchedule.ActivityType.OTHER)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class RequirementWebhookView(APIView):
+    """处理n8n webhook返回的旅游需求数据"""
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(
+        operation_description="接收并处理来自n8n webhook的旅游需求解析结果",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['user_input', 'structured_data'],
+            properties={
+                'user_input': openapi.Schema(type=openapi.TYPE_STRING, description='用户输入的自然语言需求'),
+                'structured_data': openapi.Schema(type=openapi.TYPE_OBJECT, description='LLM解析后的结构化数据'),
+                'requirement_id': openapi.Schema(type=openapi.TYPE_STRING, description='需求ID'),
+                'llm_info': openapi.Schema(type=openapi.TYPE_OBJECT, description='LLM相关信息'),
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'success': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                    'requirement_id': openapi.Schema(type=openapi.TYPE_STRING),
+                    'structured_data': openapi.Schema(type=openapi.TYPE_OBJECT),
+                }
+            ),
+            400: "请求参数错误",
+            500: "服务器内部错误"
+        },
+        tags=['Webhook服务']
+    )
+    def post(self, request, *args, **kwargs):
+        """接收并处理webhook数据"""
+        try:
+            logger.info('接收到来自n8n的需求解析webhook请求')
+            
+            data = request.data
+            logger.info(f'请求数据: {json.dumps(data, ensure_ascii=False)[:500]}...')
+            
+            # 处理列表结构
+            if isinstance(data, list) and len(data) > 0:
+                logger.info('请求数据为列表结构，使用第一个元素')
+                data = data[0]
+            
+            # 处理output字段
+            if 'output' in data:
+                logger.info('发现output字段，使用其内部数据')
+                data = data['output']
+            
+            # 提取结构化数据
+            requirement_data = data.get('structured_data', data)
+            logger.info(f'处理需求数据: {json.dumps(requirement_data, ensure_ascii=False)[:300]}...')
+            
+            # 生成requirement_id
+            from datetime import datetime
+            import time
+            
+            # 确保原子性，使用时间戳和循环检测
+            max_attempts = 100
+            requirement_id = None
+            
+            for attempt in range(max_attempts):
+                # 获取当前日期，格式化为YYYYMMDD
+                today = datetime.now().strftime('%Y%m%d')
+                
+                # 查询当日已存在的记录，找到最大的序号
+                prefix = f'REQ_{today}_'
+                existing_records = Requirement.objects.filter(requirement_id__startswith=prefix)
+                
+                # 提取最大序号
+                max_seq = 0
+                for record in existing_records:
+                    try:
+                        seq = int(record.requirement_id.split('_')[-1])
+                        if seq > max_seq:
+                            max_seq = seq
+                    except (ValueError, IndexError):
+                        pass
+                
+                # 生成下一个序号
+                next_seq = max_seq + 1
+                new_id = f'{prefix}{next_seq:03d}'
+                
+                # 检查是否存在冲突
+                if not Requirement.objects.filter(requirement_id=new_id).exists():
+                    requirement_id = new_id
+                    break
+                
+                # 避免无限循环，添加短暂延迟
+                time.sleep(0.01)
+            
+            if not requirement_id:
+                logger.error('生成requirement_id失败')
+                return Response(
+                    {'success': False, 'error': '生成requirement_id失败'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            # 解析base_info
+            base_info = requirement_data.get('base_info', {})
+            origin = base_info.get('origin', {})
+            group_size = base_info.get('group_size', {})
+            travel_date = base_info.get('travel_date', {})
+            
+            # 解析preferences
+            preferences = requirement_data.get('preferences', {})
+            transportation = preferences.get('transportation', {})
+            accommodation = preferences.get('accommodation', {})
+            itinerary = preferences.get('itinerary', {})
+            special_constraints = itinerary.get('special_constraints', {})
+            
+            # 解析budget
+            budget = requirement_data.get('budget', {})
+            budget_range = budget.get('range', {})
+            
+            # 解析metadata
+            metadata = requirement_data.get('metadata', {})
+            audit_trail = metadata.get('audit_trail', {})
+            template_info = metadata.get('template_info', {})
+            
+            # 处理destination_cities
+            destination_cities = base_info.get('destination_cities', '[]')
+            if isinstance(destination_cities, str):
+                if destination_cities.strip():
+                    # 如果是普通字符串，转换为列表格式
+                    destination_cities = [{'name': destination_cities}]
+                else:
+                    # 空字符串，使用空列表
+                    destination_cities = []
+            elif isinstance(destination_cities, list):
+                # 已经是列表，保持不变
+                pass
+            else:
+                # 其他类型，使用空列表
+                destination_cities = []
+            
+            # 处理日期字段
+            from datetime import datetime
+            travel_start_date = travel_date.get('start_date')
+            if travel_start_date and travel_start_date.strip():
+                try:
+                    travel_start_date = datetime.fromisoformat(travel_start_date).date()
+                except ValueError:
+                    logger.warning('start_date格式错误，设为None')
+                    travel_start_date = None
+            else:
+                travel_start_date = None
+            
+            travel_end_date = travel_date.get('end_date')
+            if travel_end_date and travel_end_date.strip():
+                try:
+                    travel_end_date = datetime.fromisoformat(travel_end_date).date()
+                except ValueError:
+                    logger.warning('end_date格式错误，设为None')
+                    travel_end_date = None
+            else:
+                travel_end_date = None
+            
+            # 处理预算字段
+            from decimal import Decimal
+            budget_min = budget_range.get('min')
+            if budget_min:
+                try:
+                    budget_min = Decimal(str(budget_min))
+                except (ValueError, TypeError):
+                    logger.warning('budget_min格式错误，设为None')
+                    budget_min = None
+            
+            budget_max = budget_range.get('max')
+            if budget_max:
+                try:
+                    budget_max = Decimal(str(budget_max))
+                except (ValueError, TypeError):
+                    logger.warning('budget_max格式错误，设为None')
+                    budget_max = None
+            
+            # 创建Requirement对象
+            requirement = Requirement(
+                requirement_id=requirement_id,
+                origin_name=origin.get('name', ''),
+                origin_code=origin.get('code', ''),
+                origin_type=origin.get('type', ''),
+                destination_cities=destination_cities,
+                trip_days=base_info.get('trip_days', 1),
+                group_adults=group_size.get('adults', 0),
+                group_children=group_size.get('children', 0),
+                group_seniors=group_size.get('seniors', 0),
+                group_total=group_size.get('total', 1),
+                travel_start_date=travel_start_date,
+                travel_end_date=travel_end_date,
+                travel_date_flexible=travel_date.get('is_flexible', False),
+                transportation_type=transportation.get('type', ''),
+                transportation_notes=transportation.get('notes', ''),
+                hotel_level=accommodation.get('level', ''),
+                hotel_requirements=accommodation.get('requirements', ''),
+                trip_rhythm=itinerary.get('rhythm', ''),
+                preference_tags=itinerary.get('tags', []),
+                must_visit_spots=special_constraints.get('must_visit_spots', []),
+                avoid_activities=special_constraints.get('avoid_activities', []),
+                budget_level=budget.get('level', ''),
+                budget_currency=budget.get('currency', 'CNY'),
+                budget_min=budget_min,
+                budget_max=budget_max,
+                budget_notes=budget.get('budget_notes', ''),
+                source_type=metadata.get('source_type', 'NaturalLanguage'),
+                status=metadata.get('status', 'Confirmed'),
+                assumptions=metadata.get('assumptions', []),
+                is_template=metadata.get('is_template', False),
+                template_name=template_info.get('name', ''),
+                template_category=template_info.get('category', ''),
+                extension=requirement_data.get('extension', {})
+            )
+            
+            # 保存到数据库
+            requirement.save()
+            logger.info(f'需求保存成功，ID: {requirement_id}')
+            
+            response_data = {
+                'success': True,
+                'requirement_id': requirement_id,
+                'structured_data': requirement_data,
+                'validation_errors': None,
+                'warnings': [],
+                'error': None
+            }
+            
+            logger.info('需求解析数据处理成功')
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            logger.error(f'处理需求解析数据失败: {e}', exc_info=True)
+            return Response(
+                {'success': False, 'error': f'处理数据失败: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ProcessRequirementViaN8nView(APIView):
+    """通过n8n webhook处理旅游需求"""
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    
+    @swagger_auto_schema(
+        operation_description="通过n8n webhook处理用户的自然语言旅游需求输入",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            required=['user_input'],
+            properties={
+                'user_input': openapi.Schema(type=openapi.TYPE_STRING, description='用户输入的自然语言需求'),
+                'save_to_db': openapi.Schema(type=openapi.TYPE_BOOLEAN, description='是否保存到数据库'),
+            }
+        ),
+        responses={
+            200: openapi.Schema(
+                type=openapi.TYPE_OBJECT,
+                properties={
+                    'success': openapi.Schema(type=openapi.TYPE_BOOLEAN),
+                    'requirement_id': openapi.Schema(type=openapi.TYPE_STRING),
+                    'structured_data': openapi.Schema(type=openapi.TYPE_OBJECT),
+                }
+            ),
+            400: "请求参数错误",
+            500: "服务器内部错误"
+        },
+        tags=['LLM服务']
+    )
+    def post(self, request):
+        """通过n8n webhook处理需求"""
+        from django.conf import settings
+        import requests
+        
+        data = request.data
+        user_input = data.get('user_input')
+        
+        if not user_input:
+            return Response(
+                {'success': False, 'error': 'user_input is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        logger.info(f'通过n8n webhook处理需求: {user_input[:100]}...')
+        
+        try:
+            n8n_webhook_url = getattr(settings, 'N8N_REQUIREMENT_WEBHOOK_URL', '')
+            
+            if not n8n_webhook_url:
+                logger.error('N8N_REQUIREMENT_WEBHOOK_URL未配置')
+                return Response(
+                    {'success': False, 'error': 'n8n webhook URL未配置'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+            
+            payload = {
+                'user_input': user_input,
+                'client_id': data.get('client_id'),
+                'provider': data.get('provider'),
+                'save_to_db': data.get('save_to_db', True)
+            }
+            
+            logger.info(f'发送请求到n8n webhook: {n8n_webhook_url}')
+            
+            response = requests.post(
+                n8n_webhook_url,
+                json=payload,
+                timeout=30,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            logger.info(f'n8n webhook响应状态: {response.status_code}')
+            
+            if response.status_code == 200:
+                result = response.json()
+                logger.info(f'n8n webhook处理成功: {result.get("success")}')
+                return Response(result, status=status.HTTP_200_OK)
+            else:
+                logger.error(f'n8n webhook返回错误: {response.status_code} - {response.text}')
+                return Response(
+                    {'success': False, 'error': f'n8n webhook处理失败: {response.status_code}'},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+                
+        except requests.Timeout:
+            logger.error('n8n webhook请求超时')
+            return Response(
+                {'success': False, 'error': '请求超时，请稍后重试'},
+                status=status.HTTP_504_GATEWAY_TIMEOUT
+            )
+        except requests.RequestException as e:
+            logger.error(f'n8n webhook请求失败: {e}', exc_info=True)
+            return Response(
+                {'success': False, 'error': f'请求失败: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        except Exception as e:
+            logger.error(f'处理需求失败: {e}', exc_info=True)
+            return Response(
+                {'success': False, 'error': f'处理失败: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

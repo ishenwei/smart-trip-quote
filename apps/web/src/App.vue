@@ -140,7 +140,7 @@ export default {
       this.errorMessage = '';
       
       try {
-        const response = await axios.post('/api/llm/process/', {
+        const response = await axios.post('/api/llm/webhook/requirement/', {
           user_input: this.userInput,
           save_to_db: true,
         });

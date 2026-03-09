@@ -144,6 +144,10 @@ def generate_itinerary(request, requirement_id):
         if not requirement.group_total:
             return JsonResponse({'success': False, 'error': '总人数不能为空'}, status=400)
         
+        # 验证出行开始日期
+        if not requirement.travel_start_date:
+            return JsonResponse({'success': False, 'error': '出行开始日期不能为空'}, status=400)
+        
         # 准备webhook数据
         webhook_data = {
             'requirement_id': requirement.requirement_id,
