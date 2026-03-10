@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from .base import BaseModel, JSONField
+from .country_code import CountryCodeDict
 import uuid
 
 
@@ -141,6 +142,15 @@ class Hotel(BaseModel):
     
     def __str__(self):
         return f"{self.hotel_name} ({self.hotel_code})"
+    
+    def get_country_name(self):
+        """
+        获取国家中文名称
+        
+        Returns:
+            str: 国家中文名称
+        """
+        return CountryCodeDict.get_country_name(self.country_code)
     
     def clean(self):
         # 验证国家代码格式

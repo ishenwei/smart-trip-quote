@@ -1,5 +1,6 @@
 from django.db import models
 from .base import BaseModel, JSONField
+from .country_code import CountryCodeDict
 from django.core.validators import MinValueValidator, MaxValueValidator
 import uuid
 
@@ -26,10 +27,11 @@ class Attraction(BaseModel):
     ]
     
     attraction_id = models.UUIDField(primary_key=True, default=uuid.uuid4, verbose_name='景点ID', db_comment='景点唯一标识符,使用UUID格式')
-    attraction_code = models.CharField(max_length=50, unique=True, verbose_name='景点代码', db_comment='景点唯一编码,用于系统内部标识和检索')
+    attraction_code = models.CharField(max_length=50, unique=True, blank=True, null=True, verbose_name='景点代码', db_comment='景点唯一编码,用于系统内部标识和检索')
     attraction_name = models.CharField(max_length=200, verbose_name='景点名称', db_comment='景点中文名称')
-    country_code = models.CharField(max_length=2, verbose_name='国家代码', db_comment='所在国家的ISO 3166-1 alpha-2代码,如CN、US等')
+    country_code = models.CharField(max_length=2, blank=True, null=True, verbose_name='国家代码', db_comment='所在国家的ISO 3166-1 alpha-2代码,如CN、US等')
     city_name = models.CharField(max_length=100, verbose_name='城市名称', db_comment='景点所在城市名称')
+    district = models.CharField(max_length=200, blank=True, null=True, verbose_name='区域和商圈', db_comment='景点所属的行政区域和商业圈信息，如"朝阳区-三里屯商圈"或"浦东新区-陆家嘴商圈"')
     region = models.CharField(max_length=100, blank=True, null=True, verbose_name='地区', db_comment='景点所在地区或省份')
     address = models.TextField(blank=True, null=True, verbose_name='地址', db_comment='景点详细地址')
     category = models.CharField(max_length=50, choices=ATTRACTION_CATEGORY_CHOICES, blank=True, null=True, verbose_name='分类', db_comment='景点主分类,如自然景观，历史古迹，文化景点，宗教场所，现代景点，娱乐场所，购物场所，户外景点，室内景点，其他')
@@ -60,6 +62,15 @@ class Attraction(BaseModel):
     
     def __str__(self):
         return self.attraction_name
+    
+    def get_country_name(self):
+        """
+        获取国家中文名称
+        
+        Returns:
+            str: 国家中文名称
+        """
+        return CountryCodeDict.get_country_name(self.country_code)
     
     class Meta:
         db_table = 'attractions'

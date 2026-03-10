@@ -15,7 +15,7 @@ MYSQL_PORT=3306
 # For local development: use localhost:3308 (requires Docker to be running)
 # For Docker container: use mariadb (Docker network alias)
 DATABASE_HOST=localhost
-DATABASE_PORT=3308
+DATABASE_PORT=3306
 DATABASE_NAME=stq_db
 DATABASE_USER=stq_user
 DATABASE_PASSWORD=!Abcde12345
@@ -40,5 +40,6 @@ ALLOWED_HOSTS=localhost,127.0.0.1,web,stq-admin.ishenwei.online,stq.ishenwei.onl
 LOG_LEVEL=INFO
 
 # n8n Webhook Configuration
-N8N_WEBHOOK_URL=https://n8n:5678/webhook-test/smart-trip-requirement
+N8N_WEBHOOK_URL=http://n8n:5678/webhook/smart-itinerary-planning
+N8N_REQUIREMENT_WEBHOOK_URL=http://n8n:5678/webhook-test/smart-requirement-analysis
 N8N_API_KEY=your-n8n-api-key-here
