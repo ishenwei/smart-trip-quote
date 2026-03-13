@@ -641,3 +641,57 @@ class ProcessRequirementViaN8nView(APIView):
                 {'success': False, 'error': f'处理失败: {str(e)}'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ItineraryOptimizationCallbackView(View):
+    """处理n8n webhook返回的行程优化结果"""
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            logger.info("接收到行程优化callback请求")
+            
+            content = request.body.decode('utf-8')
+            logger.info(f"请求内容长度: {len(content)}")
+            
+            data = json.loads(content)
+            
+            if 'output' in data:
+                data = data['output']
+            
+            itinerary_id = data.get('itinerary_id')
+            description = data.get('description')
+            
+            if not itinerary_id:
+                logger.error('JSON中缺少itinerary_id字段')
+                return JsonResponse({'success': False, 'error': '缺少itinerary_id字段'}, status=400)
+            
+            if not description:
+                logger.warning('JSON中缺少description字段，将设置为空字符串')
+                description = ''
+            
+            logger.info(f"准备更新行程: {itinerary_id}")
+            logger.info(f"description长度: {len(description)}")
+            
+            try:
+                itinerary = Itinerary.objects.get(itinerary_id=itinerary_id)
+            except Itinerary.DoesNotExist:
+                logger.error(f"行程不存在: {itinerary_id}")
+                return JsonResponse({'success': False, 'error': f'行程不存在: {itinerary_id}'}, status=404)
+            
+            itinerary.description = description
+            itinerary.save()
+            
+            logger.info(f"行程优化成功: {itinerary_id}, description已更新")
+            
+            return JsonResponse({
+                'success': True, 
+                'message': f'行程 {itinerary_id} 的description已更新'
+            })
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON解析失败: {e}")
+            return JsonResponse({'success': False, 'error': f'JSON解析失败: {str(e)}'}, status=400)
+        except Exception as e:
+            logger.error(f"处理行程优化callback失败: {e}", exc_info=True)
+            return JsonResponse({'success': False, 'error': f'处理失败: {str(e)}'}, status=500)

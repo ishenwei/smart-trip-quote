@@ -3,12 +3,16 @@
 {% block after_related_objects %}
 {{ block.super }}
 
-{# 行程详情预览按钮 #}
+{# 行程详情预览按钮和优化按钮 #}
 <div class="submit-row">
-    <div style="text-align: center;">
+    <div style="text-align: center; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
         <a href="/admin/itinerary/{{ original.itinerary_id }}/preview/" target="_blank" class="preview-button" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; transition: background-color 0.2s ease, transform 0.1s ease;">
             <span class="preview-icon" style="margin-right: 6px;">👁️</span> 行程详情预览
         </a>
+        
+        <button id="optimizeBtn" type="button" class="optimize-button" onclick="optimizeItinerary()" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #9b59b6; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; cursor: pointer; border: none; transition: background-color 0.2s ease, transform 0.1s ease;">
+            <span class="optimize-icon" style="margin-right: 6px;">⚡</span> 行程详情优化
+        </button>
         <style>
             .preview-button:hover {
                 background-color: #45a049;
@@ -21,8 +25,144 @@
             .preview-button:active {
                 transform: translateY(0);
             }
+            .optimize-button:hover {
+                background-color: #8e44ad;
+                transform: translateY(-1px);
+            }
+            .optimize-button:focus {
+                outline: 2px solid #9b59b6;
+                outline-offset: 2px;
+            }
+            .optimize-button:active {
+                transform: translateY(0);
+            }
+            .optimize-button:disabled {
+                background-color: #bdc3c7;
+                cursor: not-allowed;
+                transform: none;
+            }
+            .loading-spinner {
+                display: inline-block;
+                width: 12px;
+                height: 12px;
+                border: 2px solid #ffffff;
+                border-top-color: transparent;
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                margin-right: 6px;
+            }
+            @keyframes spin {
+                to { transform: rotate(360deg); }
+            }
+            .message {
+                padding: 10px 15px;
+                border-radius: 4px;
+                margin-top: 10px;
+                font-size: 13px;
+            }
+            .message.success {
+                background-color: #d4edda;
+                color: #155724;
+                border: 1px solid #c3e6cb;
+            }
+            .message.error {
+                background-color: #f8d7da;
+                color: #721c24;
+                border: 1px solid #f5c6cb;
+            }
+            .message.info {
+                background-color: #d1ecf1;
+                color: #0c5460;
+                border: 1px solid #bee5eb;
+            }
         </style>
     </div>
+    <div id="optimizeMessageContainer"></div>
 </div>
+
+<script>
+function optimizeItinerary() {
+    var btn = document.getElementById('optimizeBtn');
+    var messageContainer = document.getElementById('optimizeMessageContainer');
+    
+    if (!btn || btn.disabled) {
+        return;
+    }
+    
+    var itineraryId = '{{ original.itinerary_id }}';
+    
+    if (!itineraryId) {
+        showMessage(messageContainer, 'error', '无法获取行程ID，请刷新页面后重试');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span>优化中...';
+    
+    showMessage(messageContainer, 'info', '正在提交优化请求，请稍候...');
+    
+    var url = '/admin/itinerary/' + itineraryId + '/optimize/';
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        credentials: 'same-origin'
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            showMessage(messageContainer, 'success', data.message || '行程优化请求已提交成功');
+        } else {
+            showMessage(messageContainer, 'error', data.error || '优化请求提交失败');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+        showMessage(messageContainer, 'error', '网络错误，请检查网络连接后重试');
+    })
+    .finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="optimize-icon">⚡</span> 行程详情优化';
+        
+        setTimeout(function() {
+            hideMessage(messageContainer);
+        }, 5000);
+    });
+}
+
+function showMessage(container, type, text) {
+    container.innerHTML = '<div class="message ' + type + '">' + text + '</div>';
+    container.style.display = 'block';
+}
+
+function hideMessage(container) {
+    if (container) {
+        container.style.display = 'none';
+    }
+}
+
+function getCSRFToken() {
+    var name = 'csrftoken';
+    var cookieValue = null;
+    
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    
+    return cookieValue || '';
+}
+</script>
 
 {% endblock %}

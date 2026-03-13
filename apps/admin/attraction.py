@@ -85,7 +85,7 @@ class AttractionAdmin(admin.ModelAdmin):
         (
             '基本信息', {
                 'fields': (
-                    'attraction_code', 'attraction_name', 'country_code', 
+                    'attraction_name', 'country_code', 
                     'city_name', 'district', 'region', 'address', 'category', 'subcategory'
                 )
             }
