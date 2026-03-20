@@ -2,20 +2,14 @@ import pytest
 import os
 import sys
 
-# 设置Django环境，使用localhost:3308作为数据库主机
+# 设置Django环境
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-os.environ['DATABASE_HOST'] = 'localhost'
-os.environ['DATABASE_PORT'] = '3308'
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import django
 django.setup()
 
-# 导入迁移命令
-from django.core.management import call_command
-
-# 在测试开始前运行迁移命令
-call_command('migrate')
+# pytest-django 会自动处理迁移，删除手动迁移调用
 
 from django.db import IntegrityError
 from apps.models.hotel import Hotel
@@ -437,7 +431,7 @@ class TestItineraryModel:
             'itinerary_id': itinerary,
             'day_number': 1,
             'schedule_date': start_date,
-            'city_name': '上海',
+            'destination_id': destination,
             'activity_type': 'ATTRACTION',
             'activity_title': '测试活动',
             'start_time': time(9, 0),
@@ -488,7 +482,6 @@ class TestItineraryModel:
             itinerary_id=itinerary,
             day_number=1,
             schedule_date=start_date,
-            city_name='上海',
             activity_type='ATTRACTION',
             activity_title='测试活动',
             start_time=time(9, 0),
@@ -595,7 +588,7 @@ class TestItineraryModel:
             itinerary_id=itinerary,
             day_number=1,
             schedule_date=start_date,
-            city_name='上海',
+            destination_id=destination,
             activity_type='ATTRACTION',
             activity_title='测试活动',
             start_time=time(9, 0),

@@ -51,7 +51,18 @@ def copy_as_template(modeladmin, request, queryset):
     count = 0
     for obj in queryset:
         obj.pk = None
-        obj.requirement_id = f"{obj.requirement_id}_copy_{timezone.now().strftime('%Y%m%d%H%M%S')}"
+        # 生成新的 requirement_id，确保不超过 20 个字符
+        timestamp = timezone.now().strftime('%m%d%H%M')
+        
+        # 处理 requirement_id 可能为 None 的情况
+        original_id = obj.requirement_id or f"REQ_{obj.pk or 'NEW'}"
+        
+        # 截断原始 ID 以确保总长度不超过 20
+        max_original_len = 20 - len('_copy_') - len(timestamp)
+        if len(original_id) > max_original_len:
+            original_id = original_id[:max_original_len]
+        
+        obj.requirement_id = f"{original_id}_copy_{timestamp}"
         obj.is_template = True
         obj.status = 'PendingReview'
         obj.save()
