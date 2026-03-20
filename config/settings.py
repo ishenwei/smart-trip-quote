@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-k4c4l-dq6vd8y=f08*vr9wy&zf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('APP_DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,192.168.3.189').split(',')
 
 
 # Application definition
@@ -149,6 +149,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = './static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -205,6 +206,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://stq.ishenwei.online',
     'https://stq-admin.ishenwei.online',
     'https://stq-n8n.ishenwei.online',
+    'http://192.168.3.189:7777',
+    'http://192.168.3.189',
 ]
 
 # Admin Site Configuration

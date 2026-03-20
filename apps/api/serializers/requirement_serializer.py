@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Requirement
+from apps.models import Requirement
 
 
 class RequirementSerializer(serializers.ModelSerializer):
