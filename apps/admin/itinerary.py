@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.db import models
 from django.utils.html import format_html
 from django.urls import reverse
+from easymde.widgets import EasyMDEEditor
 import os
 import sys
 import logging
@@ -537,8 +538,8 @@ class ItineraryAdmin(admin.ModelAdmin):
             'fields': (
                 ('created_by', 'updated_by'),
                 ('version',),
-                ('itinerary_json_data')
-                #('is_deleted', 'deleted_at')
+                'itinerary_json_data',
+                'itinerary_quote_json_data'
             ),
             'classes': ('collapse', 'compact')
         })
@@ -563,7 +564,8 @@ class ItineraryAdmin(admin.ModelAdmin):
         'created_at',
         'updated_at',
         'version',
-        'itinerary_json_data'
+        'itinerary_json_data',
+        'itinerary_quote_json_data'
     )
     
     # 表单字段尺寸调整
@@ -574,6 +576,20 @@ class ItineraryAdmin(admin.ModelAdmin):
         models.DecimalField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '15', 'type': 'number'})},
         models.DateField: {'widget': admin.widgets.AdminDateWidget(attrs={'size': '12'})},
     }
+
+    def get_form(self, request, obj=None, **kwargs):
+        """重写 get_form 方法，为 description 和 itinerary_quote 字段使用 EasyMDEEditor"""
+        form = super().get_form(request, obj, **kwargs)
+        
+        # 为 description 字段配置 EasyMDEEditor
+        if 'description' in form.base_fields:
+            form.base_fields['description'].widget = EasyMDEEditor()
+        
+        # 为 itinerary_quote 字段配置 EasyMDEEditor
+        if 'itinerary_quote' in form.base_fields:
+            form.base_fields['itinerary_quote'].widget = EasyMDEEditor()
+        
+        return form
     
     # 动态生成行程内联
     def get_inline_instances(self, request, obj=None):

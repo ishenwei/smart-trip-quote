@@ -274,3 +274,7 @@ LOGGING = {
         'level': 'WARNING',
     },
 }
+
+# EasyMDE Configuration
+EASY_MDE_CSS_URL = 'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css'
+EASY_MDE_JS_URL = 'https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js'

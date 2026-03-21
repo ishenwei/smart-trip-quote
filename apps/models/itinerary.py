@@ -67,6 +67,7 @@ class Itinerary(BaseModel):
     deleted_at = models.DateTimeField(null=True, blank=True, verbose_name='删除时间', db_comment='删除时间')
     itinerary_json_data = models.JSONField(null=True, blank=True, verbose_name='行程结构化JSON数据', db_comment='行程完整结构化JSON数据,包含所有关联数据')
     itinerary_quote = models.TextField(null=True, blank=True, verbose_name='行程报价', db_comment='行程报价详情')
+    itinerary_quote_json_data = models.TextField(null=True, blank=True, verbose_name='行程报价JSON数据', db_comment='行程报价的JSON结构化数据')
 
     def save(self, *args, **kwargs):
         # 计算总天数
@@ -192,15 +193,15 @@ class Itinerary(BaseModel):
                     'schedule_id': str(schedule.schedule_id),
                     'day_number': schedule.day_number,
                     'schedule_date': schedule.schedule_date.isoformat() if schedule.schedule_date else None,
-                    'destination_id': str(schedule.destination_id) if schedule.destination_id else None,
+                    'destination_id': str(schedule.destination_id_id) if schedule.destination_id_id else None,
                     'activity_type': schedule.activity_type,
                     'activity_title': schedule.activity_title,
                     'activity_description': schedule.activity_description,
                     'start_time': schedule.start_time.isoformat() if schedule.start_time else None,
                     'end_time': schedule.end_time.isoformat() if schedule.end_time else None,
-                    'attraction_id': str(schedule.attraction_id) if schedule.attraction_id else None,
-                    'hotel_id': str(schedule.hotel_id) if schedule.hotel_id else None,
-                    'restaurant_id': str(schedule.restaurant_id) if schedule.restaurant_id else None,
+                    'attraction_id': str(schedule.attraction_id_id) if schedule.attraction_id_id else None,
+                    'hotel_id': str(schedule.hotel_id_id) if schedule.hotel_id_id else None,
+                    'restaurant_id': str(schedule.restaurant_id_id) if schedule.restaurant_id_id else None,
                     'estimated_cost': str(schedule.estimated_cost) if schedule.estimated_cost else None,
                     'currency': schedule.currency,
                     'booking_status': schedule.booking_status,
