@@ -15,6 +15,8 @@ services:
       DATABASE_NAME: ${DATABASE_NAME}
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      N8N_ITINERARY_OPTIMIZATION_WEBHOOK_URL: ${N8N_ITINERARY_OPTIMIZATION_WEBHOOK_URL}
+      N8N_API_KEY: ${N8N_API_KEY}
       LOG_LEVEL: INFO
       PYTHONUNBUFFERED: 1
     networks:
@@ -88,16 +90,16 @@ services:
       start_period: 10s
 
   n8n:
-    container_name: n8n
+    container_name: stq-n8n
     image: docker.n8n.io/n8nio/n8n
     ports:
       - "62000:5678"
     environment:
-      N8N_HOST: n8n.ishenwei.online
-      N8N_PROTOCOL: https
-      #WEBHOOK_URL: https://stq-n8n.ishenwei.online/
-      WEBHOOK_URL: http://127.0.0.1:62000/
-      NODE_ENV: production
+      N8N_HOST: ${N8N_HOST}
+      N8N_PROTOCOL: ${N8N_PROTOCOL}
+      WEBHOOK_URL: ${WEBHOOK_URL}
+      NODE_ENV: ${NODE_ENV}
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE}
     volumes:
       - ./n8n_data:/home/node/.n8n
       - ./n8n_data/files:/home/node/.n8n-files

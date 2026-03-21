@@ -3,8 +3,50 @@ Webhook 数据序列化器和验证器
 用于验证和处理来自 n8n webhook 的数据
 """
 from rest_framework import serializers
-from datetime import date, time
+from datetime import date, datetime, time
 from typing import List, Dict, Any, Optional
+
+
+class FlexibleDateField(serializers.DateField):
+    """支持多种格式的日期字段"""
+    def to_internal_value(self, data):
+        if data is None or data == '':
+            return None
+        if isinstance(data, date):
+            return data
+        # 尝试多种格式
+        formats = ['%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%m/%d/%Y', '%Y%m%d']
+        for fmt in formats:
+            try:
+                return datetime.strptime(str(data), fmt).date()
+            except:
+                pass
+        # 尝试 ISO 格式变体
+        try:
+            return serializers.DateField().to_internal_value(data)
+        except:
+            pass
+        raise serializers.ValidationError(f'无效的日期格式: {data}')
+
+
+class FlexibleDateTimeField(serializers.DateTimeField):
+    """支持多种格式的日期时间字段"""
+    def to_internal_value(self, data):
+        if data is None or data == '':
+            return None
+        if isinstance(data, datetime):
+            return data
+        formats = ['%Y-%m-%dT%H:%M:%S', '%Y-%m-%d %H:%M:%S', '%Y/%m/%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S.%f']
+        for fmt in formats:
+            try:
+                return datetime.strptime(str(data), fmt)
+            except:
+                pass
+        try:
+            return serializers.DateTimeField().to_internal_value(data)
+        except:
+            pass
+        raise serializers.ValidationError(f'无效的日期时间格式: {data}')
 
 
 class ActivitySerializer(serializers.Serializer):
@@ -139,8 +181,8 @@ class GroupSizeSerializer(serializers.Serializer):
 
 class TravelDateSerializer(serializers.Serializer):
     """旅行日期序列化器"""
-    start_date = serializers.DateField(required=False, allow_null=True)
-    end_date = serializers.DateField(required=False, allow_null=True)
+    start_date = FlexibleDateField(required=False, allow_null=True)
+    end_date = FlexibleDateField(required=False, allow_null=True)
     is_flexible = serializers.BooleanField(default=False)
 
 
@@ -227,8 +269,8 @@ class TemplateInfoSerializer(serializers.Serializer):
 
 class AuditTrailSerializer(serializers.Serializer):
     """审计追踪序列化器"""
-    created_at = serializers.DateTimeField(required=False, allow_null=True)
-    updated_at = serializers.DateTimeField(required=False, allow_null=True)
+    created_at = FlexibleDateTimeField(required=False, allow_null=True)
+    updated_at = FlexibleDateTimeField(required=False, allow_null=True)
 
 
 class MetadataSerializer(serializers.Serializer):

@@ -258,6 +258,12 @@ def optimize_itinerary(request, itinerary_id):
             'itinerary_json_data': itinerary.itinerary_json_data
         }
         
+        # 打印 webhook 数据用于调试
+        logger.info(f'行程优化webhook数据 keys: {list(webhook_data.keys())}')
+        logger.info(f'itinerary_json_data type: {type(itinerary.itinerary_json_data)}')
+        if isinstance(itinerary.itinerary_json_data, dict):
+            logger.info(f'itinerary_json_data keys: {list(itinerary.itinerary_json_data.keys())}')
+        
         n8n_webhook_url = getattr(settings, 'N8N_ITINERARY_OPTIMIZATION_WEBHOOK_URL', '')
         n8n_api_key = getattr(settings, 'N8N_API_KEY', '')
         

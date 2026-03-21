@@ -89,10 +89,12 @@ class ItineraryService:
     @classmethod
     def _create_itinerary_main(cls, data: Dict[str, Any], requirement: Requirement) -> Itinerary:
         """创建行程主表"""
+        start_date_val = data.get('start_date')
+        end_date_val = data.get('end_date')
         itinerary = Itinerary(
             itinerary_name=data.get('itinerary_name', '未命名行程'),
-            start_date=date.fromisoformat(data.get('start_date')),
-            end_date=date.fromisoformat(data.get('end_date')),
+            start_date=start_date_val if isinstance(start_date_val, date) else date.fromisoformat(start_date_val),
+            end_date=end_date_val if isinstance(end_date_val, date) else date.fromisoformat(end_date_val),
             travel_purpose=Itinerary.TravelPurpose.LEISURE,
             contact_person=requirement.contact_person or '测试用户',
             contact_phone=requirement.contact_phone or '13800138000',
@@ -111,13 +113,15 @@ class ItineraryService:
         destinations = data.get('destinations', [])
         
         for dest_data in destinations:
+            arrival_date_val = dest_data.get('arrival_date')
+            departure_date_val = dest_data.get('departure_date')
             destination = Destination(
                 itinerary=itinerary,
                 destination_order=dest_data.get('destination_order'),
                 city_name=dest_data.get('city_name'),
                 country_code=dest_data.get('country_code'),
-                arrival_date=date.fromisoformat(dest_data.get('arrival_date')),
-                departure_date=date.fromisoformat(dest_data.get('departure_date'))
+                arrival_date=arrival_date_val if isinstance(arrival_date_val, date) else date.fromisoformat(arrival_date_val),
+                departure_date=departure_date_val if isinstance(departure_date_val, date) else date.fromisoformat(departure_date_val)
             )
             destination.save()
     
@@ -142,7 +146,8 @@ class ItineraryService:
         
         for day_schedule in daily_schedules:
             day_number = day_schedule.get('day')
-            schedule_date = date.fromisoformat(day_schedule.get('date'))
+            schedule_date_val = day_schedule.get('date')
+            schedule_date = schedule_date_val if isinstance(schedule_date_val, date) else date.fromisoformat(schedule_date_val)
             city = day_schedule.get('city')
             
             destination = Destination.objects.filter(
@@ -152,8 +157,10 @@ class ItineraryService:
             
             activities = day_schedule.get('activities', [])
             for activity in activities:
-                start_time = time.fromisoformat(activity.get('start_time'))
-                end_time = time.fromisoformat(activity.get('end_time'))
+                start_time_val = activity.get('start_time')
+                end_time_val = activity.get('end_time')
+                start_time = start_time_val if isinstance(start_time_val, time) else time.fromisoformat(start_time_val)
+                end_time = end_time_val if isinstance(end_time_val, time) else time.fromisoformat(end_time_val)
                 
                 activity_type = cls.ACTIVITY_TYPE_MAP.get(
                     activity.get('activity_type'),

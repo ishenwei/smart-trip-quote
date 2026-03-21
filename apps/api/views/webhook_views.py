@@ -159,6 +159,9 @@ class RequirementWebhookView(APIView):
                 logger.info('发现output字段，使用其内部数据')
                 data = data['output']
             
+            # 打印接收到的原始数据，查看n8n返回的日期格式
+            logger.info(f'接收到的原始数据: {json.dumps(data, indent=2, ensure_ascii=False)[:2000]}')
+            
             serializer = RequirementWebhookSerializer(data=data)
             if not serializer.is_valid():
                 errors = serializer.errors
