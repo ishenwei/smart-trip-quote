@@ -21,6 +21,7 @@ from apps.views import test_itinerary_save_logs
 urlpatterns = [
     path('admin/', include('apps.admin.urls')),
     path('admin/', admin_site.urls),
+    path('api/', include('apps.api.urls')),
     path('api/llm/', include('apps.api.urls')),
     #path('api/webhook/', include('apps.api.urls')),
     path('test_save_logs/', test_itinerary_save_logs, name='test_save_logs'),

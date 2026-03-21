@@ -66,6 +66,7 @@ class Itinerary(BaseModel):
     is_deleted = models.BooleanField(default=False, verbose_name='是否删除', db_comment='标识是否已删除')
     deleted_at = models.DateTimeField(null=True, blank=True, verbose_name='删除时间', db_comment='删除时间')
     itinerary_json_data = models.JSONField(null=True, blank=True, verbose_name='行程结构化JSON数据', db_comment='行程完整结构化JSON数据,包含所有关联数据')
+    itinerary_quote = models.TextField(null=True, blank=True, verbose_name='行程报价', db_comment='行程报价详情')
 
     def save(self, *args, **kwargs):
         # 计算总天数

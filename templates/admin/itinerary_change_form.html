@@ -6,37 +6,105 @@
 {# 行程详情预览按钮和优化按钮 #}
 <div class="submit-row">
     <div style="text-align: center; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-        <a href="/admin/itinerary/{{ original.itinerary_id }}/preview/" target="_blank" class="preview-button" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; transition: background-color 0.2s ease, transform 0.1s ease;">
+        <a href="/admin/itinerary/{{ original.itinerary_id }}/preview/" target="_blank" class="preview-button" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #1E3A5F; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; transition: background-color 0.2s ease, transform 0.1s ease;">
             <span class="preview-icon" style="margin-right: 6px;">👁️</span> 行程详情预览
         </a>
         
-        <button id="optimizeBtn" type="button" class="optimize-button" onclick="optimizeItinerary()" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #9b59b6; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; cursor: pointer; border: none; transition: background-color 0.2s ease, transform 0.1s ease;">
+        <button id="optimizeBtn" type="button" class="optimize-button" onclick="optimizeItinerary()" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #2D5A4C; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; cursor: pointer; border: none; transition: background-color 0.2s ease, transform 0.1s ease;">
             <span class="optimize-icon" style="margin-right: 6px;">⚡</span> 行程详情优化
+        </button>
+        <a id="exportPdfBtn" href="/api/export/pdf/{{ original.itinerary_id }}/" target="_blank" class="export-pdf-button" style="margin-left: 8px; color: white;">
+            <span style="margin-right: 6px;">📄</span> 导出PDF
+        </a>
+        <a id="exportWordBtn" href="/api/export/word/{{ original.itinerary_id }}/" target="_blank" class="export-word-button" style="margin-left: 8px; color: white;">
+            <span style="margin-right: 6px;">📝</span> 导出Word
+        </a>
+        
+        <button id="quoteBtn" type="button" class="quote-button" onclick="quoteItinerary()" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #8B6914; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; cursor: pointer; border: none; transition: background-color 0.2s ease, transform 0.1s ease;">
+            <span class="quote-icon" style="margin-right: 6px;">💰</span> 旅游行程报价
         </button>
         <style>
             .preview-button:hover {
-                background-color: #45a049;
+                background-color: #15293F;
                 transform: translateY(-1px);
             }
             .preview-button:focus {
-                outline: 2px solid #4CAF50;
+                outline: 2px solid #1E3A5F;
                 outline-offset: 2px;
             }
             .preview-button:active {
                 transform: translateY(0);
             }
             .optimize-button:hover {
-                background-color: #8e44ad;
+                background-color: #1E4A3D;
                 transform: translateY(-1px);
             }
             .optimize-button:focus {
-                outline: 2px solid #9b59b6;
+                outline: 2px solid #2D5A4C;
                 outline-offset: 2px;
             }
             .optimize-button:active {
                 transform: translateY(0);
             }
             .optimize-button:disabled {
+                background-color: #bdc3c7;
+                cursor: not-allowed;
+                transform: none;
+            }
+            .quote-button:hover {
+                background-color: #F57C00;
+                transform: translateY(-1px);
+            }
+            .quote-button:focus {
+                outline: 2px solid #FF9800;
+                outline-offset: 2px;
+            }
+            .quote-button:active {
+                transform: translateY(0);
+            }
+            .export-pdf-button {
+                display: inline-flex;
+                align-items: center;
+                padding: 8px 15px;
+                background-color: #5D4E37;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 13px;
+                line-height: 1.4;
+                cursor: pointer;
+                border: none;
+            }
+            .export-pdf-button:hover {
+                background-color: #4A3F2D;
+                transform: translateY(-1px);
+            }
+            .export-pdf-button:focus {
+                outline: 2px solid #5D4E37;
+                outline-offset: 2px;
+            }
+            .export-pdf-button:active {
+                transform: translateY(0);
+            }
+            .export-word-button {
+                display: inline-flex;
+                align-items: center;
+                padding: 8px 15px;
+                background-color: #6B7280;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                font-weight: 600;
+                font-size: 13px;
+                line-height: 1.4;
+                transition: background-color 0.2s ease, transform 0.1s ease;
+            }
+            .export-word-button:hover {
+                background-color: #4B5563;
+                transform: translateY(-1px);
+            }
+            .quote-button:disabled {
                 background-color: #bdc3c7;
                 cursor: not-allowed;
                 transform: none;
@@ -78,6 +146,7 @@
         </style>
     </div>
     <div id="optimizeMessageContainer"></div>
+    <div id="quoteMessageContainer"></div>
 </div>
 
 <script>
@@ -128,6 +197,60 @@ function optimizeItinerary() {
     .finally(function() {
         btn.disabled = false;
         btn.innerHTML = '<span class="optimize-icon">⚡</span> 行程详情优化';
+        
+        setTimeout(function() {
+            hideMessage(messageContainer);
+        }, 5000);
+    });
+}
+
+function quoteItinerary() {
+    var btn = document.getElementById('quoteBtn');
+    var messageContainer = document.getElementById('quoteMessageContainer');
+    
+    if (!btn || btn.disabled) {
+        return;
+    }
+    
+    var itineraryId = '{{ original.itinerary_id }}';
+    
+    if (!itineraryId) {
+        showMessage(messageContainer, 'error', '无法获取行程ID，请刷新页面后重试');
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading-spinner"></span>报价中...';
+    
+    showMessage(messageContainer, 'info', '正在提交报价请求，请稍候...');
+    
+    var url = '/admin/itinerary/' + itineraryId + '/quote/';
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken()
+        },
+        credentials: 'same-origin'
+    })
+    .then(function(response) {
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.success) {
+            showMessage(messageContainer, 'success', data.message || '行程报价请求已提交成功');
+        } else {
+            showMessage(messageContainer, 'error', data.error || '报价请求提交失败');
+        }
+    })
+    .catch(function(error) {
+        console.error('Error:', error);
+        showMessage(messageContainer, 'error', '网络错误，请检查网络连接后重试');
+    })
+    .finally(function() {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="quote-icon">💰</span> 旅游行程报价';
         
         setTimeout(function() {
             hideMessage(messageContainer);

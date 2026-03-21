@@ -102,7 +102,7 @@ class AttractionAdmin(admin.ModelAdmin):
             '门票信息', {
                 'fields': (
                     'ticket_price', 'currency', 'ticket_type', 'booking_required', 
-                    'booking_website'
+                    'booking_website', 'pricing_strategy'
                 )
             }
         ),

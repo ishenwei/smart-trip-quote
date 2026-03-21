@@ -529,6 +529,10 @@ class ItineraryAdmin(admin.ModelAdmin):
             ),
             'classes': ('compact',)
         }),
+        ('行程报价', {
+            'fields': ('itinerary_quote',),
+            'classes': ('compact',)
+        }),
         ('管理信息', {
             'fields': (
                 ('created_by', 'updated_by'),
@@ -565,7 +569,7 @@ class ItineraryAdmin(admin.ModelAdmin):
     # 表单字段尺寸调整
     formfield_overrides = {
         models.CharField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '40'})},
-        models.TextField: {'widget': admin.widgets.AdminTextareaWidget(attrs={'rows': 3, 'cols': 60})},
+        models.TextField: {'widget': admin.widgets.AdminTextareaWidget(attrs={'rows': 10, 'cols': 60})},
         models.IntegerField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '10', 'type': 'number'})},
         models.DecimalField: {'widget': admin.widgets.AdminTextInputWidget(attrs={'size': '15', 'type': 'number'})},
         models.DateField: {'widget': admin.widgets.AdminDateWidget(attrs={'size': '12'})},
@@ -819,6 +823,7 @@ class ItineraryAdmin(admin.ModelAdmin):
             if obj:
                 try:
                     extra_context['preview_button'] = self.preview_itinerary(obj)
+                    extra_context['quote_button'] = self.quote_itinerary(obj)
                 except Exception as e:
                     import traceback
                     traceback.print_exc()
@@ -859,6 +864,35 @@ class ItineraryAdmin(admin.ModelAdmin):
     
     preview_itinerary.short_description = '预览操作'
     preview_itinerary.allow_tags = True
+    
+    # 添加行程报价按钮
+    def quote_itinerary(self, obj):
+        return format_html(
+            '<button id="quoteBtn" type="button" class="quote-button" onclick="quoteItinerary()" style="display: inline-flex; align-items: center; padding: 8px 15px; background-color: #FF9800; color: white; text-decoration: none; border-radius: 4px; font-weight: 600; font-size: 13px; line-height: 1.4; cursor: pointer; border: none; transition: background-color 0.2s ease, transform 0.1s ease;">\n'  # noqa
+            '    <span class="quote-icon" style="margin-right: 6px;">💰</span> 旅游行程报价\n'  # noqa
+            '</button>\n'  # noqa
+            '<style>\n'  # noqa
+            '    .quote-button:hover {{\n'  # noqa
+            '        background-color: #F57C00;\n'  # noqa
+            '        transform: translateY(-1px);\n'  # noqa
+            '    }}\n'  # noqa
+            '    .quote-button:focus {{\n'  # noqa
+            '        outline: 2px solid #FF9800;\n'  # noqa
+            '        outline-offset: 2px;\n'  # noqa
+            '    }}\n'  # noqa
+            '    .quote-button:active {{\n'  # noqa
+            '        transform: translateY(0);\n'  # noqa
+            '    }}\n'  # noqa
+            '    .quote-button:disabled {{\n'  # noqa
+            '        background-color: #bdc3c7;\n'  # noqa
+            '        cursor: not-allowed;\n'  # noqa
+            '        transform: none;\n'  # noqa
+            '    }}\n'  # noqa
+            '</style>'
+        )
+    
+    quote_itinerary.short_description = '报价操作'
+    quote_itinerary.allow_tags = True
     
     def status_badge(self, obj):
         colors = {

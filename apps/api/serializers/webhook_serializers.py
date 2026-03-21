@@ -97,6 +97,14 @@ class DestinationSerializer(serializers.Serializer):
                     'departure_date': '离开日期必须晚于或等于到达日期'
                 })
         return data
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        for field in ['arrival_date', 'departure_date']:
+            if field in ret and ret[field]:
+                if hasattr(ret[field], 'isoformat'):
+                    ret[field] = ret[field].isoformat()
+        return ret
 
 
 class TravelerStatsSerializer(serializers.Serializer):
@@ -128,6 +136,13 @@ class DailyScheduleSerializer(serializers.Serializer):
             if not isinstance(data['date'], date):
                 raise serializers.ValidationError({'date': '日期格式无效'})
         return data
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if 'date' in ret and ret['date']:
+            if hasattr(ret['date'], 'isoformat'):
+                ret['date'] = ret['date'].isoformat()
+        return ret
 
 
 class ItineraryWebhookSerializer(serializers.Serializer):
@@ -184,6 +199,14 @@ class TravelDateSerializer(serializers.Serializer):
     start_date = FlexibleDateField(required=False, allow_null=True)
     end_date = FlexibleDateField(required=False, allow_null=True)
     is_flexible = serializers.BooleanField(default=False)
+    
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        for field in ['start_date', 'end_date']:
+            if field in ret and ret[field]:
+                if hasattr(ret[field], 'isoformat'):
+                    ret[field] = ret[field].isoformat()
+        return ret
 
 
 class TransportationSerializer(serializers.Serializer):
@@ -361,6 +384,21 @@ class ItineraryOptimizationCallbackSerializer(serializers.Serializer):
             data = data['output']
         
         return super().to_internal_value(data)
+
+
+class ItineraryQuoteCallbackSerializer(serializers.Serializer):
+    """
+    行程报价回调数据验证器
+    验证 n8n 返回的行程报价结果
+    """
+    itinerary_id = serializers.CharField(max_length=50)
+    itinerary_quote = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    
+    def validate_itinerary_id(self, value):
+        """验证 itinerary_id 格式"""
+        if not value or not value.strip():
+            raise serializers.ValidationError('itinerary_id 不能为空')
+        return value.strip()
 
 
 class N8nProcessRequirementSerializer(serializers.Serializer):

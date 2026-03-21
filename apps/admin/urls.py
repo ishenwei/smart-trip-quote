@@ -1,10 +1,11 @@
 from django.urls import path, re_path
-from .views import preview_itinerary, get_filtered_resources, generate_itinerary, optimize_itinerary
+from .views import preview_itinerary, get_filtered_resources, generate_itinerary, optimize_itinerary, quote_itinerary
 import uuid
 
 urlpatterns = [
     re_path(r'itinerary/(?P<itinerary_id>[A-Z0-9_]+)/preview/', preview_itinerary, name='preview_itinerary'),
     re_path(r'itinerary/(?P<itinerary_id>[A-Z0-9_]+)/optimize/', optimize_itinerary, name='optimize_itinerary'),
+    re_path(r'itinerary/(?P<itinerary_id>[A-Z0-9_]+)/quote/', quote_itinerary, name='quote_itinerary'),
     path('get_filtered_resources/', get_filtered_resources, name='get_filtered_resources'),
     path('requirement/<str:requirement_id>/generate-itinerary/', generate_itinerary, name='generate_itinerary'),
 ]

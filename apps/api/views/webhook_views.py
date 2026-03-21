@@ -18,6 +18,7 @@ from apps.api.serializers.webhook_serializers import (
     ItineraryWebhookSerializer,
     RequirementWebhookSerializer,
     ItineraryOptimizationCallbackSerializer,
+    ItineraryQuoteCallbackSerializer,
     N8nProcessRequirementSerializer,
 )
 from apps.api.services.webhook_services import (
@@ -174,6 +175,18 @@ class RequirementWebhookView(APIView):
             
             validated_data = serializer.validated_data
             requirement_data = validated_data.get('structured_data', validated_data)
+            
+            # 转换日期对象为字符串，避免JSON序列化错误
+            def convert_dates(obj):
+                if isinstance(obj, dict):
+                    return {k: convert_dates(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [convert_dates(item) for item in obj]
+                elif hasattr(obj, 'isoformat'):
+                    return obj.isoformat()
+                return obj
+            
+            requirement_data = convert_dates(requirement_data)
             
             logger.info(f'处理需求数据: {json.dumps(LogSanitizer.sanitize_dict(requirement_data), ensure_ascii=False)[:300]}...')
             
@@ -360,4 +373,57 @@ class ItineraryOptimizationCallbackView(View):
             return JsonResponse({'success': False, 'error': f'JSON解析失败: {str(e)}'}, status=400)
         except Exception as e:
             logger.error(f"处理行程优化callback失败: {e}", exc_info=True)
+            return JsonResponse({'success': False, 'error': f'处理失败: {str(e)}'}, status=500)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class ItineraryQuoteCallbackView(View):
+    """处理n8n webhook返回的行程报价结果"""
+    
+    def post(self, request, *args, **kwargs):
+        try:
+            logger.info("接收到行程报价callback请求")
+            
+            content = request.body.decode('utf-8')
+            logger.info(f"请求内容长度: {len(content)}")
+            
+            data = json.loads(content)
+            
+            serializer = ItineraryQuoteCallbackSerializer(data=data)
+            if not serializer.is_valid():
+                errors = serializer.errors
+                logger.error(f'数据验证失败: {errors}')
+                return JsonResponse({
+                    'success': False,
+                    'error': '数据验证失败',
+                    'validation_errors': errors
+                }, status=400)
+            
+            validated_data = serializer.validated_data
+            itinerary_id = validated_data.get('itinerary_id')
+            itinerary_quote = validated_data.get('itinerary_quote', '')
+            
+            logger.info(f"准备更新行程报价: {itinerary_id}")
+            
+            valid, itinerary, error_msg = ItineraryOptimizationService.validate_itinerary_exists(itinerary_id)
+            if not valid:
+                logger.error(error_msg)
+                return JsonResponse({'success': False, 'error': error_msg}, status=404)
+            
+            # 保存报价
+            itinerary.itinerary_quote = itinerary_quote
+            itinerary.save(update_fields=['itinerary_quote', 'updated_at'])
+            
+            logger.info(f"行程报价更新成功: {itinerary_id}")
+            
+            return JsonResponse({
+                'success': True, 
+                'message': f'行程 {itinerary_id} 的报价已更新'
+            })
+            
+        except json.JSONDecodeError as e:
+            logger.error(f"JSON解析失败: {e}")
+            return JsonResponse({'success': False, 'error': f'JSON解析失败: {str(e)}'}, status=400)
+        except Exception as e:
+            logger.error(f"处理行程报价callback失败: {e}", exc_info=True)
             return JsonResponse({'success': False, 'error': f'处理失败: {str(e)}'}, status=500)

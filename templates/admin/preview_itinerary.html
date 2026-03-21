@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>行程详情预览 - {{ itinerary.itinerary_name }}</title>
+    <title>行程预览 - {{ itinerary.itinerary_name }}</title>
     <style>
-        /* 全局样式 */
         * {
             margin: 0;
             padding: 0;
@@ -13,435 +12,481 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            line-height: 1.6;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.5;
             color: #333;
-            background-color: #f5f5f5;
-            padding: 20px;
+            background-color: #f0f2f5;
+            padding: 16px;
         }
         
-        /* 容器样式 */
         .container {
-            max-width: 1000px;
+            max-width: 900px;
             margin: 0 auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-        }
-        
-        /* 标题样式 */
-        h1 {
-            color: #2c3e50;
-            font-size: 28px;
-            margin-bottom: 30px;
-            text-align: center;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-        }
-        
-        h2 {
-            color: #34495e;
-            font-size: 22px;
-            margin: 30px 0 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        h3 {
-            color: #555;
-            font-size: 18px;
-            margin: 20px 0 15px;
-        }
-        
-        /* 信息卡片样式 */
-        .info-card {
-            background-color: #f9f9f9;
+            background: #fff;
             border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-left: 4px solid #3498db;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            overflow: hidden;
         }
         
-        /* 表格样式 */
-        table {
+        /* 页头 */
+        .page-header {
+            background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+            color: #fff;
+            padding: 20px 24px;
+        }
+        
+        .page-header h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .page-header .subtitle {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+        
+        /* 分隔线 */
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 0;
+        }
+        
+        /* 区块 */
+        .section {
+            padding: 16px 24px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1a73e8;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-title::before {
+            content: "";
+            width: 3px;
+            height: 14px;
+            background: #1a73e8;
+            border-radius: 2px;
+        }
+        
+        /* 信息行 */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px 20px;
+        }
+        
+        .info-item {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .info-label {
+            color: #666;
+            flex-shrink: 0;
+        }
+        
+        .info-value {
+            color: #222;
+            font-weight: 500;
+        }
+        
+        /* 统计卡片 */
+        .stats-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 12px 16px;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a73e8;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        /* 目的地标签 */
+        .dest-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .dest-tag {
+            background: #e8f0fe;
+            color: #1a73e8;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 13px;
+        }
+        
+        /* 每日行程 */
+        .day-block {
+            margin-bottom: 16px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .day-block:last-child {
+            margin-bottom: 0;
+        }
+        
+        .day-header {
+            background: #f0f4f8;
+            padding: 10px 16px;
+            font-weight: 600;
+            color: #1a237e;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .day-title {
+            font-size: 14px;
+        }
+        
+        .day-subtitle {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+        
+        /* 行程表格 */
+        .schedule-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
         }
         
-        th, td {
-            padding: 12px;
+        .schedule-table th {
+            background: #fafafa;
+            padding: 8px 12px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 1px solid #eee;
         }
         
-        th {
-            background-color: #f2f2f2;
-            font-weight: 600;
+        .schedule-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
         }
         
-        tr:hover {
-            background-color: #f5f5f5;
+        .schedule-table tr:last-child td {
+            border-bottom: none;
         }
         
-        /* 行程安排样式 */
-        .schedule-day {
-            margin-bottom: 30px;
-            padding: 20px;
-            background-color: #f9f9f9;
+        .schedule-table tbody tr:nth-child(even) {
+            background: #fafafa;
+        }
+        
+        .schedule-table tbody tr:hover {
+            background: #e8f0fe;
+        }
+        
+        .time-col {
+            width: 120px;
+            color: #e65100;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        .activity-col {
+            color: #222;
+        }
+        
+        .location-col {
+            color: #666;
+            font-size: 12px;
+        }
+        
+        .type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        
+        .type-badge.checkin {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .type-badge.checkout {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .type-badge.sightseeing {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .type-badge.transport {
+            background: #fce4ec;
+            color: #c62828;
+        }
+        
+        .type-badge.meal {
+            background: #fff8e1;
+            color: #f9a825;
+        }
+        
+        /* 描述区块 */
+        .description {
+            color: #444;
+            line-height: 1.8;
+        }
+        
+        /* 报价区块 */
+        .quote-box {
+            background: #fff8e1;
+            border: 1px solid #ffe082;
             border-radius: 6px;
+            padding: 16px;
         }
         
-        .schedule-day h3 {
-            margin-top: 0;
-            color: #3498db;
+        .quote-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: #f57f17;
         }
         
-        .schedule-item {
-            margin: 15px 0;
-            padding: 15px;
-            background-color: #fff;
-            border-radius: 4px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        .quote-note {
+            font-size: 12px;
+            color: #666;
+            margin-top: 8px;
         }
         
-        .schedule-time {
-            font-weight: 600;
-            color: #e67e22;
-        }
-        
-        .schedule-title {
-            font-weight: 600;
-            margin: 5px 0;
-        }
-        
-        .schedule-location {
-            color: #7f8c8d;
-            margin: 5px 0;
-        }
-        
-        .schedule-contact {
-            color: #27ae60;
-            margin: 5px 0;
-        }
-        
-        /* 响应式样式 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            h2 {
-                font-size: 20px;
-            }
-            
-            table {
-                font-size: 14px;
-            }
-            
-            th, td {
+        /* 响应式 */
+        @media (max-width: 600px) {
+            body {
                 padding: 8px;
+            }
+            
+            .section {
+                padding: 12px 16px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .schedule-table {
+                font-size: 12px;
+            }
+            
+            .time-col {
+                width: 90px;
             }
         }
         
         /* 打印样式 */
         @media print {
             body {
-                background-color: #fff;
+                background: #fff;
                 padding: 0;
             }
             
             .container {
                 box-shadow: none;
-                padding: 0;
+            }
+            
+            .day-block {
+                break-inside: avoid;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>行程详情预览</h1>
+        <!-- 页头 -->
+        <div class="page-header">
+            <h1>{{ itinerary.itinerary_name }}</h1>
+            <div class="subtitle">行程编号: {{ itinerary.itinerary_id }} | 状态: {{ itinerary.current_status }}</div>
+        </div>
+        
+        <div class="divider"></div>
         
         <!-- 行程基本信息 -->
-        <section>
-            <h2>1. 行程基本信息</h2>
-            <div class="info-card">
-                <table>
-                    <tr>
-                        <th>行程名称</th>
-                        <td>{{ itinerary.itinerary_name }}</td>
-                    </tr>
-                    <tr>
-                        <th>行程编号</th>
-                        <td>{{ itinerary.itinerary_id }}</td>
-                    </tr>
-                    <tr>
-                        <th>行程时长</th>
-                        <td>{{ itinerary.total_days }} 天</td>
-                    </tr>
-                    <tr>
-                        <th>出发日期</th>
-                        <td>{{ itinerary.start_date|date:"Y年m月d日" }}</td>
-                    </tr>
-                    <tr>
-                        <th>结束日期</th>
-                        <td>{{ itinerary.end_date|date:"Y年m月d日" }}</td>
-                    </tr>
-                    <tr>
-                        <th>行程状态</th>
-                        <td>{{ itinerary.current_status }}</td>
-                    </tr>
-                    <tr>
-                        <th>联系人</th>
-                        <td>{{ itinerary.contact_person }}</td>
-                    </tr>
-                    <tr>
-                        <th>联系电话</th>
-                        <td>{{ itinerary.contact_phone }}</td>
-                    </tr>
-                    <tr>
-                        <th>出发城市</th>
-                        <td>{{ itinerary.departure_city }}</td>
-                    </tr>
-                    <tr>
-                        <th>返回城市</th>
-                        <td>{{ itinerary.return_city }}</td>
-                    </tr>
-                </table>
+        <div class="section">
+            <div class="section-title">基本信息</div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">行程天数:</span>
+                    <span class="info-value">{{ itinerary.total_days }} 天</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">出发日期:</span>
+                    <span class="info-value">{{ itinerary.start_date|date:"Y年m月d日" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">返回日期:</span>
+                    <span class="info-value">{{ itinerary.end_date|date:"Y年m月d日" }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">出发城市:</span>
+                    <span class="info-value">{{ itinerary.departure_city }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">返回城市:</span>
+                    <span class="info-value">{{ itinerary.return_city }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">联系人:</span>
+                    <span class="info-value">{{ itinerary.contact_person }} ({{ itinerary.contact_phone }})</span>
+                </div>
             </div>
-        </section>
+        </div>
         
-        <!-- 旅客统计数据 -->
-        <section>
-            <h2>2. 旅客统计数据</h2>
+        <!-- 旅客统计 -->
+        <div class="section">
+            <div class="section-title">旅客统计</div>
             {% if traveler_stats %}
-                <div class="info-card">
-                    <table>
-                        <tr>
-                        <th>总旅客数量</th>
-                        <td>{{ traveler_stats.adult_count|add:traveler_stats.child_count|add:traveler_stats.infant_count|add:traveler_stats.senior_count }} 人</td>
-                    </tr>
-                    <tr>
-                        <th>成人数</th>
-                        <td>{{ traveler_stats.adult_count }} 人</td>
-                    </tr>
-                    <tr>
-                        <th>儿童数</th>
-                        <td>{{ traveler_stats.child_count }} 人</td>
-                    </tr>
-                    <tr>
-                        <th>婴儿数</th>
-                        <td>{{ traveler_stats.infant_count }} 人</td>
-                    </tr>
-                    <tr>
-                        <th>老人数</th>
-                        <td>{{ traveler_stats.senior_count }} 人</td>
-                    </tr>
-                    <tr>
-                        <th>备注</th>
-                        <td>{{ traveler_stats.notes }}</td>
-                    </tr>
-                    </table>
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-number">{{ traveler_stats.adult_count }}</div>
+                    <div class="stat-label">成人</div>
                 </div>
-            {% else %}
-                <div class="info-card">
-                    <p>暂无旅客统计数据</p>
+                <div class="stat-card">
+                    <div class="stat-number">{{ traveler_stats.child_count }}</div>
+                    <div class="stat-label">儿童</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ traveler_stats.infant_count }}</div>
+                    <div class="stat-label">婴儿</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">{{ traveler_stats.senior_count }}</div>
+                    <div class="stat-label">老人</div>
+                </div>
+                <div class="stat-card" style="background: #e8f0fe;">
+                    <div class="stat-number" style="color: #1a237e;">{{ traveler_stats.adult_count|add:traveler_stats.child_count|add:traveler_stats.infant_count|add:traveler_stats.senior_count }}</div>
+                    <div class="stat-label">合计</div>
+                </div>
+            </div>
+            {% if traveler_stats.notes %}
+            <div style="margin-top: 12px; font-size: 12px; color: #666;">
+                备注: {{ traveler_stats.notes }}
+            </div>
             {% endif %}
-        </section>
+            {% else %}
+            <div style="color: #999;">暂无旅客数据</div>
+            {% endif %}
+        </div>
         
-        <!-- 目的地信息 -->
-        <section>
-            <h2>3. 目的地信息</h2>
+        <!-- 目的地概览 -->
+        <div class="section">
+            <div class="section-title">目的地</div>
             {% if destinations %}
-                {% for destination in destinations %}
-                    <div class="info-card">
-                        <h3>{{ destination.city_name }}, {{ destination.country_code }}</h3>
-                        <table>
-                            <tr>
-                                <th>抵达日期</th>
-                                <td>{{ destination.arrival_date|date:"Y年m月d日" }}</td>
-                            </tr>
-                            <tr>
-                                <th>离开日期</th>
-                                <td>{{ destination.departure_date|date:"Y年m月d日" }}</td>
-                            </tr>
-                            <tr>
-                                <th>停留天数</th>
-                                <td>{{ destination.nights }} 晚</td>
-                            </tr>
-                            <tr>
-                                <th>地区</th>
-                                <td>{{ destination.region }}</td>
-                            </tr>
-                        </table>
-                    </div>
+            <div class="dest-tags">
+                {% for dest in destinations %}
+                <span class="dest-tag">{{ dest.city_name }}</span>
                 {% endfor %}
+            </div>
             {% else %}
-                <div class="info-card">
-                    <p>暂无目的地信息</p>
-                </div>
+            <div style="color: #999;">暂无目的地数据</div>
             {% endif %}
-        </section>
+        </div>
         
-        <!-- 每日行程安排 -->
-        <section>
-            <h2>4. 每日行程安排</h2>
+        <!-- 每日行程 -->
+        <div class="section">
+            <div class="section-title">每日行程</div>
             {% if grouped_schedules %}
-                {% for date, schedules in grouped_schedules.items %}
-                    <div class="schedule-day">
-                        <h3>{{ date|date:"Y年m月d日" }}</h3>
+            {% for date, schedules in grouped_schedules.items %}
+            <div class="day-block">
+                <div class="day-header">
+                    <span class="day-title">{{ date|date:"m月d日" }} · Day {{ forloop.counter }}</span>
+                    <span class="day-subtitle">{{ date|date:"Y年" }}</span>
+                </div>
+                <table class="schedule-table">
+                    <thead>
+                        <tr>
+                            <th class="time-col">时间</th>
+                            <th>活动</th>
+                            <th class="location-col">地点</th>
+                        </tr>
+                    </thead>
+                    <tbody>
                         {% for schedule in schedules %}
-                            <div class="schedule-item">
-                                <div class="schedule-time">{{ schedule.start_time|time:"H:i" }} - {{ schedule.end_time|time:"H:i" }}</div>
-                                <div class="schedule-title">{{ schedule.activity_title }}</div>
-                                <div class="schedule-location">地点: {{ schedule.destination_id.city_name }}</div>
+                        <tr>
+                            <td class="time-col">{{ schedule.start_time|time:"H:i" }}-{{ schedule.end_time|time:"H:i" }}</td>
+                            <td class="activity-col">
+                                {{ schedule.activity_title }}
                                 {% if schedule.activity_type %}
-                                    <div class="schedule-contact">活动类型: {{ schedule.activity_type }}</div>
-                                    {% if schedule.activity_type == 'CHECK_IN' or schedule.activity_type == 'CHECK_OUT' %}
-                                        {% if schedule.hotel_id %}
-                                            <div class="schedule-contact">酒店名称: {{ schedule.hotel_id.hotel_name }}</div>
-                                        {% else %}
-                                            <div class="schedule-contact">酒店名称: 无</div>
-                                        {% endif %}
+                                    {% if schedule.activity_type == 'CHECK_IN' %}
+                                        <span class="type-badge checkin">入住</span>
+                                    {% elif schedule.activity_type == 'CHECK_OUT' %}
+                                        <span class="type-badge checkout">退房</span>
+                                    {% elif schedule.activity_type == 'SIGHTSEEING' %}
+                                        <span class="type-badge sightseeing">观光</span>
+                                    {% elif schedule.activity_type == 'TRANSPORT' %}
+                                        <span class="type-badge transport">交通</span>
+                                    {% elif schedule.activity_type == 'MEAL' %}
+                                        <span class="type-badge meal">餐饮</span>
                                     {% endif %}
                                 {% endif %}
-                            </div>
+                            </td>
+                            <td class="location-col">{{ schedule.destination_id.city_name|default:"-" }}</td>
+                        </tr>
                         {% endfor %}
-                    </div>
-                {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
             {% else %}
-                <div class="info-card">
-                    <p>暂无行程安排信息</p>
-                </div>
+            <div style="color: #999;">暂无行程安排</div>
             {% endif %}
-        </section>
+        </div>
         
-        <!-- 行程JSON数据 -->
-        <section>
-            <h2>5. 行程结构化JSON数据</h2>
-            {% if itinerary.itinerary_json_data %}
-                <div class="info-card">
-                    <div class="json-container">
-                        <button class="json-toggle" onclick="toggleJson(this)">展开 JSON 数据</button>
-                        <div class="json-content" style="display: none;">
-                            <pre class="json-pre">{{ itinerary.itinerary_json_data }}</pre>
-                        </div>
-                    </div>
-                </div>
-            {% else %}
-                <div class="info-card">
-                    <p>暂无JSON数据</p>
-                </div>
-            {% endif %}
-        </section>
+        <!-- 行程描述 -->
+        {% if itinerary.description %}
+        <div class="section">
+            <div class="section-title">行程说明</div>
+            <div class="description">{{ itinerary.description|linebreaks }}</div>
+        </div>
+        {% endif %}
+        
+        <!-- 行程报价 -->
+        {% if itinerary.itinerary_quote %}
+        <div class="section">
+            <div class="section-title">行程报价</div>
+            <div class="quote-box">
+                {{ itinerary.itinerary_quote|linebreaks }}
+            </div>
+        </div>
+        {% endif %}
     </div>
-    
-    <script>
-        function toggleJson(button) {
-            const content = button.nextElementSibling;
-            const pre = content.querySelector('.json-pre');
-            
-            if (content.style.display === 'none') {
-                content.style.display = 'block';
-                button.textContent = '折叠 JSON 数据';
-                
-                // 确保JSON数据格式正确显示
-                if (pre.textContent) {
-                    try {
-                        // 检查是否已经是格式化的JSON
-                        if (pre.textContent.trim().startsWith('{') || pre.textContent.trim().startsWith('[')) {
-                            const jsonObj = JSON.parse(pre.textContent);
-                            pre.textContent = JSON.stringify(jsonObj, null, 2);
-                        } else {
-                            // 如果是对象字符串表示，尝试转换
-                            const jsonStr = pre.textContent.replace(/^Object\s+\{/, '{').replace(/\}$/, '');
-                            const jsonObj = JSON.parse(jsonStr);
-                            pre.textContent = JSON.stringify(jsonObj, null, 2);
-                        }
-                    } catch (e) {
-                        console.error('JSON parsing error:', e);
-                        // 如果解析失败，保持原始内容
-                    }
-                }
-            } else {
-                content.style.display = 'none';
-                button.textContent = '展开 JSON 数据';
-            }
-        }
-    </script>
-    
-    <style>
-        /* JSON数据展示样式 */
-        .json-container {
-            position: relative;
-        }
-        
-        .json-toggle {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            transition: background-color 0.3s ease;
-        }
-        
-        .json-toggle:hover {
-            background-color: #2980b9;
-        }
-        
-        .json-content {
-            overflow: auto;
-            max-height: 500px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f8f9fa;
-        }
-        
-        .json-pre {
-            margin: 0;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            color: #333;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        
-        /* JSON语法高亮 */
-        .json-pre {
-            position: relative;
-        }
-        
-        .json-pre .json-key {
-            color: #0000ff;
-        }
-        
-        .json-pre .json-string {
-            color: #008000;
-        }
-        
-        .json-pre .json-number {
-            color: #ff0000;
-        }
-        
-        .json-pre .json-boolean {
-            color: #800080;
-        }
-        
-        .json-pre .json-null {
-            color: #808080;
-        }
-    </style>
 </body>
 </html>

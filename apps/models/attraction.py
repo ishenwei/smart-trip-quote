@@ -48,6 +48,7 @@ class Attraction(BaseModel):
     ticket_type = models.CharField(max_length=50, blank=True, null=True, verbose_name='票种', db_comment='门票类型,如成人票、儿童票、套票等')
     booking_required = models.BooleanField(default=False, verbose_name='是否需要预订', db_comment='标识是否需要提前预订')
     booking_website = models.CharField(max_length=500, blank=True, null=True, verbose_name='预订网站', db_comment='官方预订网站URL')
+    pricing_strategy = models.TextField(blank=True, null=True, verbose_name='定价策略', db_comment='景点详细定价策略说明,包括不同票种、优惠政策、套票组合等定价规则')
     facilities = JSONField(blank=True, null=True, verbose_name='设施', db_comment='景点设施列表,如停车场、餐厅、洗手间等')
     popularity_score = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)], blank=True, null=True, verbose_name='受欢迎度评分', db_comment='景点受欢迎度评分,范围0-5')
     visitor_rating = models.DecimalField(max_digits=3, decimal_places=2, validators=[MinValueValidator(0), MaxValueValidator(5)], blank=True, null=True, verbose_name='游客评分', db_comment='游客综合评分,范围0-5')
