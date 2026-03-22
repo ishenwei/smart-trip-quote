@@ -232,6 +232,13 @@ class ItineraryAdmin(admin.ModelAdmin):
     # 指定主键URL参数名称，解决行程ID在URL中被编码的问题
     pk_url_kwarg = 'itinerary_id'
     
+    # 引入 EasyMDE 的 CSS 和 JS
+    class Media:
+        css = {
+            'all': ('easymde/easymde.min.css',)
+        }
+        js = ('easymde/easymde.min.js', 'easymde/easymde.init.js')
+    
     # 重写get_object方法，确保正确处理行程ID
     def get_object(self, request, object_id, from_field=None):
         """获取行程对象，确保行程ID不被URL编码"""
@@ -581,13 +588,16 @@ class ItineraryAdmin(admin.ModelAdmin):
         """重写 get_form 方法，为 description 和 itinerary_quote 字段使用 EasyMDEEditor"""
         form = super().get_form(request, obj, **kwargs)
         
+        # 配置 EasyMDE 默认 preview 模式
+        easymde_options = {'initialMode': 'preview'}
+        
         # 为 description 字段配置 EasyMDEEditor
         if 'description' in form.base_fields:
-            form.base_fields['description'].widget = EasyMDEEditor()
+            form.base_fields['description'].widget = EasyMDEEditor(easymde_options=easymde_options)
         
         # 为 itinerary_quote 字段配置 EasyMDEEditor
         if 'itinerary_quote' in form.base_fields:
-            form.base_fields['itinerary_quote'].widget = EasyMDEEditor()
+            form.base_fields['itinerary_quote'].widget = EasyMDEEditor(easymde_options=easymde_options)
         
         return form
     

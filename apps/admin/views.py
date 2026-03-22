@@ -367,16 +367,22 @@ def quote_itinerary(request, itinerary_id):
         if not itinerary.itinerary_json_data:
             return JsonResponse({'success': False, 'error': '行程数据为空，无法进行报价'}, status=400)
         
+        # 解析 itinerary_quote_json_data 为 JSON 对象
+        import json
+        quote_json_data = None
+        if itinerary.itinerary_quote_json_data:
+            try:
+                quote_json_data = json.loads(itinerary.itinerary_quote_json_data)
+            except json.JSONDecodeError:
+                pass
+        
         webhook_data = {
             'itinerary_id': itinerary.itinerary_id,
-            'itinerary_json_data': itinerary.itinerary_json_data
+            'itinerary_quote_json_data': quote_json_data
         }
         
         # 打印 webhook 数据用于调试
         logger.info(f'行程报价webhook数据 keys: {list(webhook_data.keys())}')
-        logger.info(f'itinerary_json_data type: {type(itinerary.itinerary_json_data)}')
-        if isinstance(itinerary.itinerary_json_data, dict):
-            logger.info(f'itinerary_json_data keys: {list(itinerary.itinerary_json_data.keys())}')
         
         n8n_webhook_url = getattr(settings, 'N8N_ITINERARY_QUOTE_WEBHOOK_URL', '')
         n8n_api_key = getattr(settings, 'N8N_API_KEY', '')

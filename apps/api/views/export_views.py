@@ -5,6 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views import View
 from django.template.loader import get_template
 import logging
+import markdown
 # WeasyPrint 延迟导入，避免启动时依赖问题
 # from weasyprint import HTML
 from docx import Document
@@ -57,11 +58,18 @@ class ItineraryPDFExportView(View):
 
             traveler_stats_list = list(itinerary.traveler_stats.all())
 
+            # 解析 Markdown 为 HTML（服务器端）
+            md = markdown.Markdown(extensions=['extra', 'tables'])
+            description_html = md.convert(itinerary.description or '')
+            quote_html = md.convert(itinerary.itinerary_quote or '')
+            
             context = {
                 'itinerary': itinerary,
                 'destinations': destinations,
                 'grouped_schedules': grouped_schedules,
                 'traveler_stats': traveler_stats_list[0] if traveler_stats_list else None,
+                'description_html': description_html,
+                'quote_html': quote_html,
             }
 
             # Render template to string
@@ -150,6 +158,19 @@ class ItineraryWordExportView(View):
             if schedule.destination_id:
                 schedules_text += f"    地点: {schedule.destination_id.city_name}\n"
 
+        # 将 Markdown 转换为纯文本（去除 Markdown 格式符号）
+        def markdown_to_text(md_content):
+            if not md_content:
+                return ''
+            # 先转换为 HTML
+            html = markdown.markdown(md_content, extensions=['extra', 'tables'])
+            # 去除 HTML 标签
+            import re
+            text = re.sub(r'<[^>]+>', '', html)
+            # 清理多余空白
+            text = re.sub(r'\n{3,}', '\n\n', text)
+            return text.strip()
+        
         # 替换占位符
         replacements = {
             '{{itinerary_name}}': itinerary.itinerary_name or '',
@@ -157,6 +178,9 @@ class ItineraryWordExportView(View):
             '{{total_days}}': str(itinerary.total_days) if itinerary.total_days else '',
             '{{start_date}}': str(itinerary.start_date) if itinerary.start_date else '',
             '{{end_date}}': str(itinerary.end_date) if itinerary.end_date else '',
+            # 单括号版本（模板中可能使用）
+            '{start_date}': str(itinerary.start_date) if itinerary.start_date else '',
+            '{end_date}': str(itinerary.end_date) if itinerary.end_date else '',
             '{{departure_city}}': itinerary.departure_city or '',
             '{{return_city}}': itinerary.return_city or '',
             '{{contact_person}}': itinerary.contact_person or '',
@@ -169,8 +193,8 @@ class ItineraryWordExportView(View):
             '{{infant_count}}': str(infant_count),
             '{{destinations}}': destinations_text.strip(),
             '{{daily_schedules}}': schedules_text.strip(),
-            '{{description}}': itinerary.description or '',
-            '{{itinerary_quote}}': itinerary.itinerary_quote or '',
+            '{{description}}': markdown_to_text(itinerary.description),
+            '{{itinerary_quote}}': markdown_to_text(itinerary.itinerary_quote),
             '{{fee_included}}': '',
             '{{fee_excluded}}': '',
             '{{special_notes}}': '',

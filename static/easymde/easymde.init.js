@@ -14,9 +14,12 @@ if (!!EasyMDE_JQuery) {
     EasyMDE_JQuery.each(EasyMDE_JQuery('.easymde-box'), function(i, elem) {
       var options = JSON.parse(EasyMDE_JQuery(elem).attr('data-easymde-options'));
       options['element'] = elem;
+      options['autofocus'] = false;
       if (elem.EasyMDE === undefined) {
         elem.EasyMDE = new EasyMDE(options);
       }
+      // 初始化后切换到预览模式
+      elem.EasyMDE.togglePreview();
     });
   });
 }

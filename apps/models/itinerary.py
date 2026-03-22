@@ -121,6 +121,7 @@ class Itinerary(BaseModel):
         
         # 保存前更新JSON数据
         self.update_itinerary_json_data()
+        self.update_itinerary_quote_json_data()
         
         super().save(*args, **kwargs)
     
@@ -237,6 +238,112 @@ class Itinerary(BaseModel):
         
         # 更新JSON数据字段
         self.itinerary_json_data = itinerary_data
+    
+    def update_itinerary_quote_json_data(self):
+        """更新行程报价的JSON结构化数据"""
+        from .daily_schedule import DailySchedule
+        
+        quote_data = {
+            'itinerary_id': self.itinerary_id,
+            'itinerary_name': self.itinerary_name,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'total_days': self.total_days,
+        }
+        
+        # 添加目的地数据
+        destinations = []
+        try:
+            for dest in self.destinations.all():
+                destination_data = {
+                    'destination_id': str(dest.destination_id),
+                    'city_name': dest.city_name,
+                }
+                destinations.append(destination_data)
+        except Exception:
+            pass
+        quote_data['destinations'] = destinations
+        
+        # 添加旅行者统计数据
+        traveler_stats = []
+        try:
+            for stat in self.traveler_stats.all():
+                stat_data = {
+                    'adult_count': stat.adult_count,
+                    'child_count': stat.child_count,
+                    'infant_count': stat.infant_count,
+                    'senior_count': stat.senior_count,
+                }
+                traveler_stats.append(stat_data)
+        except Exception:
+            pass
+        quote_data['traveler_stats'] = traveler_stats
+        
+        # 获取所有关联的景点、酒店、餐厅
+        attractions = []
+        hotels = []
+        restaurants = []
+        
+        try:
+            # 从每日行程中提取关联的景点、酒店、餐厅
+            schedules = DailySchedule.objects.filter(itinerary_id=self)
+            for schedule in schedules:
+                # 景点
+                if schedule.attraction_id_id:
+                    from .attraction import Attraction
+                    try:
+                        attraction = Attraction.objects.get(attraction_id=schedule.attraction_id_id)
+                        attractions.append({
+                            'attraction_id': str(attraction.attraction_id),
+                            'attraction_name': attraction.attraction_name,
+                            'pricing_strategy': attraction.pricing_strategy,
+                        })
+                    except Attraction.DoesNotExist:
+                        pass
+                
+                # 酒店
+                if schedule.hotel_id_id:
+                    from .hotel import Hotel
+                    try:
+                        hotel = Hotel.objects.get(hotel_id=schedule.hotel_id_id)
+                        hotels.append({
+                            'hotel_id': str(hotel.hotel_id),
+                            'hotel_name': hotel.hotel_name,
+                            'pricing_strategy': hotel.pricing_strategy,
+                        })
+                    except Hotel.DoesNotExist:
+                        pass
+                
+                # 餐厅
+                if schedule.restaurant_id_id:
+                    from .restaurant import Restaurant
+                    try:
+                        restaurant = Restaurant.objects.get(restaurant_id=schedule.restaurant_id_id)
+                        restaurants.append({
+                            'restaurant_id': str(restaurant.restaurant_id),
+                            'restaurant_name': restaurant.restaurant_name,
+                            'pricing_strategy': restaurant.pricing_strategy,
+                        })
+                    except Restaurant.DoesNotExist:
+                        pass
+        except Exception as e:
+            import logging
+            logger = logging.getLogger('itinerary')
+            logger.error(f"Error fetching quote data: {str(e)}")
+            pass
+        
+        # 去重
+        attractions = list({a['attraction_id']: a for a in attractions}.values())
+        hotels = list({h['hotel_id']: h for h in hotels}.values())
+        restaurants = list({r['restaurant_id']: r for r in restaurants}.values())
+        
+        quote_data['attractions'] = attractions
+        quote_data['hotels'] = hotels
+        quote_data['restaurants'] = restaurants
+        
+        # 更新JSON数据字段（使用json.dumps转换为标准JSON字符串）
+        import json
+        self.itinerary_quote_json_data = json.dumps(quote_data, ensure_ascii=False)
 
     def get_absolute_url(self):
         """返回行程的编辑链接"""

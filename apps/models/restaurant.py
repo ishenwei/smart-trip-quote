@@ -115,6 +115,7 @@ class Restaurant(BaseModel):
     created_by = models.CharField(max_length=50, blank=True, verbose_name='创建人', db_comment='记录创建人用户名')
     updated_by = models.CharField(max_length=50, blank=True, verbose_name='更新人', db_comment='记录更新人用户名')
     version = models.IntegerField(default=1, verbose_name='版本', db_comment='数据版本号,用于版本控制')
+    pricing_strategy = models.TextField(null=True, blank=True, verbose_name='定价策略', db_comment='餐厅的定价策略信息')
     
     class Meta:
         db_table = 'restaurants'

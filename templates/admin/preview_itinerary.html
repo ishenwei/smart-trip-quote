@@ -269,12 +269,76 @@
             line-height: 1.8;
         }
         
+        .description h1, .description h2, .description h3, 
+        .description h4, .description h5, .description h6 {
+            margin: 16px 0 8px 0;
+            color: #1a73e8;
+        }
+        
+        .description p {
+            margin: 8px 0;
+        }
+        
+        .description ul, .description ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        
+        .description table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 12px 0;
+        }
+        
+        .description th, .description td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .description th {
+            background: #f5f5f5;
+        }
+        
         /* 报价区块 */
         .quote-box {
-            background: #fff8e1;
-            border: 1px solid #ffe082;
+            background: #f5f5f5;
+            border: 1px solid #e0e0e0;
             border-radius: 6px;
             padding: 16px;
+            color: #444;
+            line-height: 1.8;
+        }
+        
+        .quote-box h1, .quote-box h2, .quote-box h3, 
+        .quote-box h4, .quote-box h5, .quote-box h6 {
+            margin: 16px 0 8px 0;
+            color: #1a73e8;
+        }
+        
+        .quote-box p {
+            margin: 8px 0;
+        }
+        
+        .quote-box ul, .quote-box ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+        
+        .quote-box table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 12px 0;
+        }
+        
+        .quote-box th, .quote-box td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .quote-box th {
+            background: #f5f5f5;
         }
         
         .quote-amount {
@@ -421,7 +485,7 @@
         </div>
         
         <!-- 每日行程 -->
-        <div class="section">
+        <div class="section" style="page-break-before: always;">
             <div class="section-title">每日行程</div>
             {% if grouped_schedules %}
             {% for date, schedules in grouped_schedules.items %}
@@ -471,22 +535,54 @@
         </div>
         
         <!-- 行程描述 -->
-        {% if itinerary.description %}
+        {% if description_html %}
+        <div class="section" style="page-break-before: always;">
+            <div class="section-title">行程说明</div>
+            <div class="description">{{ description_html|safe }}</div>
+        </div>
+        {% elif itinerary.description %}
         <div class="section">
             <div class="section-title">行程说明</div>
-            <div class="description">{{ itinerary.description|linebreaks }}</div>
+            <textarea id="description-editor">{{ itinerary.description }}</textarea>
         </div>
         {% endif %}
         
         <!-- 行程报价 -->
-        {% if itinerary.itinerary_quote %}
+        {% if quote_html %}
         <div class="section">
             <div class="section-title">行程报价</div>
-            <div class="quote-box">
-                {{ itinerary.itinerary_quote|linebreaks }}
-            </div>
+            <div class="quote-box">{{ quote_html|safe }}</div>
+        </div>
+        {% elif itinerary.itinerary_quote %}
+        <div class="section">
+            <div class="section-title">行程报价</div>
+            <textarea id="quote-editor">{{ itinerary.itinerary_quote }}</textarea>
         </div>
         {% endif %}
     </div>
+    
+    <!-- EasyMDE JS -->
+    <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // 使用 marked 解析 Markdown 并应用页面 CSS
+        function renderMarkdown(elementId, outputClass) {
+            var textarea = document.getElementById(elementId);
+            if (!textarea) return;
+            
+            var content = textarea.value;
+            var html = marked.parse(content);
+            
+            var wrapper = document.createElement('div');
+            wrapper.className = outputClass;
+            wrapper.innerHTML = html;
+            
+            textarea.parentNode.replaceChild(wrapper, textarea);
+        }
+        
+        // 渲染 description 和 quote
+        renderMarkdown('description-editor', 'description');
+        renderMarkdown('quote-editor', 'quote-box');
+    </script>
 </body>
 </html>

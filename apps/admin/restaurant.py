@@ -106,7 +106,7 @@ class RestaurantAdmin(admin.ModelAdmin):
         (
             '价格信息', {
                 'fields': (
-                    'price_range', 'avg_price_per_person'
+                    'price_range', 'pricing_strategy'
                 )
             }
         ),

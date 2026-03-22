@@ -99,7 +99,7 @@ class HotelAdmin(admin.ModelAdmin):
         (
             '价格信息', {
                 'fields': (
-                    'price_range', 'currency', 'min_price', 'max_price'
+                    'pricing_strategy',
                 )
             }
         ),
