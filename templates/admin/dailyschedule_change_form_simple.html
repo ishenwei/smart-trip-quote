@@ -113,6 +113,16 @@
         </div>
     </div>
     <script type="text/javascript">
+    // 页面加载时立即设置消息监听（必须在 ready 之前）
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'daily_schedule_saved') {
+        // 直接刷新父窗口
+        if (window.opener) {
+          window.opener.location.reload();
+        }
+      }
+    });
+
     (function($) {
       $(document).ready(function($) {
         // 检查是否有成功消息

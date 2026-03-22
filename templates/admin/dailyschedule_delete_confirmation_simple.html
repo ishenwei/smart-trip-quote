@@ -67,19 +67,90 @@
     <script type="text/javascript">
     (function($) {
       $(document).ready(function($) {
-        // 监听删除按钮点击
-        $('form input[type="submit"]').click(function() {
-          // 删除成功后刷新父窗口
-          window.onbeforeunload = function() {
-            if (window.opener) {
-              window.opener.location.reload();
+        // 获取 CSRF token 从 cookie 中（Django 方式）
+        function getCsrfToken() {
+          var name = 'csrftoken';
+          var cookieValue = null;
+          if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+              }
             }
-          };
+          }
+          return cookieValue;
+        }
+
+        // 监听表单提交（删除确认）
+        $('form').on('submit', function(e) {
+          e.preventDefault();
+          
+          var $form = $(this);
+          var deleteUrl = window.location.href;  // POST 到当前删除确认页本身
+          
+          $.ajax({
+            url: deleteUrl,
+            type: 'POST',
+            data: $form.serialize(),  // 包含 csrf_token 和 post=yes
+            headers: {
+              'X-Requested-With': 'XMLHttpRequest',
+              'X-CSRFToken': getCsrfToken()
+            },
+            success: function(response, textStatus, xhr) {
+              // 检查是否是 AJAX 响应还是重定向
+              var contentType = xhr.getResponseHeader('Content-Type') || '';
+              var isAjaxResponse = contentType.indexOf('application/json') !== -1;
+              
+              if (isAjaxResponse) {
+                // JSON 响应表示成功
+                if (window.opener) {
+                  window.opener.location.reload();
+                }
+                $('.delete-confirmation').html(
+                  '<div style="padding: 20px; text-align: center;">' +
+                  '<p style="color: green; font-size: 16px;">删除成功！</p>' +
+                  '<p>父窗口已刷新，您现在可以手动关闭此弹窗。</p>' +
+                  '</div>'
+                );
+              } else {
+                // HTML 响应，检查是否包含成功标识
+                if (response.indexOf('success') !== -1 || response.indexOf('删除成功') !== -1) {
+                  if (window.opener) {
+                    window.opener.location.reload();
+                  }
+                }
+                // 无论如何都刷新父窗口
+                if (window.opener) {
+                  window.opener.location.reload();
+                }
+              }
+            },
+            error: function(xhr, status, error) {
+              if (xhr.status === 403) {
+                alert('删除失败：CSRF 验证失败，请刷新页面重试。');
+              } else if (xhr.status === 302 || xhr.status === 301) {
+                // 重定向表示 Django 处理成功
+                if (window.opener) {
+                  window.opener.location.reload();
+                }
+                $('.delete-confirmation').html(
+                  '<div style="padding: 20px; text-align: center;">' +
+                  '<p style="color: green; font-size: 16px;">删除成功！</p>' +
+                  '<p>父窗口已刷新，您现在可以手动关闭此弹窗。</p>' +
+                  '</div>'
+                );
+              } else {
+                alert('删除失败：' + (error || '请重试。'));
+              }
+            }
+          });
         });
         
         // 监听取消按钮点击
-        $('form a.cancel-link').click(function() {
-          // 关闭窗口
+        $('form a.cancel-link').on('click', function() {
           window.close();
           return false;
         });
