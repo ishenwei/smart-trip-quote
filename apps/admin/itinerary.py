@@ -682,6 +682,7 @@ class ItineraryAdmin(admin.ModelAdmin):
         import logging
         import sys
         import traceback
+        from datetime import timedelta
         
         # 确保输出不缓冲
         sys.stdout.flush()
@@ -735,7 +736,71 @@ class ItineraryAdmin(admin.ModelAdmin):
         else:
             obj.updated_by = request.user.username
         
-        # 验证关联的记录（不包含DailySchedule）
+        # ========== 处理 start_date 变化时的自动调整逻辑 ==========
+        if change:
+            try:
+                # 获取原始行程对象
+                old_obj = Itinerary.objects.get(pk=obj.pk)
+                old_start_date = old_obj.start_date
+                new_start_date = obj.start_date
+                
+                # 检查 start_date 是否发生变化
+                if old_start_date and new_start_date and old_start_date != new_start_date:
+                    logger.info(f"检测到 start_date 发生变化: {old_start_date} -> {new_start_date}")
+                    
+                    # 1) 自动根据总天数调整结束日期(end_date)
+                    if obj.total_days:
+                        old_end_date = old_obj.end_date
+                        new_end_date = new_start_date + timedelta(days=obj.total_days - 1)
+                        obj.end_date = new_end_date
+                        logger.info(f"自动调整 end_date: {old_end_date} -> {new_end_date}")
+                    
+                    # 2) 自动调整所有关联 Destination 的开始/结束日期
+                    destinations = obj.destinations.all()
+                    logger.info(f"开始调整 {destinations.count()} 个 Destination 的日期")
+                    
+                    for dest in destinations:
+                        old_arrival = dest.arrival_date
+                        old_departure = dest.departure_date
+                        
+                        # 计算日期偏移量
+                        date_offset = (new_start_date - old_start_date).days
+                        
+                        # 调整 arrival_date
+                        if dest.arrival_date:
+                            dest.arrival_date = dest.arrival_date + timedelta(days=date_offset)
+                        
+                        # 调整 departure_date
+                        if dest.departure_date:
+                            dest.departure_date = dest.departure_date + timedelta(days=date_offset)
+                        
+                        dest.save()
+                        logger.info(f"Destination {dest.city_name} 日期调整: arrival {old_arrival} -> {dest.arrival_date}, departure {old_departure} -> {dest.departure_date}")
+                    
+                    # 3) 自动调整所有关联 DailySchedule 的活动日期(schedule_date)
+                    schedules = DailySchedule.objects.filter(itinerary_id=obj)
+                    logger.info(f"开始调整 {schedules.count()} 个 DailySchedule 的日期")
+                    
+                    for schedule in schedules:
+                        old_schedule_date = schedule.schedule_date
+                        
+                        # 计算日期偏移量
+                        date_offset = (new_start_date - old_start_date).days
+                        
+                        # 调整 schedule_date
+                        if schedule.schedule_date:
+                            schedule.schedule_date = schedule.schedule_date + timedelta(days=date_offset)
+                            schedule.save()
+                            logger.info(f"DailySchedule {schedule.schedule_id} 日期调整: {old_schedule_date} -> {schedule.schedule_date}")
+                    
+                    logger.info("日期调整完成")
+            except Itinerary.DoesNotExist:
+                logger.warning("未找到原始行程对象，跳过日期调整逻辑")
+            except Exception as e:
+                logger.error(f"日期调整过程中发生异常: {str(e)}")
+                logger.error(f"异常详情: {traceback.format_exc()}")
+        
+        # ========== 验证关联的记录（不包含DailySchedule） ==========
         from django.core.exceptions import ValidationError
         error_messages = []
         

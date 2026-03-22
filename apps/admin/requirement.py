@@ -238,17 +238,18 @@ class RequirementAdmin(admin.ModelAdmin):
     ]
     
     fieldsets = (
-        ('基本信息', {
-            'fields': (
-                'requirement_id',
-                'origin_name',
-                'origin_type',
-                'destination_cities',
-                'contact_person',
-                'contact_phone',
-                'contact_company'
-            )
-        }),
+                ('基本信息', {
+                    'fields': (
+                        'requirement_id',
+                        'origin_name',
+                        'origin_type',
+                        'destination_cities',
+                        'district',
+                        'contact_person',
+                        'contact_phone',
+                        'contact_company'
+                    )
+                }),
         ('团队人数', {
             'fields': (
                 'group_adults',
@@ -337,6 +338,7 @@ class RequirementAdmin(admin.ModelAdmin):
                         'origin_name',
                         'origin_type',
                         'destination_cities',
+                        'district',
                         'contact_person',
                         'contact_phone',
                         'contact_company'
