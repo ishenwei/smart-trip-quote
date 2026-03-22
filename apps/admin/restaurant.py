@@ -74,7 +74,7 @@ class RestaurantAdmin(admin.ModelAdmin):
         (
             '基本信息', {
                 'fields': (
-                    'restaurant_code', 'restaurant_name', 'country_code', 
+                    'restaurant_name', 'country_code', 
                     'city_name', 'district', 'address', 'cuisine_type', 
                     'sub_cuisine_types', 'restaurant_type'
                 )

@@ -78,6 +78,11 @@ class ItineraryService:
             
             cls._create_requirement_itinerary_relation(requirement, itinerary)
             
+            # 更新 itinerary_json_data 和 itinerary_quote_json_data
+            itinerary.update_itinerary_json_data()
+            itinerary.update_itinerary_quote_json_data()
+            itinerary.save()
+            
             logger.info(f'行程创建成功: itinerary_id={itinerary.itinerary_id}, name={itinerary.itinerary_name}')
             
             return True, itinerary, None

@@ -364,6 +364,11 @@ def quote_itinerary(request, itinerary_id):
     try:
         itinerary = get_object_or_404(Itinerary, itinerary_id=itinerary_id)
         
+        # 更新 JSON 数据，确保为最新
+        itinerary.update_itinerary_json_data()
+        itinerary.update_itinerary_quote_json_data()
+        itinerary.save()
+        
         if not itinerary.itinerary_json_data:
             return JsonResponse({'success': False, 'error': '行程数据为空，无法进行报价'}, status=400)
         
@@ -378,6 +383,7 @@ def quote_itinerary(request, itinerary_id):
         
         webhook_data = {
             'itinerary_id': itinerary.itinerary_id,
+            'itinerary_json_data': itinerary.itinerary_json_data,
             'itinerary_quote_json_data': quote_json_data
         }
         

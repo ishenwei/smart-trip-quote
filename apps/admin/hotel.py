@@ -73,7 +73,7 @@ class HotelAdmin(admin.ModelAdmin):
         (
             '基本信息', {
                 'fields': (
-                    'hotel_code', 'hotel_name', 'brand_name', 'country_code', 
+                    'hotel_name', 'brand_name', 'country_code', 
                     'city_name', 'district', 'address', 'latitude', 'longitude'
                 )
             }

@@ -30,7 +30,7 @@ class Restaurant(BaseModel):
         PERMANENTLY_CLOSED = 'PERMANENTLY_CLOSED', '永久关闭'
     
     restaurant_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='餐厅ID', db_comment='餐厅唯一标识符,使用UUID格式')
-    restaurant_code = models.CharField(max_length=50, unique=True, verbose_name='餐厅代码', db_comment='餐厅唯一编码,用于系统内部标识和检索')
+    restaurant_code = models.CharField(max_length=50, blank=True, default='', verbose_name='餐厅代码', db_comment='餐厅唯一编码,用于系统内部标识和检索')
     restaurant_name = models.CharField(max_length=200, verbose_name='餐厅名称', db_comment='餐厅中文名称')
     country_code = models.CharField(max_length=2, verbose_name='国家代码', db_comment='所在国家的ISO 3166-1 alpha-2代码,如CN、US等')
     city_name = models.CharField(max_length=100, verbose_name='城市名称', db_comment='餐厅所在城市名称')

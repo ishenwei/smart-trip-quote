@@ -1,0 +1,70 @@
+/* 每日行程内联列表列宽调整 */
+/* 操作列宽度 */
+.field-edit_daily_schedule {
+    width: 50px !important;
+    min-width: 50px !important;
+    max-width: 50px !important;
+}
+
+/* 第几天列宽度 */
+.field-day_number {
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+}
+
+/* 日期列宽度 */
+.field-schedule_date {
+    width: 90px !important;
+    min-width: 90px !important;
+}
+
+/* 目的地列宽度 */
+.field-destination_id {
+    width: 80px !important;
+    min-width: 80px !important;
+}
+
+/* 时间列宽度 */
+.field-time_range {
+    width: 80px !important;
+    min-width: 80px !important;
+}
+
+/* 活动类型列宽度 */
+.field-activity_type {
+    width: 70px !important;
+    min-width: 70px !important;
+}
+
+/* 活动标题列宽度 - 增加 */
+.field-activity_title {
+    width: 150px !important;
+    min-width: 150px !important;
+}
+
+/* 活动描述列宽度 - 增加 */
+.field-activity_description {
+    width: 250px !important;
+    min-width: 200px !important;
+}
+
+/* 关联列宽度 */
+.field-attraction_id,
+.field-hotel_id,
+.field-restaurant_id {
+    width: 100px !important;
+    min-width: 80px !important;
+}
+
+/* 备注列宽度 */
+.field-notes {
+    width: 120px !important;
+    min-width: 100px !important;
+}
+
+/* 删除列宽度 */
+.field-delete_daily_schedule {
+    width: 40px !important;
+    min-width: 40px !important;
+}

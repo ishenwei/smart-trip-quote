@@ -25,7 +25,7 @@ class Hotel(BaseModel):
         CLOSED = 'CLOSED', '已关闭'
     
     hotel_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, verbose_name='酒店ID', db_comment='酒店唯一标识符,使用UUID格式')
-    hotel_code = models.CharField(max_length=50, unique=True, verbose_name='酒店代码', db_comment='酒店唯一编码,用于系统内部标识和检索')
+    hotel_code = models.CharField(max_length=50, blank=True, default='', verbose_name='酒店代码', db_comment='酒店唯一编码,用于系统内部标识和检索')
     hotel_name = models.CharField(max_length=200, verbose_name='酒店名称', db_comment='酒店中文名称')
     brand_name = models.CharField(max_length=100, blank=True, verbose_name='品牌名称', db_comment='酒店所属品牌名称')
     country_code = models.CharField(max_length=2, verbose_name='国家代码', db_comment='所在国家的ISO 3166-1 alpha-2代码,如CN、US等')

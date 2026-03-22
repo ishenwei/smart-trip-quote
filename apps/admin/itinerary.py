@@ -45,6 +45,12 @@ class DayScheduleInline(admin.TabularInline):
     extra = 0
     classes = ('compact',)
     
+    # 自定义 CSS 调整列宽
+    class Media:
+        css = {
+            'all': ('admin/css/custom_inline.css',)
+        }
+    
     def __init__(self, day_number, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.day_number = day_number
@@ -80,6 +86,43 @@ class DayScheduleInline(admin.TabularInline):
     delete_daily_schedule.short_description = '删除'
     delete_daily_schedule.allow_tags = True
     
+    # 合并开始和结束时间
+    def time_range(self, obj):
+        if obj and obj.start_time and obj.end_time:
+            start = str(obj.start_time)[:5]  # 去掉秒
+            end = str(obj.end_time)[:5]
+            return f'{start}~{end}'
+        elif obj and obj.start_time:
+            return str(obj.start_time)[:5]
+        return ''
+    time_range.short_description = '时间'
+    
+    # 酒店显示名称（带链接）
+    def hotel_name(self, obj):
+        if obj and obj.hotel_id:
+            edit_url = reverse('admin:apps_hotel_change', args=[obj.hotel_id.hotel_id])
+            return format_html(
+                '<a href="{}" target="_blank">{}</a>',
+                edit_url,
+                obj.hotel_id.hotel_name
+            )
+        return ''
+    hotel_name.short_description = '酒店'
+    hotel_name.allow_tags = True
+    
+    # 餐厅显示名称（带链接）
+    def restaurant_name(self, obj):
+        if obj and obj.restaurant_id:
+            edit_url = reverse('admin:apps_restaurant_change', args=[obj.restaurant_id.restaurant_id])
+            return format_html(
+                '<a href="{}" target="_blank">{}</a>',
+                edit_url,
+                obj.restaurant_id.restaurant_name
+            )
+        return ''
+    restaurant_name.short_description = '餐厅'
+    restaurant_name.allow_tags = True
+    
     # 将自定义方法添加到只读字段
     readonly_fields = (
         'edit_daily_schedule',
@@ -90,11 +133,10 @@ class DayScheduleInline(admin.TabularInline):
         'activity_type',
         'activity_title',
         'activity_description',
-        'start_time',
-        'end_time',
+        'time_range',
         'attraction_id',
-        'hotel_id',
-        'restaurant_id',
+        'hotel_name',
+        'restaurant_name',
         'estimated_cost',
         'currency',
         'booking_status',
@@ -112,20 +154,19 @@ class DayScheduleInline(admin.TabularInline):
         'day_number',
         'schedule_date',
         'destination_id',
-        'start_time',
-        'end_time',
+        'time_range',
         'activity_type',
         'activity_title',
         'activity_description',
         'attraction_id',
-        'hotel_id',
-        'restaurant_id',
+        'hotel_name',
+        'restaurant_name',
+        'notes',
         'delete_daily_schedule',
         #'estimated_cost',
         #'currency',
         #'booking_status',
         #'booking_reference',
-        #'notes'
     )
     
     # 添加新增按钮

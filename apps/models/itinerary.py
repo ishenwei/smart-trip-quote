@@ -23,7 +23,7 @@ class Itinerary(BaseModel):
         DRAFT = 'DRAFT', '草稿'
         PENDING_REVIEW = 'PENDING_REVIEW', '待审核'
         CONFIRMED = 'CONFIRMED', '已确认'
-        EXPIRED = 'EXPIRED', '已过期'
+        EXPIRED = 'EXPIRED', '已作废'
         CANCELLED = 'CANCELLED', '已取消'
         COMPLETED = 'COMPLETED', '已完成'
 
