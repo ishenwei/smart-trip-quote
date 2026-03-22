@@ -426,32 +426,9 @@ class RequirementAdmin(admin.ModelAdmin):
         return super().get_fieldsets(request, obj)
     
     def destination_display(self, obj):
-        cities = obj.destination_cities
-        
-        # 如果是字符串，尝试解析为列表（支持 JSON 和 Python 字面量格式）
-        if isinstance(cities, str):
-            try:
-                # 先尝试 JSON 解析
-                cities = json.loads(cities)
-            except json.JSONDecodeError:
-                try:
-                    # 再尝试 Python 字面量解析（处理单引号的情况）
-                    cities = ast.literal_eval(cities)
-                except (ValueError, SyntaxError):
-                    cities = None
-        
-        # 确保 cities 是列表
-        if not isinstance(cities, list):
-            cities = []
-        
-        if cities:
-            city_names = []
-            for city in cities[:3]:
-                if isinstance(city, dict):
-                    city_names.append(city.get('name', str(city)))
-                else:
-                    city_names.append(str(city))
-            return ','.join(city_names) + ('...' if len(cities) > 3 else '')
+        # 直接显示原始数据，不做转换
+        if obj.destination_cities:
+            return str(obj.destination_cities)
         return '-'
     destination_display.short_description = '目的地'
     

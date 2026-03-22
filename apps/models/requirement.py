@@ -279,6 +279,12 @@ class Requirement(BaseModel):
                 raise ValidationError({'budget_min': '最低预算不能高于最高预算'})
     
     def to_json(self):
+        # 处理 destination_cities 字段，确保为数组格式
+        destination_cities = self.destination_cities
+        if destination_cities and isinstance(destination_cities, str):
+            # 字符串转换为数组
+            destination_cities = [city.strip() for city in destination_cities.split(',') if city.strip()]
+        
         return {
             'requirement_id': self.requirement_id,
             'base_info': {
@@ -287,7 +293,7 @@ class Requirement(BaseModel):
                     'code': self.origin_code,
                     'type': self.origin_type
                 },
-                'destination_cities': self.destination_cities,
+                'destination_cities': destination_cities,
                 'trip_days': self.trip_days,
                 'group_size': {
                     'adults': self.group_adults,
