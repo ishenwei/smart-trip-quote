@@ -372,9 +372,18 @@ class RequirementService:
         budget_range = budget.get('range', {})
         template_info = metadata.get('template_info', {})
         
-        destination_cities = base_info.get('destination_cities', [])
-        if isinstance(destination_cities, str):
-            destination_cities = [{'name': destination_cities}] if destination_cities.strip() else []
+        destination_cities_list = base_info.get('destination_cities', [])
+        if isinstance(destination_cities_list, str):
+            destination_cities_list = [{'name': destination_cities_list}] if destination_cities_list.strip() else []
+        
+        # 将 destination_cities 数组转换为逗号分隔的字符串
+        if isinstance(destination_cities_list, list):
+            destination_cities = ','.join([
+                city.get('name', str(city)) if isinstance(city, dict) else str(city)
+                for city in destination_cities_list
+            ])
+        else:
+            destination_cities = ''
         
         return {
             'requirement_id': requirement_id,

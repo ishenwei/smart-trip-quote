@@ -51,7 +51,7 @@ class Requirement(BaseModel):
     
     origin_type = models.CharField(max_length=20, blank=True, choices=OriginType.choices, verbose_name='出发地类型', db_comment='出发地类型')
     
-    destination_cities = JSONField(verbose_name='目的地城市列表', default=list, db_comment='目的地城市列表')
+    destination_cities = models.CharField(max_length=500, verbose_name='目的地城市(逗号分隔)', default='', db_comment='目的地城市列表')
     district = JSONField(verbose_name='区域和商圈', default=list, blank=True, db_comment='目的地区域和商圈列表，如["朝阳区", "国贸"]')
     
     trip_days = models.IntegerField(
