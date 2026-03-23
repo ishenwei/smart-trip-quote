@@ -357,6 +357,10 @@ class RequirementService:
     @classmethod
     def _extract_requirement_fields(cls, requirement_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
         """提取需求字段"""
+        contact_person = data.get('contact_name', '')
+        contact_phone = data.get('contact_phone', '')
+        contact_email = data.get('contact_email', '')
+        
         base_info = data.get('base_info', {})
         preferences = data.get('preferences', {})
         budget = data.get('budget', {})
@@ -412,6 +416,9 @@ class RequirementService:
             'budget_min': cls.parse_decimal(budget_range.get('min')),
             'budget_max': cls.parse_decimal(budget_range.get('max')),
             'budget_notes': budget.get('budget_notes', ''),
+            'contact_person': contact_person,
+            'contact_phone': contact_phone,
+            'contact_email': contact_email,
             'source_type': metadata.get('source_type', 'NaturalLanguage'),
             'status': metadata.get('status', 'Confirmed'),
             'assumptions': metadata.get('assumptions', []),

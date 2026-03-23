@@ -46,6 +46,7 @@ class Itinerary(BaseModel):
     contact_person = models.CharField(max_length=100, verbose_name='联系人', db_comment='联系人姓名')
     contact_phone = models.CharField(max_length=20, verbose_name='联系电话', db_comment='联系人电话')
     contact_company = models.CharField(max_length=100, null=True, blank=True, verbose_name='联系人单位', db_comment='联系人所在单位或公司')
+    contact_email = models.CharField(max_length=255, verbose_name='联系人电子邮件', blank=True, default='', db_comment='联系人电子邮件')
     departure_city = models.CharField(max_length=100, verbose_name='出发城市', db_comment='出发城市名称')
     return_city = models.CharField(max_length=100, verbose_name='返回城市', db_comment='返回城市名称')
     total_budget = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(0)], verbose_name='总预算', db_comment='行程总预算金额')

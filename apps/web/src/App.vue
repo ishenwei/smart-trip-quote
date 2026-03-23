@@ -62,9 +62,9 @@
         <!-- 步骤指引 -->
         <div class="steps-card" v-if="!submissionSuccess">
           <el-steps :active="isSubmitting ? 1 : 0" simple finish-status="success">
-            <el-step title="输入需求" :icon="EditPen" />
-            <el-step title="AI 解析" :icon="MagicStick" />
-            <el-step title="生成结果" :icon="Document" />
+            <el-step title="输入需求" icon="EditPen" />
+            <el-step title="AI 解析" icon="MagicStick" />
+            <el-step title="生成结果" icon="Document" />
           </el-steps>
         </div>
 
@@ -110,6 +110,45 @@
                   class="main-textarea"
                 />
               </el-form-item>
+
+              <div class="contact-fields">
+                <el-form-item>
+                  <el-input
+                    v-model="contactName"
+                    :disabled="isSubmitting"
+                    placeholder="联系人姓名"
+                    class="contact-input"
+                  >
+                    <template #prefix>
+                      <el-icon><User /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-input
+                    v-model="contactPhone"
+                    :disabled="isSubmitting"
+                    placeholder="联系电话"
+                    class="contact-input"
+                  >
+                    <template #prefix>
+                      <el-icon><Phone /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+                <el-form-item>
+                  <el-input
+                    v-model="contactEmail"
+                    :disabled="isSubmitting"
+                    placeholder="电子邮件地址"
+                    class="contact-input"
+                  >
+                    <template #prefix>
+                      <el-icon><Message /></el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
+              </div>
 
               <el-alert
                 v-if="errorMessage"
@@ -182,16 +221,9 @@
               </div>
             </div>
 
-            <div class="structured-result" v-if="submissionResult && submissionResult.structured_data">
-              <div class="block-header">
-                <el-icon><Document /></el-icon>
-                结构化解析数据
-                <el-button link type="primary" size="small" @click="copyJson" style="margin-left: auto">
-                  <el-icon><CopyDocument /></el-icon>
-                  复制 JSON
-                </el-button>
-              </div>
-              <pre class="json-block">{{ formattedStructuredData }}</pre>
+            <div class="pending-message">
+              <el-icon class="pending-icon"><MagicStick /></el-icon>
+              <p>我们会尽快为您安排合适的行程并通知您！</p>
             </div>
 
             <div class="result-actions">
@@ -239,13 +271,11 @@
 <script setup>
 import { ref, computed } from 'vue'
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
-import {
-  EditPen, MagicStick, Document, InfoFilled, Promotion,
-  CircleCheckFilled, CopyDocument, Plus, Setting
-} from '@element-plus/icons-vue'
 
 const userInput = ref('')
+const contactName = ref('')
+const contactPhone = ref('')
+const contactEmail = ref('')
 const isSubmitting = ref(false)
 const submissionSuccess = ref(false)
 const submissionResult = ref(null)
@@ -253,12 +283,6 @@ const errorMessage = ref('')
 
 const isFormValid = computed(() => userInput.value.trim().length > 0)
 
-const formattedStructuredData = computed(() => {
-  if (submissionResult.value?.structured_data) {
-    return JSON.stringify(submissionResult.value.structured_data, null, 2)
-  }
-  return ''
-})
 
 const examples = [
   { label: '三亚家庭游', text: '从北京出发去三亚，2大1小，5天4晚，预算2万，住海景酒店，希望有亲子活动' },
@@ -290,6 +314,9 @@ async function submitRequirement() {
     const response = await axios.post('/api/llm/webhook/requirement/', {
       user_input: userInput.value,
       save_to_db: true,
+      contact_name: contactName.value,
+      contact_phone: contactPhone.value,
+      contact_email: contactEmail.value,
     })
 
     if (response.data.success) {
@@ -313,6 +340,9 @@ async function submitRequirement() {
 
 function resetForm() {
   userInput.value = ''
+  contactName.value = ''
+  contactPhone.value = ''
+  contactEmail.value = ''
   errorMessage.value = ''
 }
 
@@ -326,14 +356,6 @@ function goAdmin() {
   window.open('/admin/', '_blank')
 }
 
-async function copyJson() {
-  try {
-    await navigator.clipboard.writeText(formattedStructuredData.value)
-    ElMessage.success('JSON 已复制到剪贴板')
-  } catch {
-    ElMessage.error('复制失败，请手动选择')
-  }
-}
 </script>
 
 <style scoped>
@@ -779,6 +801,56 @@ async function copyJson() {
   flex-wrap: wrap;
 }
 
+/* Contact fields */
+.contact-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.contact-fields .el-form-item {
+  margin-bottom: 0;
+}
+
+.contact-input :deep(.el-input__wrapper) {
+  border-color: var(--color-border) !important;
+  background: #fafffe !important;
+}
+
+.contact-input :deep(.el-input__wrapper:hover) {
+  border-color: var(--color-primary) !important;
+}
+
+.contact-input :deep(.el-input__wrapper.is-focus) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.12) !important;
+}
+
+/* Pending message */
+.pending-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  text-align: center;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.pending-icon {
+  font-size: 36px;
+  color: var(--color-primary);
+}
+
+.pending-message p {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text);
+  letter-spacing: 0.3px;
+}
+
 /* Features section */
 .features {
   background: var(--color-bg-card);
@@ -901,6 +973,10 @@ async function copyJson() {
   }
 
   .meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-fields {
     grid-template-columns: 1fr;
   }
 }

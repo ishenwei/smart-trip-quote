@@ -328,6 +328,9 @@ class RequirementWebhookSerializer(serializers.Serializer):
     structured_data = StructuredDataSerializer(required=False)
     requirement_id = serializers.CharField(max_length=50, required=False)
     llm_info = serializers.JSONField(required=False, allow_null=True)
+    contact_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    contact_phone = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    contact_email = serializers.EmailField(max_length=200, required=False, allow_blank=True)
     
     def validate(self, data):
         """整体验证"""
@@ -409,6 +412,9 @@ class N8nProcessRequirementSerializer(serializers.Serializer):
     client_id = serializers.CharField(max_length=100, required=False, allow_blank=True)
     provider = serializers.CharField(max_length=50, required=False, allow_blank=True)
     save_to_db = serializers.BooleanField(default=True)
+    contact_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    contact_phone = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    contact_email = serializers.EmailField(max_length=200, required=False, allow_blank=True)
     
     def validate_user_input(self, value):
         """验证用户输入"""

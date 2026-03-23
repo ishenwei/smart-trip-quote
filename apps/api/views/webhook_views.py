@@ -176,6 +176,14 @@ class RequirementWebhookView(APIView):
             validated_data = serializer.validated_data
             requirement_data = validated_data.get('structured_data', validated_data)
             
+            # 确保联系人字段被提取（可能在顶层或 structured_data 中）
+            if not requirement_data.get('contact_name'):
+                requirement_data['contact_name'] = validated_data.get('contact_name', '')
+            if not requirement_data.get('contact_phone'):
+                requirement_data['contact_phone'] = validated_data.get('contact_phone', '')
+            if not requirement_data.get('contact_email'):
+                requirement_data['contact_email'] = validated_data.get('contact_email', '')
+            
             # 转换日期对象为字符串，避免JSON序列化错误
             def convert_dates(obj):
                 if isinstance(obj, dict):
@@ -292,7 +300,10 @@ class ProcessRequirementViaN8nView(APIView):
                 'user_input': user_input,
                 'client_id': validated_data.get('client_id'),
                 'provider': validated_data.get('provider'),
-                'save_to_db': validated_data.get('save_to_db', True)
+                'save_to_db': validated_data.get('save_to_db', True),
+                'contact_name': validated_data.get('contact_name'),
+                'contact_phone': validated_data.get('contact_phone'),
+                'contact_email': validated_data.get('contact_email'),
             }
             
             success, result, error_msg = N8nIntegrationService.send_to_n8n(

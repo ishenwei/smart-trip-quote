@@ -83,6 +83,7 @@ class Requirement(BaseModel):
         verbose_name='总人数',
         db_comment='出行总人数'
     )
+    contact_email = models.CharField(max_length=255, verbose_name='联系人电子邮件', blank=True, default='', db_comment='联系人电子邮件')
     
     travel_start_date = models.DateField(null=True, blank=True, verbose_name='出行开始日期', db_comment='出行开始日期')
     travel_end_date = models.DateField(null=True, blank=True, verbose_name='出行结束日期', db_comment='出行结束日期')
