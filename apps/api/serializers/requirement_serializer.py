@@ -24,6 +24,10 @@ class RequirementDetailSerializer(serializers.ModelSerializer):
         model = Requirement
         fields = [
             'requirement_id',
+            'contact_name',
+            'contact_phone',
+            'contact_email',
+            'contact_company',
             'base_info',
             'preferences',
             'budget',
@@ -135,7 +139,11 @@ class RequirementCreateSerializer(serializers.ModelSerializer):
             'source_type',
             'created_by',
             'assumptions',
-            'extension'
+            'extension',
+            'contact_name',
+            'contact_phone',
+            'contact_email',
+            'contact_company',
         ]
         read_only_fields = ['requirement_id']
         extra_kwargs = {
@@ -181,7 +189,11 @@ class RequirementUpdateSerializer(serializers.ModelSerializer):
             'budget_max',
             'budget_notes',
             'assumptions',
-            'extension'
+            'extension',
+            'contact_name',
+            'contact_phone',
+            'contact_email',
+            'contact_company',
         ]
         extra_kwargs = {
             'preference_tags': {'required': False, 'allow_blank': True},

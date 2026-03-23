@@ -317,6 +317,9 @@ class StructuredDataSerializer(serializers.Serializer):
     budget = BudgetSerializer(required=False)
     metadata = MetadataSerializer(required=False)
     extension = serializers.JSONField(required=False, default=dict)
+    contact_name = serializers.CharField(max_length=200, required=False, allow_blank=True)
+    contact_phone = serializers.CharField(max_length=50, required=False, allow_blank=True)
+    contact_email = serializers.EmailField(max_length=200, required=False, allow_blank=True)
 
 
 class RequirementWebhookSerializer(serializers.Serializer):
