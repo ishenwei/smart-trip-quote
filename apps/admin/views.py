@@ -175,8 +175,9 @@ def generate_itinerary(request, requirement_id):
                 headers['X-API-Key'] = n8n_api_key
             
             retry_count = 0
-            max_retries = 2
-            
+            max_retries = getattr(settings, 'WEBHOOK_MAX_RETRIES', 0)
+            timeout = getattr(settings, 'WEBHOOK_TIMEOUT', 120)
+
             while retry_count <= max_retries:
                 try:
                     logger.info(f"开始发送webhook请求 - 时间戳: {datetime.now().isoformat()}, "
@@ -188,6 +189,7 @@ def generate_itinerary(request, requirement_id):
                         n8n_webhook_url,
                         headers=headers,
                         json=webhook_data,
+                        timeout=timeout,
                         verify=False  # 使用HTTP，不需要SSL
                     )
                     
@@ -218,11 +220,16 @@ def generate_itinerary(request, requirement_id):
         
         # 同步发送webhook
         success, status_code = send_webhook()
+
+        itinerary_id = json.loads(response_text).get('itinerary_id', '')
+        itinerary_name = json.loads(response_text).get('itinerary_name', '')
+
         
         if success:
             logger.info(f"行程规划生成请求已发送 - 需求ID: {requirement.requirement_id}, "
                         f"请求ID: {request_id}")
-            return JsonResponse({'success': True})
+            return JsonResponse({'success': True,'message': f"行程规划已经生成-行程ID:{itinerary_id}-行程名称:{itinerary_name}" })
+
         else:
             # 即使webhook调用失败，也返回成功状态，避免用户看到错误信息
             logger.warning(f"行程规划生成请求发送失败 - 需求ID: {requirement.requirement_id}, "
@@ -281,8 +288,8 @@ def optimize_itinerary(request, itinerary_id):
         if n8n_api_key:
             headers['X-API-Key'] = n8n_api_key
         
-        max_retries = getattr(settings, 'WEBHOOK_MAX_RETRIES', 2)
-        timeout = getattr(settings, 'WEBHOOK_TIMEOUT', 30)
+        max_retries = getattr(settings, 'WEBHOOK_MAX_RETRIES', 0)
+        timeout = getattr(settings, 'WEBHOOK_TIMEOUT', 120)
         
         retry_count = 0
         last_error = None
@@ -410,7 +417,7 @@ def quote_itinerary(request, itinerary_id):
             headers['X-API-Key'] = n8n_api_key
         
         max_retries = getattr(settings, 'WEBHOOK_MAX_RETRIES', 2)
-        timeout = getattr(settings, 'WEBHOOK_TIMEOUT', 30)
+        timeout = getattr(settings, 'WEBHOOK_TIMEOUT', 120)
         
         retry_count = 0
         last_error = None
