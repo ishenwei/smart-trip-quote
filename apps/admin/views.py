@@ -202,7 +202,11 @@ def generate_itinerary(request, requirement_id):
                                 f"结果: {response_text[:200]}...")
                     
                     if status_code >= 200 and status_code < 300:
-                        return True, status_code
+                        try:
+                            resp_json = json.loads(response_text)
+                        except Exception:
+                            resp_json = {}
+                        return True, resp_json
                     else:
                         logger.warning(f"Webhook调用失败 - 状态码: {status_code}, "
                                       f"结果: {response_text[:200]}..., "
@@ -210,28 +214,24 @@ def generate_itinerary(request, requirement_id):
                 except Exception as e:
                     logger.error(f"Webhook调用异常 - 错误: {str(e)}, "
                                  f"重试次数: {retry_count}")
-                
+
                 retry_count += 1
                 if retry_count <= max_retries:
                     import time
                     time.sleep(2)  # 等待2秒后重试
-            
-            return False, None
-        
+
+            return False, {}
+
         # 同步发送webhook
-        success, status_code = send_webhook()
+        success, resp_json = send_webhook()
 
-        itinerary_id = json.loads(response_text).get('itinerary_id', '')
-        itinerary_name = json.loads(response_text).get('itinerary_name', '')
-
-        
         if success:
+            itinerary_id = resp_json.get('itinerary_id', '')
+            itinerary_name = resp_json.get('itinerary_name', '')
             logger.info(f"行程规划生成请求已发送 - 需求ID: {requirement.requirement_id}, "
                         f"请求ID: {request_id}")
-            return JsonResponse({'success': True,'message': f"行程规划已经生成-行程ID:{itinerary_id}-行程名称:{itinerary_name}" })
-
+            return JsonResponse({'success': True, 'message': f"行程规划生成请求已发送 - 需求ID: {requirement.requirement_id}"})
         else:
-            # 即使webhook调用失败，也返回成功状态，避免用户看到错误信息
             logger.warning(f"行程规划生成请求发送失败 - 需求ID: {requirement.requirement_id}, "
                            f"请求ID: {request_id}")
             return JsonResponse({'success': True, 'message': '旅游行程规划设计中，该操作可能需要一些时间，请稍后在旅游行程规划页面查看'})
