@@ -223,8 +223,8 @@ N8N_ITINERARY_QUOTE_WEBHOOK_URL = os.getenv('N8N_ITINERARY_QUOTE_WEBHOOK_URL', '
 N8N_API_KEY = os.getenv('N8N_API_KEY', '')
 
 # Webhook Request Configuration
-WEBHOOK_TIMEOUT = 30  # 30秒超时
-WEBHOOK_MAX_RETRIES = 2  # 最多2次重试
+WEBHOOK_TIMEOUT = 120  # 120秒超时
+WEBHOOK_MAX_RETRIES = 0  # 最多0次重试
 
 # Logging Configuration
 LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO').upper()
@@ -264,6 +264,11 @@ LOGGING = {
             'propagate': False,
         },
         'itinerary_admin': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': False,
+        },
+        'apps.admin': {
             'handlers': ['console'],
             'level': LOG_LEVEL,
             'propagate': False,

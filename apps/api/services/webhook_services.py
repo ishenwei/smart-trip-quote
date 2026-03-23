@@ -7,6 +7,7 @@ from datetime import date, time, datetime
 from decimal import Decimal, InvalidOperation
 from typing import Dict, Any, Optional, Tuple
 from django.db import transaction
+from django.conf import settings
 
 from apps.models.itinerary import Itinerary
 from apps.models.destinations import Destination
@@ -427,6 +428,50 @@ class RequirementService:
             'template_category': template_info.get('category', ''),
             'extension': data.get('extension', {})
         }
+    
+    @classmethod
+    def send_to_n8n(cls, webhook_url: str, payload: Dict[str, Any]) -> Tuple[bool, Optional[Dict], Optional[str]]:
+        """
+        发送请求到 N8N webhook
+        
+        Args:
+            webhook_url: N8N webhook URL
+            payload: 请求数据
+        
+        Returns:
+            (是否成功, 响应数据, 错误信息)
+        """
+        import requests
+        
+        timeout = getattr(settings, 'WEBHOOK_TIMEOUT', 120)
+        
+        try:
+            logger.info(f'发送请求到 n8n webhook: {webhook_url}')
+            
+            response = requests.post(
+                webhook_url,
+                json=payload,
+                timeout=timeout,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                logger.info(f'n8n webhook 处理成功: {result.get("success")}')
+                return True, result, None
+            else:
+                error_msg = f'n8n webhook 返回错误: {response.status_code}'
+                logger.error(f'{error_msg} - {response.text}')
+                return False, None, error_msg
+                
+        except requests.Timeout:
+            error_msg = 'n8n webhook 请求超时'
+            logger.error(error_msg)
+            return False, None, error_msg
+        except requests.RequestException as e:
+            error_msg = f'n8n webhook 请求失败: {str(e)}'
+            logger.error(error_msg, exc_info=True)
+            return False, None, error_msg
 
 
 class ItineraryOptimizationService:
@@ -468,53 +513,3 @@ class ItineraryOptimizationService:
         except Exception as e:
             logger.error(f'更新行程描述失败: {e}', exc_info=True)
             return False, f'更新行程描述失败: {str(e)}'
-
-
-class N8nIntegrationService:
-    """
-    N8N 集成服务类
-    处理与 N8N 交互的业务逻辑
-    """
-    
-    @classmethod
-    def send_to_n8n(cls, webhook_url: str, payload: Dict[str, Any], timeout: int = 30) -> Tuple[bool, Optional[Dict], Optional[str]]:
-        """
-        发送请求到 N8N webhook
-        
-        Args:
-            webhook_url: N8N webhook URL
-            payload: 请求数据
-            timeout: 超时时间（秒）
-        
-        Returns:
-            (是否成功, 响应数据, 错误信息)
-        """
-        import requests
-        
-        try:
-            logger.info(f'发送请求到 n8n webhook: {webhook_url}')
-            
-            response = requests.post(
-                webhook_url,
-                json=payload,
-                timeout=timeout,
-                headers={'Content-Type': 'application/json'}
-            )
-            
-            if response.status_code == 200:
-                result = response.json()
-                logger.info(f'n8n webhook 处理成功: {result.get("success")}')
-                return True, result, None
-            else:
-                error_msg = f'n8n webhook 返回错误: {response.status_code}'
-                logger.error(f'{error_msg} - {response.text}')
-                return False, None, error_msg
-                
-        except requests.Timeout:
-            error_msg = 'n8n webhook 请求超时'
-            logger.error(error_msg)
-            return False, None, error_msg
-        except requests.RequestException as e:
-            error_msg = f'n8n webhook 请求失败: {str(e)}'
-            logger.error(error_msg, exc_info=True)
-            return False, None, error_msg

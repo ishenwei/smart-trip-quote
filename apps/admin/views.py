@@ -302,7 +302,9 @@ def optimize_itinerary(request, itinerary_id):
                 )
                 
                 status_code = response.status_code
+                logger.info(f"行程优化Webhook调用结果 - 状态码: {status_code}")
                 response_text = response.text
+                logger.info(f"行程优化Webhook调用结果 - 结果: {response_text}")
                 
                 logger.info(f"行程优化Webhook调用结果 - 时间戳: {datetime.now().isoformat()}, "
                             f"请求ID: {request_id}, "
@@ -313,7 +315,7 @@ def optimize_itinerary(request, itinerary_id):
                                 f"请求ID: {request_id}")
                     return JsonResponse({
                         'success': True,
-                        'message': '行程优化请求已提交，请在行程详情页面查看优化后的结果'
+                        'message': json.loads(response_text).get('message', '')
                     })
                 else:
                     logger.warning(f"行程优化Webhook调用失败 - 状态码: {status_code}, "

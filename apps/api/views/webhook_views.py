@@ -25,7 +25,6 @@ from apps.api.services.webhook_services import (
     ItineraryService,
     RequirementService,
     ItineraryOptimizationService,
-    N8nIntegrationService,
 )
 from apps.api.utils.logging_utils import LogSanitizer, sanitize_request_log
 
@@ -176,14 +175,7 @@ class RequirementWebhookView(APIView):
             validated_data = serializer.validated_data
             requirement_data = validated_data.get('structured_data', validated_data)
             
-            # 确保联系人字段被提取（可能在顶层或 structured_data 中）
-            if not requirement_data.get('contact_name'):
-                requirement_data['contact_name'] = validated_data.get('contact_name', '')
-            if not requirement_data.get('contact_phone'):
-                requirement_data['contact_phone'] = validated_data.get('contact_phone', '')
-            if not requirement_data.get('contact_email'):
-                requirement_data['contact_email'] = validated_data.get('contact_email', '')
-            
+
             # 转换日期对象为字符串，避免JSON序列化错误
             def convert_dates(obj):
                 if isinstance(obj, dict):
@@ -221,6 +213,7 @@ class RequirementWebhookView(APIView):
                 'success': True,
                 'requirement_id': requirement_id,
                 'structured_data': requirement_data,
+                'message': f'需求解析数据处理成功，请在需求列表页面查看{requirement_id}',
                 'validation_errors': None,
                 'warnings': [],
                 'error': None
@@ -306,7 +299,7 @@ class ProcessRequirementViaN8nView(APIView):
                 'contact_email': validated_data.get('contact_email'),
             }
             
-            success, result, error_msg = N8nIntegrationService.send_to_n8n(
+            success, result, error_msg = RequirementService.send_to_n8n(
                 n8n_webhook_url, payload
             )
             
