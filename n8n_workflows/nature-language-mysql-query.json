@@ -1,0 +1,374 @@
+{
+  "name": "自然语言查询MySQL",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        144
+      ],
+      "id": "5204d922-7052-4bce-b10f-98a6f5dd7b68",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT \n    t.TABLE_NAME AS `tablename`,\n    t.TABLE_COMMENT AS `tablecomment`,\n    c.COLUMN_NAME AS `columnname`,\n    c.COLUMN_COMMENT AS `columncomment`,\n    c.COLUMN_TYPE AS `columntype`\nFROM \n    information_schema.TABLES t\nJOIN \n    information_schema.COLUMNS c \n    ON t.TABLE_SCHEMA = c.TABLE_SCHEMA AND t.TABLE_NAME = c.TABLE_NAME\nWHERE \n    t.TABLE_SCHEMA = DATABASE()\nORDER BY \n    t.TABLE_NAME, c.ORDINAL_POSITION; -- 按表和字段顺序排序",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        352,
+        144
+      ],
+      "id": "15cc1f33-c6a4-479d-973a-48dce3900f03",
+      "name": "MySQL",
+      "credentials": {
+        "mySql": {
+          "id": "GRC4lHyPKhVcZ2vX",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = {};\nitems.forEach(item => {\n  const tableName = item.json.tablename;\n\n  // 如果该表名还没添加到 result，则初始化\n  if (!result[tableName]) {\n    result[tableName] = {\n      tablename: tableName,\n      tablecomment: item.json.tablecomment || \"\",\n      fields: [] // 用于存储该表的所有字段\n    };\n  }\n\n  // 添加字段信息\n  result[tableName].fields.push({\n    columnname: item.json.columnname,\n    columncomment: item.json.columncomment || \"\",\n    columntype: item.json.columntype || \"\"\n  });\n});\n\n// 转换为数组返回\nconst tempRes= Object.values(result).map(table => ({ json: table }));\nreturn [\n  {\n    json: {\n      fileContent: tempRes.map(item => {\n        let tableName = `# ${item.json.tablecomment} ${item.json.tablename}`;\n        let fields = item.json.fields.map(field => `- ${field.columnname} ${field.columntype} ${field.columncomment}`).join(\"\\n\");\n        return `${tableName}\\n${fields}\\n`;\n      }).join(\"\\n\")\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        544,
+        144
+      ],
+      "id": "cc5dffa9-0b39-423f-9143-a294520936f6",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "fileContent",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        768,
+        144
+      ],
+      "id": "930c37b0-0bc1-4a9f-920a-f6702881565a",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/.n8n-files/db.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        992,
+        144
+      ],
+      "id": "fb26111a-c030-4bbd-a66d-590273798512",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "content": "## 生成数据结构文件\n** 请在数据库结构发生变化的时候执行这个工作流 **",
+        "height": 320,
+        "width": 1180,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0d55c94f-8648-4322-83f9-913a77a1af68",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        528
+      ],
+      "id": "29b972a6-91cf-4ebe-9654-227aedb68e2b",
+      "name": "When chat message received",
+      "webhookId": "aa9571f3-5576-4f00-8150-b65c5cabea33"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/.n8n-files/db.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        288,
+        528
+      ],
+      "id": "1d365d8b-0acd-4340-8c08-444a4e11c1f2",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        512,
+        528
+      ],
+      "id": "001b8b21-de58-4cbd-aeaa-54395b75fd51",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "=你是一个经验丰富的DBA，精通MySQL数据库。你会根据用户的需求和数据结构，生成一个查询语句。只需要返回一个可执行的SQL语句，不需要任何解释。\n数据结构：{{ $json.data }}\n## 对话示例\n用户：查询职工总人数\n回答：select count(*) as totalworkers from zm_workers where history is null and state=1;"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        720,
+        528
+      ],
+      "id": "92dcc220-7444-4dd2-be31-f1230edea17b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        720,
+        704
+      ],
+      "id": "90eb393d-05ef-4d25-a985-c7f1ba0ef82b",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "GiqZGmqC6Lr2y6Ys",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        1088,
+        528
+      ],
+      "id": "d57e6902-c213-4599-aae3-7d5d547cc5fd",
+      "name": "MySQL1",
+      "credentials": {
+        "mySql": {
+          "id": "GRC4lHyPKhVcZ2vX",
+          "name": "MySQL account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1328,
+        528
+      ],
+      "id": "fd6c4b6b-1d5c-45af-b21d-12ca3f9a0ea4",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "=/home/node/.n8n-files/selectResult.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        528
+      ],
+      "id": "77e765a0-6e40-42e1-a815-468fb14a42b8",
+      "name": "Read/Write Files from Disk2"
+    },
+    {
+      "parameters": {
+        "content": "## 自然语言查询MySQL数据库",
+        "height": 480,
+        "width": 1860
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        368
+      ],
+      "id": "bc008640-f382-4e02-9a53-9b074e49ac1e",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "MySQL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "MySQL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MySQL1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "683a2e09-8e2b-4b36-aed5-688e40501f5a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ce85a1de035bc437afea9903fc66ba077d067aadcc1e29a4d351e8dc726947f"
+  },
+  "id": "p8n6dVe6YqjEVCyy",
+  "tags": []
+}

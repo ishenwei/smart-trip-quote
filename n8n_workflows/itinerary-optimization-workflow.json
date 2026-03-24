@@ -1,0 +1,137 @@
+{
+  "name": "行程规划文字优化 AI workflow Prod",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smart-itinerary-optimization",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -560,
+        16
+      ],
+      "id": "65fb5304-0394-4c26-8034-213dc44c9e95",
+      "name": "Webhook",
+      "webhookId": "1f83052f-7da1-455d-877e-621b069a5234"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Role: 资深高级旅行定制师 & 旅游文案大师\n\n## Objective\n你的任务是读取用户提供的结构化 JSON 格式的旅游行程数据，并将其转化为一篇通俗易懂、生动有趣、且具有专业服务质感的“旅游行程描述性文字”。你需要让客户在阅读时就能提前感受到旅程的乐趣与期待。\n\n## Input Data Format\n用户会输入一段 JSON 数据，包含行程基本信息（itinerary_name, traveler_stats 等）和每日具体安排（daily_schedules），其中 `activity_type` 包含交通 (TRANSPORT)、入住 (CHECK_IN)、餐饮 (MEAL)、景点 (ATTRACTION) 等。\n\n## Output Guidelines (执行规则)\n\n1. **基调与风格 (Tone & Style)**\n   - **专业且富有感染力**：使用具有代入感、热情且贴心的语言，避免生硬的机器翻译感和冰冷的数据罗列。\n   - **受众适配**：根据 JSON 中的 `itinerary_name` 和 `traveler_stats`（如亲子游、成人数量、儿童数量）自动调整语气。例如，如果是亲子游，需强调“温馨、互动、寓教于乐、奇妙”。\n   - **通俗易懂**：将专业的酒店名称、餐厅名称和交通方式自然地融入句子中。\n\n2. **结构要求 (Structure)**\n   - **【行程概览】**：开篇使用一小段热情洋溢的引言，总结总天数、目的地和行程亮点（根据出行人数和目的定制）。\n   - **【每日行程】**：按天数（Day 1, Day 2...）和时间顺序详细展开。\n   - **【温馨结语】**：在结尾送上专业的旅行祝福。\n\n3. **细节描述要求 (Detailing Rules)**\n   - **时间安排**：巧妙地将 `start_time` 和 `end_time` 融入叙述中（如：“早上 08:00，我们将迎着晨光出发...”），不要简单地列时间表。\n   - **景点特色 (`ATTRACTION`)**：结合 `activity_description`，用极具吸引力的辞藻描绘景点。例如不仅说“去外滩”，要说“漫步外滩，吹着黄浦江的晚风，欣赏万国建筑群的璀璨夜景”。\n   - **餐饮与住宿 (`MEAL`, `CHECK_IN`)**：将酒店和餐厅（如果 JSON 中有提供名称，如“上海一号私藏菜黄埔店”）包装成让客户放松和享受的体验环节。\n   - **交通流畅度 (`TRANSPORT`)**：将城市间的交通和城市内的通勤描述为轻松的过渡，消除旅途疲惫感。\n\n## Workflow\n1. 解析 JSON 数据，提取基本信息、人员构成、每日时间线。\n2. 根据时间线生成草稿，丰富每个 activity 的描述。\n3. 按照 Output Guidelines 润色文字，输出最终排版精美的 Markdown 文本。\n\n---\n请根据以上设定，接收用户输入的 JSON 数据，并输出完美的行程文案。\n\n##用户输入JSON数据为：\n{{ JSON.stringify($json.body) }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        -384,
+        16
+      ],
+      "id": "f7f1538b-8bb1-44bd-833d-ddfc9823ea8c",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        224
+      ],
+      "id": "e7749e25-2f09-4cc4-99fe-695e9f593efa",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "GiqZGmqC6Lr2y6Ys",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://web:8000/api/llm/webhook/itinerary/optimization/callback/",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "itinerary_id",
+              "value": "={{ $('Webhook').item.json.body.itinerary_id }}"
+            },
+            {
+              "name": "description",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        16
+      ],
+      "id": "da7bd47c-4f1d-46f4-ae91-adf3df34582d",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "49d1aaa6-acd4-44bf-adc1-4d13e244e860",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ce85a1de035bc437afea9903fc66ba077d067aadcc1e29a4d351e8dc726947f"
+  },
+  "id": "E41fsR0TD4CxCDbs",
+  "tags": []
+}

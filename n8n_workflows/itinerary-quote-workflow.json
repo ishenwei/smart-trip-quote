@@ -1,0 +1,208 @@
+{
+  "name": "旅游行程报价 AI workflow Dev",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "smart-itinerary-quote",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -672,
+        -464
+      ],
+      "id": "348f0a62-a230-40c2-bc1b-5ebf91891d0b",
+      "name": "Webhook",
+      "webhookId": "e0f36c93-7610-4a68-88b6-b66bb3c710ec"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        144,
+        -464
+      ],
+      "id": "1c8e6ee8-fc3f-4149-9dc4-efb523ed9ddf",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# Role\n你是一位专业的旅游产品计价专家，擅长从复杂的行程 JSON 数据中提取关键信息，并结合给定的定价策略，准确计算出旅游团组的总报价。\n\n# Task\n请阅读【行程结构化数据】和整个行程中每个景点的【报价策略】，每个酒店的【报价策略】，每个餐厅的【报价策略】，为用户计算该行程的总预计报价。\n\n# Constraints\n1. **数据提取**：从 JSON 的 `traveler_stats` 中提取成人、儿童、老人和婴儿的具体人数。\n\n2. **日期匹配**：根据 `start_date` 或 `daily_schedules` 中的日期，对照报价策略中的“适用日期分布”确定当天的价格档位。\n\n3. **规则校验**：严格检查“成团要求”（如人数是否达标）和“提前量”等限制条件。如果条件不符，必须在结果中明确提示。\n\n4. **计算逻辑**：\n    景点总价 = (成人单价 × 成人人数) + (儿童单价 × 儿童人数) + (老人单价 × 老人人数)。婴儿通常不计费（除非策略另有说明）。\n    酒店总价 = (房价类型1每晚单价 × 房间数) + (房价类型2每晚单价 × 房间数)。参考行程里关于每个酒店入住的备注，标明了房间数和房间类型。\n    餐饮总价 = (成人餐标 × 成人人数) + (儿童餐标 × 儿童人数) + (老人餐标 × 老人人数)。如儿童，老人餐标未定义则按成人餐标计算，婴儿通常不计费（除非策略另有说明）。\n\n5. **输出格式**：要求条理清晰，列出计算过程。\n\n# Input Data\n### 1. 行程结构化数据\n{{ JSON.stringify($json.itinerary_data) }}\n\n### 2. 相关景点报价策略\n{{ JSON.stringify($json.attractions_quote) }}\n\n### 2. 相关酒店报价策略\n{{ JSON.stringify($json.hotels_quote) }}\n\n### 2. 相关餐厅报价策略\n{{ JSON.stringify($json.restaurants_quote) }}\n\n# Output Format (请按此结构回复)\n## 1. 团组基本信息\n* **出行日期**：YYYY-MM-DD (周X)\n* **人员构成**：X成人 / X儿童 / X老人 / X婴儿\n\n---\n\n## 2. 价格适用性核查\n* **成团人数校验**：是否满足 X 人成团（[符合/不符合]）\n* **价格档位判定**：根据日期判定为 [XXX档]\n\n## 3. 景点费用明细计算\n### 景点1\n* **成人费用**：单价 × 人数 = 小计\n* **儿童费用**：单价 × 人数 = 小计\n* **老年人费用**：单价 × 人数 = 小计\n> 备注：\n> **成团人数校验**：是否满足 X 人成团（[符合/不符合]）\n> **价格档位判定**：根据日期判定为 [XXX档]\n\n### 景点2\n* **成人费用**：单价 × 人数 = 小计\n* **儿童费用**：单价 × 人数 = 小计\n* **老年人费用**：单价 × 人数 = 小计\n> 备注：\n> **成团人数校验**：是否满足 X 人成团（[符合/不符合]）\n> **价格档位判定**：根据日期判定为 [XXX档]\n---\n\n## 4. 酒店费用明细计算\n### 酒店1\n* **成人费用**：单价 × 人数 = 小计\n* **儿童费用**：单价 × 人数 = 小计\n* **老年人费用**：单价 × 人数 = 小计\n> 备注：\n> **行程要求说明**：\n\n### 酒店2\n* **成人费用**：单价 × 人数 = 小计\n* **儿童费用**：单价 × 人数 = 小计\n* **老年人费用**：单价 × 人数 = 小计\n> 备注：\n> **行程要求说明**：\n---\n\n## 5. 餐饮费用明细计算\n### 餐厅1\n* **成人费用**：单价 × 人数 = 小计\n* **儿童费用**：单价 × 人数 = 小计\n* **老年人费用**：单价 × 人数 = 小计\n> 备注：\n> **行程要求说明**：\n\n### 餐厅2\n* **成人费用**：单价 × 人数 = 小计\n* **儿童费用**：单价 × 人数 = 小计\n* **老年人费用**：单价 × 人数 = 小计\n> 备注：\n> **行程要求说明**：\n\n---\n\n## 6. 报价总计\n* **景点总费用**：￥XXXX 元 \n* **酒店总费用**：￥XXXX 元 \n* **餐饮总费用**：￥XXXX 元 \n\n* **预计总费用**：￥XXXX 元 \n* **温馨提示**：(例如：是否支持退改、是否需自带导游等约束说明)\n\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -272,
+        -464
+      ],
+      "id": "0eb1e0c3-8b51-40f0-9455-684303d58ea5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://web:8000/api/llm/webhook/itinerary/quote/callback/",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "itinerary_id",
+              "value": "={{ $('Webhook').item.json.body.itinerary_id }}"
+            },
+            {
+              "name": "itinerary_quote",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        0,
+        -464
+      ],
+      "id": "19d91bc3-0bca-48ba-a2fc-200780e2be0f",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6a8359a1-f5d2-4fd3-9255-f18ac040e201",
+              "name": "itinerary_data",
+              "value": "={{ $json.body.itinerary_json_data }}",
+              "type": "object"
+            },
+            {
+              "id": "e2e621a0-d44c-42f5-a70e-fd0763cab1c6",
+              "name": "attractions_quote",
+              "value": "={{ $json.body.itinerary_quote_json_data.attractions }}",
+              "type": "array"
+            },
+            {
+              "id": "b82be70a-68c1-4bb0-af5a-aa1b17d1913e",
+              "name": "hotels_quote",
+              "value": "={{ $json.body.itinerary_quote_json_data.hotels }}",
+              "type": "string"
+            },
+            {
+              "id": "397738a9-6413-4934-b60a-4f259a1c97e7",
+              "name": "restaurants_quote",
+              "value": "={{ $json.body.itinerary_quote_json_data.restaurants }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -512,
+        -464
+      ],
+      "id": "1bcb0abb-ee84-4be0-af96-14b5e9ae39c0",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        -304
+      ],
+      "id": "918d7442-e2bb-47d1-a3da-4bdaa2f8ff55",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "GiqZGmqC6Lr2y6Ys",
+          "name": "DeepSeek account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "7f6be1c1-7071-43dc-a872-52ca81f1c5fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5ce85a1de035bc437afea9903fc66ba077d067aadcc1e29a4d351e8dc726947f"
+  },
+  "id": "IbAmQkf45x6ytNX2",
+  "tags": []
+}
